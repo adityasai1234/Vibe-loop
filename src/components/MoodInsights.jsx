@@ -1,4 +1,3 @@
-import React from "react";
 // Placeholder for chart/animation imports (e.g., Framer Motion, chart libraries)
 
 const mockData = {

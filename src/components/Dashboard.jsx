@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../firebase/AuthContext';
 import { Box, Button, Container, Flex, Heading, Text, Avatar, VStack, HStack, Spinner } from '@chakra-ui/react';

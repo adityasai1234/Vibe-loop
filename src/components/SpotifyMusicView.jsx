@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 // Placeholder for Spotify API integration
 
 const mockTracks = [
@@ -98,3 +98,4 @@ export default function VibeRecsPage() {
     </div>
   );
 };
+

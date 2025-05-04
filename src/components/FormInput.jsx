@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * A responsive form input component with label
  * 

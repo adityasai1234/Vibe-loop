@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { 
   GoogleAuthProvider, 
   signInWithPopup, 
@@ -137,3 +137,4 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
+

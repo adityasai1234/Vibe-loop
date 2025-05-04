@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
 const REDIRECT_URI = "http://localhost:3000/spotify-callback"; // Change to your deployed URL in production

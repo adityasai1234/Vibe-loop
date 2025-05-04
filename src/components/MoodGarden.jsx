@@ -1,4 +1,3 @@
-import React from "react";
 // Placeholder for animation imports (e.g., Framer Motion, Lottie)
 
 export default function CompanionPage() {
@@ -44,3 +43,4 @@ export default function CompanionPage() {
   </div>
   );
 }
+

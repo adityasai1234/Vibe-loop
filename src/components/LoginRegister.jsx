@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { getAuth, GoogleAuthProvider, signInWithRedirect, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { AiFillApple } from "react-icons/ai";
+import AuthLayout from "./AuthLayout";
 
 const moodThemes = [
   { color: "#6EC1E4", label: "Calm" },
@@ -58,7 +59,7 @@ export default function AuthPage() {
       title="Vibeloop"
       subtitle={isLogin ? "Welcome back!" : "Create your account"}
     >
-        
+      <div className="space-y-6">
         <form className="space-y-4" onSubmit={handleAuth}>
           <div className="space-y-1">
             <label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
@@ -186,6 +187,7 @@ export default function AuthPage() {
           </div>
         </div>
       )}
-    </div>
+    </AuthLayout>
   );
 }
+

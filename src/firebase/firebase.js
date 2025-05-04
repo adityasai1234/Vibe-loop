@@ -28,3 +28,4 @@ const firestore = getFirestore(app);
 
 export { app, auth, firestore };
 export default app;
+
