@@ -1,51 +1,42 @@
-import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-import Home from "./components/Home";
-import SpotifyLogin from "./components/SpotifyLogin";
-import Login from "./components/Login";
-import Dashboard from "./components/Dashboard";
-import NotFound from "./components/NotFound";
-import ProtectedRoute from "./components/ProtectedRoute";
-import { JournalPage, ProfilePage } from "./pages";
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { Box } from '@chakra-ui/react';
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
+import ProfilePage from './pages/ProfilePage';
+import NotFound from './components/NotFound';
+import PrivateRoute from './components/PrivateRoute';
+import Navbar from './components/Navbar';
 
 function App() {
   return (
-    <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Navigate to="/login" />} />
-        
-        {/* Protected Routes */}
-        <Route 
-          path="/dashboard" 
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/journal" 
-          element={
-            <ProtectedRoute>
-              <JournalPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/profile" 
-          element={
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
-          } 
-        />
-        
-        {/* Other Routes */}
-        <Route path="/spotify-callback" element={<SpotifyLogin />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+    <Box minH="100vh">
+      <Navbar />
+      <Box as="main" pt="60px">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route 
+            path="/dashboard" 
+            element={
+              <PrivateRoute>
+                <DashboardPage />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/profile" 
+            element={
+              <PrivateRoute>
+                <ProfilePage />
+              </PrivateRoute>
+            } 
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Box>
+    </Box>
   );
 }
 

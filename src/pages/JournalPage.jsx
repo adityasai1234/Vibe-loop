@@ -6,10 +6,6 @@ import { doc, updateDoc, arrayUnion, getDoc, serverTimestamp } from 'firebase/fi
 import { firestore } from '../firebase/firebase';
 import { Box, Container, Heading, Text, useToast, Flex, Spinner } from '@chakra-ui/react';
 
-/**
- * JournalPage component for users to write and save journal entries
- * Entries are saved to the user's document in Firestore
- */
 const JournalPage = () => {
   const { currentUser, loading } = useAuth();
   const [savingEntry, setSavingEntry] = useState(false);
@@ -18,7 +14,6 @@ const JournalPage = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  // Fetch user data on component mount
   useEffect(() => {
     const fetchUserData = async () => {
       if (currentUser) {
@@ -68,7 +63,7 @@ const JournalPage = () => {
         
         // Calculate new streak and EP
         const newStreak = isConsecutiveDay ? (userData.currentStreak || 0) + 1 : 1;
-        const epBonus = isConsecutiveDay ? 5 : 3; // More EP for streak continuation
+        const epBonus = isConsecutiveDay ? 5 : 3;
         const newEP = (userData.ep || 0) + epBonus;
         
         // Update user document
