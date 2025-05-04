@@ -1,4 +1,3 @@
-import React from "react";
 // Placeholder for canvas/SVG and animation imports (e.g., Framer Motion)
 
 const mockPoster = {

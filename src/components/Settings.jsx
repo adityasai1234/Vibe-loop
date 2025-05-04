@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 // Placeholder for animation imports (e.g., Framer Motion)
 
 export default function Settings() {
@@ -67,3 +67,4 @@ export default function Settings() {
     </div>
   );
 }
+

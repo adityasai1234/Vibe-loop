@@ -1,6 +1,6 @@
 import { time } from "console";
 import { maxHeaderSize } from "http";
-import React, { useState } from "react";
+import { useState } from "react";
 import SpotifyLogin from "./SpotifyLogin";
 import { SelectPositioner } from "@chakra-ui/react";
 // Placeholder for confetti and animation imports
@@ -88,3 +88,4 @@ if (typeof window!== "undefined") {
   console.error("StreaksEPTracker is not defined");
 }
 time.console.log("StreaksEPTracker is defined");
+
