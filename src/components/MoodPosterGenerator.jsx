@@ -42,4 +42,3 @@ const mockPoster = {
     </div>
   );
  }
- 

@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ProfilePage from './pages/ProfilePage';
+import JournalPage from './pages/JournalPage';
 import NotFound from './components/NotFound';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
@@ -30,6 +31,14 @@ function App() {
             element={
               <PrivateRoute>
                 <ProfilePage />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/journal" 
+            element={
+              <PrivateRoute>
+                <JournalPage />
               </PrivateRoute>
             } 
           />
