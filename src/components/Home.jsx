@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../firebase/AuthContext";
 
 const moodGradients = {
   happy: "bg-gradient-to-r from-[#FFD166] to-[#FFE29F]",
@@ -21,6 +22,13 @@ function AnimatedBlob() {
 }
 
 function Hero() {
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
+  
+  const handleDashboardRedirect = () => {
+    navigate('/dashboard');
+  };
+  
   return (
     <section className="relative flex flex-col items-center justify-center min-h-[70vh] text-center px-4 pt-16 pb-8">
       <AnimatedBlob />
@@ -36,30 +44,42 @@ function Hero() {
           Your daily ritual for feeling, reflecting, and vibing.
         </motion.p>
         <div className="flex gap-4 mt-2">
-          <Link to="/signup">
+          {currentUser ? (
             <motion.button
               whileHover={{ scale: 1.05 }}
+              onClick={handleDashboardRedirect}
               className="px-8 py-3 rounded-full bg-gradient-to-r from-[#FFD166] to-[#FFE29F] text-gray-900 font-semibold shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-300 transition-all"
             >
-              Sign Up
+              Go to Dashboard
             </motion.button>
-          </Link>
-          <Link to="/login">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              className="px-8 py-3 rounded-full border-2 border-[#FFD166] text-[#FFD166] bg-white font-semibold shadow focus:outline-none focus:ring-2 focus:ring-yellow-200 transition-all"
-            >
-              Log In
-            </motion.button>
-          </Link>
-          <Link to="/demo">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              className="px-8 py-3 rounded-full border-2 border-gray-200 text-gray-500 bg-white font-semibold shadow focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all"
-            >
-              Try Demo
-            </motion.button>
-          </Link>
+          ) : (
+            <>
+              <Link to="/login">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  className="px-8 py-3 rounded-full bg-gradient-to-r from-[#FFD166] to-[#FFE29F] text-gray-900 font-semibold shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-300 transition-all"
+                >
+                  Sign Up
+                </motion.button>
+              </Link>
+              <Link to="/login">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  className="px-8 py-3 rounded-full border-2 border-[#FFD166] text-[#FFD166] bg-white font-semibold shadow focus:outline-none focus:ring-2 focus:ring-yellow-200 transition-all"
+                >
+                  Log In
+                </motion.button>
+              </Link>
+              <Link to="/demo">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  className="px-8 py-3 rounded-full border-2 border-gray-200 text-gray-500 bg-white font-semibold shadow focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all"
+                >
+                  Try Demo
+                </motion.button>
+              </Link>
+            </>
+          )}
         </div>
         <div className="mt-8 flex flex-col items-center">
           <motion.img

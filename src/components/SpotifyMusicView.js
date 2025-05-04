@@ -31,8 +31,8 @@ const mockTracks = [
   }
 ];
 
--export default function SpotifyMusicView() {
-+export default function VibeRecsPage() {
+export default function SpotifyMusicView() {
+export default function VibeRecsPage() {
   const [liked, setLiked] = useState({});
   const [playlist, setPlaylist] = useState([]);
 

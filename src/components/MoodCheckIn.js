@@ -12,9 +12,7 @@ const moods = [
   { emoji: "🤔", label: "Thoughtful" },
 ];
 const tags = ["anxious", "joyful", "numb", "focused", "grateful", "overwhelmed"];
-
--export default function MoodCheckIn({ onSubmit }) {
-+export default function MoodCheckPage({ onSubmit }) {
+export default function MoodCheckIn({ onSubmit }) {
   const [selectedMood, setSelectedMood] = useState(null);
   const [intensity, setIntensity] = useState(5);
   const [selectedTags, setSelectedTags] = useState([]);

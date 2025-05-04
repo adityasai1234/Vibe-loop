@@ -1,6 +1,8 @@
-import React, { useState } from "react";
-// Placeholder for Firebase Auth imports and OAuth logic
-// import { auth } from "../backend/firebaseConfig";
+import React, { useState, useEffect } from "react";
+import { getAuth, GoogleAuthProvider, signInWithRedirect, onAuthStateChanged } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+import { FcGoogle } from "react-icons/fc";
+import { AiFillApple } from "react-icons/ai";
 
 const moodThemes = [
   { color: "#6EC1E4", label: "Calm" },
@@ -10,6 +12,9 @@ const moodThemes = [
 ];
 const genres = ["Pop", "Rock", "Jazz", "Classical", "Hip-Hop", "EDM"];
 
+const auth = getAuth();
+const provider = new GoogleAuthProvider();
+
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -18,15 +23,30 @@ export default function AuthPage() {
   const [selectedTheme, setSelectedTheme] = useState(null);
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [notificationTime, setNotificationTime] = useState("");
+  const navigate = useNavigate();
 
-  // Placeholder handlers for auth
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        navigate("/dashboard");
+      }
+    });
+    return () => unsubscribe();
+  }, [navigate]);
+
   const handleAuth = (e) => {
     e.preventDefault();
     setShowOnboarding(true);
   };
+
   const handleOAuth = (provider) => {
     setShowOnboarding(true);
   };
+
+  const handleGoogleSignIn = () => {
+    signInWithRedirect(auth, provider);
+  };
+
   const toggleGenre = (genre) => {
     setSelectedGenres((prev) =>
       prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre]
@@ -34,81 +54,111 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-blue-100 to-pink-100 animate-fade-in">
-      <div className="bg-white rounded-3xl shadow-xl p-8 w-80 max-w-full flex flex-col gap-6 animate-slide-up">
-        <h1 className="text-3xl font-bold text-center text-blue-600 mb-2">Vibeloop</h1>
-        <form className="flex flex-col gap-4" onSubmit={handleAuth}>
-          <input
-            type="email"
-            placeholder="Email"
-            className="rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+    <AuthLayout
+      title="Vibeloop"
+      subtitle={isLogin ? "Welcome back!" : "Create your account"}
+    >
+        
+        <form className="space-y-4" onSubmit={handleAuth}>
+          <div className="space-y-1">
+            <label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+            <input
+              id="email"
+              type="email"
+              placeholder="your@email.com"
+              className="w-full h-12 px-4 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="space-y-1">
+            <label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              className="w-full h-12 px-4 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          
           <button
             type="submit"
-            className="bg-blue-500 text-white rounded-lg py-2 font-semibold hover:bg-blue-600 transition"
+            className="w-full h-12 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 dark:bg-primary-600 dark:hover:bg-primary-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50"
           >
-            {isLogin ? "Login" : "Register"}
+            {isLogin ? "Sign In" : "Create Account"}
           </button>
         </form>
-        <div className="flex flex-col gap-2">
+        
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+          <span className="text-xs text-gray-500 dark:text-gray-400">or continue with</span>
+          <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <button
-            className="bg-gray-100 rounded-lg py-2 flex items-center justify-center gap-2 hover:bg-gray-200 transition"
-            onClick={() => handleOAuth("google")}
+            className="h-12 flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50"
+            onClick={handleGoogleSignIn}
           >
-            <span role="img" aria-label="Google">🔵</span> Continue with Google
+            <FcGoogle size="20px" />
+            <span className="text-sm text-gray-700 dark:text-gray-200">Google</span>
           </button>
           <button
-            className="bg-gray-100 rounded-lg py-2 flex items-center justify-center gap-2 hover:bg-gray-200 transition"
+            className="h-12 flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50"
             onClick={() => handleOAuth("apple")}
           >
-            <span role="img" aria-label="Apple">🍏</span> Continue with Apple
+            <AiFillApple size="20px" className="text-black dark:text-white" />
+            <span className="text-sm text-gray-700 dark:text-gray-200">Apple</span>
           </button>
         </div>
-        <p className="text-center text-gray-500 text-sm">
+        
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400">
           {isLogin ? "Don't have an account?" : "Already have an account?"}
           <button
-            className="ml-1 text-blue-500 underline"
+            className="ml-1 text-primary-500 dark:text-primary-400 hover:underline focus:outline-none"
             onClick={() => setIsLogin((v) => !v)}
           >
-            {isLogin ? "Register" : "Login"}
+            {isLogin ? "Sign up" : "Sign in"}
           </button>
         </p>
       </div>
       {showOnboarding && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 animate-fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl p-8 w-96 max-w-full flex flex-col gap-6 animate-slide-up">
-            <h2 className="text-2xl font-bold text-center mb-2">Welcome! 🎉</h2>
-            <div>
-              <p className="font-semibold mb-1">Choose your mood color theme:</p>
-              <div className="flex gap-3 justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-lg space-y-6 animate-fadeIn">
+            <div className="text-center">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-200">Welcome! 🎉</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Let's personalize your experience</p>
+            </div>
+            
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Choose your mood color theme:</p>
+              <div className="flex flex-wrap gap-4 justify-center">
                 {moodThemes.map((theme) => (
                   <button
                     key={theme.color}
-                    className={`w-10 h-10 rounded-full border-4 transition-all ${selectedTheme === theme.color ? "border-blue-500 scale-110" : "border-transparent"}`}
+                    className={`w-12 h-12 rounded-full border-4 transition-all duration-300 hover:scale-105 ${selectedTheme === theme.color ? "border-primary-500 scale-110 shadow-md" : "border-transparent"}`}
                     style={{ background: theme.color }}
                     onClick={() => setSelectedTheme(theme.color)}
-                  />
+                    aria-label={`Select ${theme.label} theme`}
+                  >
+                    <span className="sr-only">{theme.label}</span>
+                  </button>
                 ))}
               </div>
             </div>
-            <div>
-              <p className="font-semibold mb-1">Select favorite music genres:</p>
+            
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Select favorite music genres:</p>
               <div className="flex flex-wrap gap-2 justify-center">
                 {genres.map((genre) => (
                   <button
                     key={genre}
-                    className={`px-3 py-1 rounded-full border transition-all ${selectedGenres.includes(genre) ? "bg-blue-200 border-blue-400" : "bg-gray-100 border-gray-300"}`}
+                    className={`px-4 py-2 rounded-full border transition-all duration-200 text-sm ${selectedGenres.includes(genre) ? "bg-primary-100 border-primary-300 text-primary-700 dark:bg-primary-900 dark:border-primary-700 dark:text-primary-300" : "bg-gray-100 border-gray-300 text-gray-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"} hover:shadow-sm`}
                     onClick={() => toggleGenre(genre)}
                   >
                     {genre}
@@ -116,30 +166,26 @@ export default function AuthPage() {
                 ))}
               </div>
             </div>
-            <div>
-              <p className="font-semibold mb-1">Set notification time:</p>
+            
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Set daily check-in reminder:</p>
               <input
                 type="time"
-                className="rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                className="w-full h-12 px-4 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200"
                 value={notificationTime}
                 onChange={(e) => setNotificationTime(e.target.value)}
               />
             </div>
+            
             <button
-              className="bg-blue-500 text-white rounded-lg py-2 font-semibold hover:bg-blue-600 transition mt-2"
+              className="w-full h-12 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 dark:bg-primary-600 dark:hover:bg-primary-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50"
               onClick={() => setShowOnboarding(false)}
             >
-              Finish Onboarding
+              Complete Setup
             </button>
           </div>
         </div>
       )}
-      <style>{`
-        .animate-fade-in { animation: fadeIn 0.7s; }
-        .animate-slide-up { animation: slideUp 0.7s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-      `}</style>
     </div>
   );
 }

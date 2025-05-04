@@ -7,9 +7,7 @@ const prompts = [
   "What are you grateful for?",
   "What did you learn today?"
 ];
-
--export default function JournalEntry({ onSave }) {
-+export default function JournalPage({ onSave }) {
+export default function JournalPage({ onSave }) {
   const [entry, setEntry] = useState("");
   const [selectedPrompt, setSelectedPrompt] = useState(null);
   const [saving, setSaving] = useState(false);

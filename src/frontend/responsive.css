@@ -1,0 +1,22 @@
+// ...existing styles...
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  /* Adjust container for mobile screens */
+  .container {
+    width: 100%;
+    padding: 10px;
+    margin: 0 auto;
+  }
+  /* ...other mobile styles... */
+}
+
+@media (min-width: 769px) {
+  /* Adjust container for larger screens */
+  .container {
+    max-width: 1200px;
+    padding: 20px;
+    margin: 0 auto;
+  }
+  /* ...other desktop styles... */
+}
