@@ -97,4 +97,4 @@ export default function VibeRecsPage() {
       `}</style>
     </div>
   );
-}
+};
