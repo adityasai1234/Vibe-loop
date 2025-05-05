@@ -1,18 +1,18 @@
 {
+  "compileOnSave": true,
+  "include": [
+    "src"
+  ],
   "compilerOptions": {
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "moduleResolution": "nodenext",
+    "module": "NodeNext",
     "noImplicitReturns": true,
-    "noUnusedLocals": true,
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
     "target": "es2017",
-    "skipLibCheck": true
-  },
-  "compileOnSave": true,
-  "include": [
-    "src"
-  ]
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "moduleResolution": "nodenext",
+    "noUnusedLocals": true
+  }
 }
