@@ -195,7 +195,7 @@ const moods: Mood[] = [
   }
 ];
 
-const EmojiMusicSuggestions: React.FC = () => {
+export const EmojiMusicSuggestions: React.FC = () => {
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedSongs, setSelectedSongs] = useState<typeof moods[0]['songs']>([]);
@@ -293,6 +293,4 @@ const EmojiMusicSuggestions: React.FC = () => {
       )}
     </div>
   );
-};
-
-export { EmojiMusicSuggestions }; 
+}; 
