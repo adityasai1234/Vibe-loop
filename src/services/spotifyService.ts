@@ -267,7 +267,7 @@ export const userService = {
 };
 
 // Mock data for development
-const MOCK_USERS = {
+export const MOCK_USERS = {
   'spotify:user:123456789': {
     id: '123456789',
     display_name: 'John Doe',

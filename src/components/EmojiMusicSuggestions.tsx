@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { sendEmailVerification } from 'firebase/auth';
 
 interface Mood {
   emoji: string;
