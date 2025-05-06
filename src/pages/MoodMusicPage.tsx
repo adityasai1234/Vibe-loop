@@ -1,9 +1,20 @@
 import React from 'react';
 import { EmojiMusicSuggestions } from '../components/EmojiMusicSuggestions';
+import ThemeToggle from '../components/ThemeToggle';
+import { Bell } from 'lucide-react';
 
 export const MoodMusicPage: React.FC = () => {
   return (
-    <div className="pt-16 md:pl-60 pb-20 min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
+    <div className="relative pt-16 md:pl-60 pb-20 min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
+      {/* Header: Notifications and Theme Toggle */}
+      <div className="absolute top-4 right-6 flex items-center gap-4">
+        <button className="p-2 hover:bg-white/10 rounded-full transition-colors">
+          <Bell size={20} className="text-white/80 hover:text-white" />
+        </button>
+        <div className="border-l border-white/10 h-6 mx-2" />
+        <ThemeToggle />
+      </div>
+      
       <div className="container mx-auto px-6 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
@@ -62,4 +73,8 @@ export const MoodMusicPage: React.FC = () => {
       </div>
     </div>
   );
+<<<<<<< HEAD
+};
+=======
 };  
+>>>>>>> cfbb9d0c8e039888d6419c953a3d5572bb3d41c8
