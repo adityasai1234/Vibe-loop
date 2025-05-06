@@ -4,8 +4,10 @@ import {
   Repeat, Shuffle, Heart, ListMusic, Maximize2, Minimize2 
 } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
+import { useThemeStore } from '../store/themeStore';
 
 export const MusicPlayer: React.FC = () => {
+  const { isDark } = useThemeStore();
   const { 
     currentSong, 
     isPlaying, 
@@ -27,7 +29,6 @@ export const MusicPlayer: React.FC = () => {
   const progressRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<number | null>(null);
   
-  // Simulate playback progress
   useEffect(() => {
     if (isPlaying && currentSong) {
       intervalRef.current = window.setInterval(() => {
@@ -99,7 +100,11 @@ export const MusicPlayer: React.FC = () => {
   }
   
   return (
-    <div className={`fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-lg text-white border-t border-white/10 z-50 transition-all duration-300 ${expanded ? 'h-96' : 'h-20'}`}>
+    <div className={`fixed bottom-0 left-0 right-0 backdrop-blur-lg border-t z-50 transition-all duration-300 ${
+      isDark 
+        ? 'bg-black/80 border-white/10 text-white' 
+        : 'bg-white/80 border-gray-200 text-gray-900'
+    } ${expanded ? 'h-96' : 'h-20'}`}>
       {expanded && (
         <div className="pt-6 px-8 flex items-center justify-between">
           <div className="flex items-center space-x-6">
@@ -110,23 +115,33 @@ export const MusicPlayer: React.FC = () => {
             />
             <div className="flex flex-col">
               <h2 className="text-2xl font-bold">{currentSong.title}</h2>
-              <p className="text-gray-400">{currentSong.artist}</p>
-              <p className="text-sm text-gray-500 mt-2">{currentSong.genre} • {currentSong.releaseDate}</p>
+              <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{currentSong.artist}</p>
+              <p className={`text-sm mt-2 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                {currentSong.genre} • {currentSong.releaseDate}
+              </p>
               <div className="flex items-center mt-4 space-x-4">
                 <button 
                   onClick={toggleLike} 
-                  className={`rounded-full p-2 ${liked ? 'text-accent-500 hover:text-accent-600' : 'text-white hover:text-gray-200'}`}
+                  className={`rounded-full p-2 ${
+                    liked 
+                      ? 'text-accent-500 hover:text-accent-600' 
+                      : isDark ? 'text-white hover:text-gray-200' : 'text-gray-900 hover:text-gray-700'
+                  }`}
                 >
                   <Heart size={20} fill={liked ? 'currentColor' : 'none'} />
                 </button>
-                <button className="text-white hover:text-gray-200 rounded-full p-2">
+                <button className={`rounded-full p-2 ${
+                  isDark ? 'text-white hover:text-gray-200' : 'text-gray-900 hover:text-gray-700'
+                }`}>
                   <ListMusic size={20} />
                 </button>
               </div>
             </div>
           </div>
           <div className="self-start">
-            <button onClick={toggleExpand} className="text-white hover:text-gray-200 p-2">
+            <button onClick={toggleExpand} className={
+              isDark ? 'text-white hover:text-gray-200 p-2' : 'text-gray-900 hover:text-gray-700 p-2'
+            }>
               <Minimize2 size={20} />
             </button>
           </div>
@@ -144,11 +159,13 @@ export const MusicPlayer: React.FC = () => {
               />
               <div className="flex flex-col">
                 <p className="font-medium truncate">{currentSong.title}</p>
-                <p className="text-sm text-gray-400 truncate">{currentSong.artist}</p>
+                <p className={`text-sm truncate ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  {currentSong.artist}
+                </p>
               </div>
               <button 
                 onClick={toggleLike} 
-                className={`p-1 ${liked ? 'text-accent-500' : 'text-gray-400'}`}
+                className={`p-1 ${liked ? 'text-accent-500' : isDark ? 'text-gray-400' : 'text-gray-500'}`}
               >
                 <Heart size={16} fill={liked ? 'currentColor' : 'none'} />
               </button>
@@ -160,42 +177,58 @@ export const MusicPlayer: React.FC = () => {
           <div className="flex items-center space-x-4 mb-1">
             <button 
               onClick={toggleShuffle} 
-              className={`p-1 ${shuffle ? 'text-primary-500' : 'text-gray-400'} hover:text-white transition-colors`}
+              className={`p-1 ${
+                shuffle 
+                  ? 'text-primary-500' 
+                  : isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'
+              } transition-colors`}
             >
               <Shuffle size={20} />
             </button>
             <button 
               onClick={prevSong} 
-              className="p-2 text-white hover:text-gray-200 transition-colors"
+              className={`p-2 transition-colors ${
+                isDark ? 'text-white hover:text-gray-200' : 'text-gray-900 hover:text-gray-700'
+              }`}
             >
               <SkipBack size={20} />
             </button>
             <button 
               onClick={togglePlayPause} 
-              className="w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 flex items-center justify-center transition-colors"
+              className="w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 flex items-center justify-center transition-colors text-white"
             >
               {isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-1" />}
             </button>
             <button 
               onClick={nextSong} 
-              className="p-2 text-white hover:text-gray-200 transition-colors"
+              className={`p-2 transition-colors ${
+                isDark ? 'text-white hover:text-gray-200' : 'text-gray-900 hover:text-gray-700'
+              }`}
             >
               <SkipForward size={20} />
             </button>
             <button 
               onClick={toggleRepeat} 
-              className={`p-1 ${repeat ? 'text-primary-500' : 'text-gray-400'} hover:text-white transition-colors`}
+              className={`p-1 ${
+                repeat 
+                  ? 'text-primary-500' 
+                  : isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'
+              } transition-colors`}
             >
               <Repeat size={20} />
             </button>
           </div>
           
           <div className="w-full flex items-center space-x-2">
-            <span className="text-xs text-gray-400 w-10 text-right">{currentTime}</span>
+            <span className={`text-xs w-10 text-right ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+              {currentTime}
+            </span>
             <div 
               ref={progressRef}
               onClick={handleProgressClick}
-              className="flex-1 h-1 bg-gray-700 rounded-full overflow-hidden cursor-pointer group"
+              className={`flex-1 h-1 rounded-full overflow-hidden cursor-pointer group ${
+                isDark ? 'bg-gray-700' : 'bg-gray-200'
+              }`}
             >
               <div 
                 className="h-full bg-primary-500 group-hover:bg-primary-400 relative"
@@ -204,12 +237,16 @@ export const MusicPlayer: React.FC = () => {
                 <div className="absolute top-1/2 right-0 w-3 h-3 bg-white rounded-full transform -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </div>
             </div>
-            <span className="text-xs text-gray-400 w-10">{totalTime}</span>
+            <span className={`text-xs w-10 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+              {totalTime}
+            </span>
           </div>
         </div>
         
         <div className="flex items-center justify-end space-x-3 w-1/4">
-          <button onClick={toggleMute} className="text-gray-400 hover:text-white">
+          <button onClick={toggleMute} className={
+            isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'
+          }>
             <VolumeIcon size={20} />
           </button>
           <input
@@ -222,7 +259,9 @@ export const MusicPlayer: React.FC = () => {
             className="w-24 accent-primary-500"
           />
           {!expanded && (
-            <button onClick={toggleExpand} className="text-gray-400 hover:text-white ml-2">
+            <button onClick={toggleExpand} className={
+              isDark ? 'text-gray-400 hover:text-white ml-2' : 'text-gray-500 hover:text-gray-900 ml-2'
+            }>
               <Maximize2 size={20} />
             </button>
           )}
