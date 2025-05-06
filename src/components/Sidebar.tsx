@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Home, Compass, Library, Bookmark, Heart, Clock, Plus, 
-  Mic, Radio, Headphones
+  Mic, Radio, Headphones, Smile
 } from 'lucide-react';
 import { playlists } from '../data/playlists';
 
@@ -22,6 +22,12 @@ export const Sidebar: React.FC = () => {
             <Link to="/discover" className="flex items-center space-x-3 p-2 rounded-md hover:bg-white/10 transition-colors">
               <Compass size={18} />
               <span>Discover</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/mood-music" className="flex items-center space-x-3 p-2 rounded-md hover:bg-white/10 transition-colors">
+              <Smile size={18} />
+              <span>Mood Music</span>
             </Link>
           </li>
           <li>

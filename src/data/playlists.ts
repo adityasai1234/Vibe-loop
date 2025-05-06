@@ -1,3 +1,4 @@
+import { DoorClosed } from 'lucide-react';
 import { Playlist } from '../types';
 
 export const playlists: Playlist[] = [
@@ -25,4 +26,4 @@ export const playlists: Playlist[] = [
     createdBy: '1',
     likes: 1240
   }
-];
+]; 

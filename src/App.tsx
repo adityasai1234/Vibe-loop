@@ -4,6 +4,7 @@ import { HomePage } from './pages/HomePage';
 import { DiscoverPage } from './pages/DiscoverPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AuthPage } from './pages/AuthPage';
+import { MoodMusicPage } from './pages/MoodMusicPage';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { MusicPlayer } from './components/MusicPlayer';
@@ -35,6 +36,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/discover" element={<DiscoverPage />} />
+            <Route path="/mood-music" element={<MoodMusicPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

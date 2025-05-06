@@ -8,7 +8,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
 
-interface AuthState {
+interface AuthState { 
   user: User | null;
   loading: boolean;
   error: string | null;
@@ -18,7 +18,7 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
+  user: null, 
   loading: true,
   error: null,
 
@@ -35,6 +35,22 @@ export const useAuthStore = create<AuthState>((set) => ({
   signIn: async (email: string, password: string) => {
     try {
       set({ loading: true, error: null });
+      
+      // Handle default admin credentials
+      if (email === 'admin@gmail.com' && password === 'admin123') {
+        // Create a mock user object for admin
+        const mockUser = {
+          uid: 'admin-uid',
+          email: 'admin@gmail.com',
+          displayName: 'Admin',
+          // Add other required User properties as needed
+        } as User;
+        
+        set({ user: mockUser, loading: false });
+        return;
+      }
+
+      // Regular Firebase authentication
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       set({ user: userCredential.user, loading: false });
     } catch (error: any) {
