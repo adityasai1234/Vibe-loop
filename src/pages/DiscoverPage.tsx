@@ -3,7 +3,10 @@ import { Filter, TrendingUp } from 'lucide-react';
 import { SongCard } from '../components/SongCard';
 import { songs } from '../data/songs';
 import { EmojiMusicSuggestions } from '../components/EmojiMusicSuggestions';
+<<<<<<< HEAD
 import ThemeToggle from '../components/ThemeToggle';
+=======
+>>>>>>> cfbb9d0c8e039888d6419c953a3d5572bb3d41c8
 
 export const DiscoverPage: React.FC = () => {
   const [activeGenre, setActiveGenre] = useState<string | null>(null);

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
@@ -25,3 +26,5 @@ export const db = getFirestore(app);
 export const FIREBASE_HOSTING_URL = import.meta.env.VITE_FIREBASE_HOSTING_URL;
 
 export { app, analytics };
+=======
+>>>>>>> cfbb9d0c8e039888d6419c953a3d5572bb3d41c8
