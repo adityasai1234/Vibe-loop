@@ -3,22 +3,22 @@ import { User } from '../types';
 export const users: User[] = [
   {
     id: '1',
-    name: 'John Doe',
-    username: 'johndoe',
-    profilePic: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    followers: 1234,
-    following: 567,
-    favoriteSongs: ['1', '3', '5', '7'],
-    recentlyPlayed: ['2', '4', '6', '8']
+    name: 'Olivia Martinez',
+    username: 'olivia_m',
+    profilePic: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    followers: 1542,
+    following: 342,
+    favoriteSongs: ['1', '4', '6'],
+    recentlyPlayed: ['4', '2', '7', '3']
   },
   {
     id: '2',
-    name: 'Jane Smith',
-    username: 'janesmith',
-    profilePic: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    followers: 2345,
-    following: 789,
-    favoriteSongs: ['2', '4', '6', '8'],
-    recentlyPlayed: ['1', '3', '5', '7']
+    name: 'Ethan Campbell',
+    username: 'ethan_beats',
+    profilePic: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    followers: 872,
+    following: 215,
+    favoriteSongs: ['2', '7', '5'],
+    recentlyPlayed: ['5', '1', '8']
   }
 ];
