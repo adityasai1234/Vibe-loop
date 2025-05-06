@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { sendEmailVerification } from 'firebase/auth';
+import { KeyboardMusic, LucideCloudDrizzle, StickyNote } from 'lucide-react';
 
 interface Mood {
   emoji: string;

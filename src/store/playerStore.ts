@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { songs } from '../data/songs';
 import { Song } from '../types';
+import { CloudCogIcon, KeySquare } from 'lucide-react';
 
 interface PlayerState {
   currentSong: Song | null;

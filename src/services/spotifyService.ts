@@ -1,6 +1,26 @@
 import { auth } from '../config/firebase';
 
 const SPOTIFY_API_BASE = 'https://api.spotify.com/v1';
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Types
+interface SpotifyUser {
+  id: string;
+  display_name: string;
+  email: string;
+  images: Array<{ url: string }>;
+  product: 'premium' | 'free';
+  type: 'user';
+  uri: string;
+}
+
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
+
+// Cache for API responses
+const cache = new Map<string, CacheEntry<any>>();
 
 // Spotify API endpoints
 const endpoints = {
@@ -28,12 +48,18 @@ const endpoints = {
   },
 };
 
-// Helper function to get access token
-const getAccessToken = async () => {
+// Helper function to get access token with caching
+const getAccessToken = async (): Promise<string> => {
   const user = auth.currentUser;
   if (!user) throw new Error('No user logged in');
   
-  // Get the Spotify access token from your backend
+  const cacheKey = `token_${user.uid}`;
+  const cached = cache.get(cacheKey);
+  
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data;
+  }
+  
   const token = await user.getIdToken();
   const response = await fetch('/api/spotify/token', {
     headers: {
@@ -41,233 +67,133 @@ const getAccessToken = async () => {
     },
   });
   
-  if (!response.ok) throw new Error('Failed to get Spotify access token');
+  if (!response.ok) {
+    throw new Error(`Failed to get Spotify access token: ${response.statusText}`);
+  }
+  
   const data = await response.json();
+  if (!data.access_token) {
+    throw new Error('Invalid token response from server');
+  }
+  
+  cache.set(cacheKey, { data: data.access_token, timestamp: Date.now() });
   return data.access_token;
 };
 
-// Playback State
-export const getPlaybackState = async () => {
+// Generic fetch wrapper with caching
+const fetchWithCache = async <T>(url: string, options?: RequestInit, useCache = true): Promise<T> => {
+  if (useCache) {
+    const cached = cache.get(url);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      return cached.data;
+    }
+  }
+
   const token = await getAccessToken();
-  const response = await fetch(endpoints.playback.state, {
+  const response = await fetch(url, {
+    ...options,
     headers: {
+      ...options?.headers,
       Authorization: `Bearer ${token}`,
     },
   });
-  return response.json();
+
+  if (!response.ok) {
+    throw new Error(`API request failed: ${response.statusText} (${response.status})`);
+  }
+
+  const data = await response.json();
+  if (useCache) {
+    cache.set(url, { data, timestamp: Date.now() });
+  }
+  return data;
 };
 
-export const getCurrentlyPlaying = async () => {
-  const token = await getAccessToken();
-  const response = await fetch(endpoints.playback.currentlyPlaying, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.json();
-};
+// Playback State
+export const getPlaybackState = () => fetchWithCache(endpoints.playback.state);
+export const getCurrentlyPlaying = () => fetchWithCache(endpoints.playback.currentlyPlaying);
 
 // Playback Control
 export const controlPlayback = {
-  play: async () => {
-    const token = await getAccessToken();
-    const response = await fetch(endpoints.playback.play, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (!response.ok) throw new Error('Failed to play');
-  },
-
-  pause: async () => {
-    const token = await getAccessToken();
-    const response = await fetch(endpoints.playback.pause, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (!response.ok) throw new Error('Failed to pause');
-  },
-
-  next: async () => {
-    const token = await getAccessToken();
-    const response = await fetch(endpoints.playback.next, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (!response.ok) throw new Error('Failed to skip to next track');
-  },
-
-  previous: async () => {
-    const token = await getAccessToken();
-    const response = await fetch(endpoints.playback.previous, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (!response.ok) throw new Error('Failed to go to previous track');
-  },
-
-  seek: async (position: number) => {
-    const token = await getAccessToken();
-    const response = await fetch(`${endpoints.playback.seek}?position_ms=${position}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (!response.ok) throw new Error('Failed to seek');
-  },
-
-  setVolume: async (volume: number) => {
-    const token = await getAccessToken();
-    const response = await fetch(`${endpoints.playback.volume}?volume_percent=${volume}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (!response.ok) throw new Error('Failed to set volume');
-  },
+  play: () => fetchWithCache(endpoints.playback.play, { method: 'PUT' }, false),
+  pause: () => fetchWithCache(endpoints.playback.pause, { method: 'PUT' }, false),
+  next: () => fetchWithCache(endpoints.playback.next, { method: 'POST' }, false),
+  previous: () => fetchWithCache(endpoints.playback.previous, { method: 'POST' }, false),
+  seek: (position: number) => 
+    fetchWithCache(`${endpoints.playback.seek}?position_ms=${position}`, { method: 'PUT' }, false),
+  setVolume: (volume: number) => 
+    fetchWithCache(`${endpoints.playback.volume}?volume_percent=${volume}`, { method: 'PUT' }, false),
 };
 
 // Playlist Management
 export const playlistService = {
-  getUserPlaylists: async () => {
-    const token = await getAccessToken();
-    const response = await fetch(endpoints.playlists.user, {
-      headers: {
-        Authorization: `Bearer ${token}`,
+  getUserPlaylists: () => fetchWithCache(endpoints.playlists.user),
+  createPlaylist: (userId: string, name: string, isPublic = false) => 
+    fetchWithCache(
+      endpoints.playlists.create.replace('{user_id}', userId),
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, public: isPublic }),
       },
-    });
-    if (!response.ok) throw new Error('Failed to get user playlists');
-    return response.json();
-  },
-
-  createPlaylist: async (userId: string, name: string, isPublic = false) => {
-    const token = await getAccessToken();
-    const response = await fetch(endpoints.playlists.create.replace('{user_id}', userId), {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
+      false
+    ),
+  addTracksToPlaylist: (playlistId: string, trackUris: string[]) =>
+    fetchWithCache(
+      endpoints.playlists.tracks.replace('{playlist_id}', playlistId),
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uris: trackUris }),
       },
-      body: JSON.stringify({
-        name,
-        public: isPublic,
-      }),
-    });
-    if (!response.ok) throw new Error('Failed to create playlist');
-    return response.json();
-  },
-
-  addTracksToPlaylist: async (playlistId: string, trackUris: string[]) => {
-    const token = await getAccessToken();
-    const response = await fetch(endpoints.playlists.tracks.replace('{playlist_id}', playlistId), {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        uris: trackUris,
-      }),
-    });
-    if (!response.ok) throw new Error('Failed to add tracks to playlist');
-    return response.json();
-  },
+      false
+    ),
 };
 
 // Following Management
 export const followingService = {
-  getFollowingArtists: async () => {
-    const token = await getAccessToken();
-    const response = await fetch(endpoints.following.artists, {
-      headers: {
-        Authorization: `Bearer ${token}`,
+  getFollowingArtists: () => fetchWithCache(endpoints.following.artists),
+  followArtist: (artistId: string) =>
+    fetchWithCache(
+      endpoints.following.artists,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: [artistId] }),
       },
-    });
-    if (!response.ok) throw new Error('Failed to get following artists');
-    return response.json();
-  },
-
-  followArtist: async (artistId: string) => {
-    const token = await getAccessToken();
-    const response = await fetch(endpoints.following.artists, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
+      false
+    ),
+  unfollowArtist: (artistId: string) =>
+    fetchWithCache(
+      endpoints.following.artists,
+      {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: [artistId] }),
       },
-      body: JSON.stringify({
-        ids: [artistId],
-      }),
-    });
-    if (!response.ok) throw new Error('Failed to follow artist');
-  },
-
-  unfollowArtist: async (artistId: string) => {
-    const token = await getAccessToken();
-    const response = await fetch(endpoints.following.artists, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        ids: [artistId],
-      }),
-    });
-    if (!response.ok) throw new Error('Failed to unfollow artist');
-  },
-
-  followPlaylist: async (playlistId: string) => {
-    const token = await getAccessToken();
-    const response = await fetch(endpoints.following.playlists.replace('{playlist_id}', playlistId), {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-    if (!response.ok) throw new Error('Failed to follow playlist');
-  },
-
-  unfollowPlaylist: async (playlistId: string) => {
-    const token = await getAccessToken();
-    const response = await fetch(endpoints.following.playlists.replace('{playlist_id}', playlistId), {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (!response.ok) throw new Error('Failed to unfollow playlist');
-  },
+      false
+    ),
+  followPlaylist: (playlistId: string) =>
+    fetchWithCache(
+      endpoints.following.playlists.replace('{playlist_id}', playlistId),
+      { method: 'PUT' },
+      false
+    ),
+  unfollowPlaylist: (playlistId: string) =>
+    fetchWithCache(
+      endpoints.following.playlists.replace('{playlist_id}', playlistId),
+      { method: 'DELETE' },
+      false
+    ),
 };
 
 // User Service
 export const userService = {
-  getCurrentUser: async () => {
-    const token = await getAccessToken();
-    const response = await fetch(`${SPOTIFY_API_BASE}/me`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (!response.ok) {
-      throw new Error('Failed to fetch user profile');
-    }
-    return response.json();
-  },
+  getCurrentUser: () => fetchWithCache(`${SPOTIFY_API_BASE}/me`),
 };
 
 // Mock data for development
-export const MOCK_USERS = {
+export const MOCK_USERS: Record<string, SpotifyUser> = {
   'spotify:user:123456789': {
     id: '123456789',
     display_name: 'John Doe',
@@ -304,4 +230,4 @@ export const MOCK_USERS = {
     type: 'user',
     uri: 'spotify:user:789123456'
   }
-}; 
+};

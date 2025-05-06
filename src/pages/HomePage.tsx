@@ -4,6 +4,7 @@ import { PlaylistCard } from '../components/PlaylistCard';
 import { songs } from '../data/songs';
 import { playlists } from '../data/playlists';
 import { users } from '../data/users';
+import { Song } from '../types';
 
 export const HomePage: React.FC = () => {
   // Get the current user (first user for demo)
@@ -11,13 +12,13 @@ export const HomePage: React.FC = () => {
   
   // Get recently played songs
   const recentlyPlayed = currentUser.recentlyPlayed.map(
-    id => songs.find(song => song.id === id)
-  ).filter(Boolean);
+    (id: string) => songs.find(song => song.id === id)
+  ).filter(Boolean) as Song[];
   
   // Get favorite songs
   const favoriteSongs = currentUser.favoriteSongs.map(
-    id => songs.find(song => song.id === id)
-  ).filter(Boolean);
+    (id: string) => songs.find(song => song.id === id)
+  ).filter(Boolean) as Song[];
   
   // Get trending songs (sort by likes)
   const trendingSongs = [...songs].sort((a, b) => b.likes - a.likes).slice(0, 5);
@@ -31,7 +32,7 @@ export const HomePage: React.FC = () => {
             <button className="text-sm text-primary-400 hover:text-primary-300">View All</button>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {recentlyPlayed.map(song => song && (
+            {recentlyPlayed.map((song: Song) => (
               <SongCard key={song.id} song={song} />
             ))}
           </div>
@@ -67,7 +68,7 @@ export const HomePage: React.FC = () => {
             <button className="text-sm text-primary-400 hover:text-primary-300">View All</button>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {favoriteSongs.map(song => song && (
+            {favoriteSongs.map((song: Song) => (
               <SongCard key={song.id} song={song} />
             ))}
           </div>

@@ -7,6 +7,7 @@ import {
   followingService,
   userService
 } from '../services/spotifyService';
+import { DnaOff, FileVideo, MoveLeft } from 'lucide-react';
 
 interface SpotifyUser {
   id: string;
