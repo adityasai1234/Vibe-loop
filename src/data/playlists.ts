@@ -1,4 +1,4 @@
-import { Nfc } from 'lucide-react';
+import { DoorClosed } from 'lucide-react';
 import { Playlist } from '../types';
 
 export const playlists: Playlist[] = [
@@ -26,28 +26,4 @@ export const playlists: Playlist[] = [
     createdBy: '1',
     likes: 1240
   }
-];
-export const playlistsWithSongs = playlists.map(playlist => ({
-  ...playlist,
-  songs: playlist.songs.map(songId => ({
-    id: songId,
-    title: `Song ${songId}`,
-    artist: `Artist ${songId}`,
-    albumArt: `https://picsum.photos/200/200?random=${songId}`,
-    genre: 'Pop',
-    releaseDate: '2023-01-01'
-  }))
-}));
-export const playlistsWithSongsAndLikes = playlistsWithSongs.map(playlist => ({
-  ...playlist,
-  likes: Math.floor(Math.random() * 1000) + 1,
-  songs: playlist.songs.map(song => ({ ...song, likes: Math.floor(Math.random() * 1000) + 1 }))
-}));
-export const playlistsWithSongsAndLikesAndCreatedBy = playlistsWithSongsAndLikes.map(playlist => ({
-  ...playlist,
-  createdBy: {
-    id: playlist.createdBy,
-    name: `User ${playlist.createdBy}`,
-    profilePicture: `https://picsum.photos/200/200?random=${playlist.createdBy}`
-  }
-}));
+]; 

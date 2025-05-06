@@ -31,14 +31,14 @@ export const MusicPlayer: React.FC = () => {
   useEffect(() => {
     if (isPlaying && currentSong) {
       intervalRef.current = window.setInterval(() => {
-        const newProgress = playbackProgress + (100 / (currentSong.duration)) * 0.1;
-        if (newProgress >= 100) {
-          clearInterval(intervalRef.current!);
-          nextSong();
-          setPlaybackProgress(0);
-        } else {
-          setPlaybackProgress(newProgress);
-        }
+        setPlaybackProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(intervalRef.current!);
+            nextSong();
+            return 0;
+          }
+          return prev + (100 / (currentSong.duration)) * 0.1;
+        });
       }, 100);
     } else if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -49,7 +49,7 @@ export const MusicPlayer: React.FC = () => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isPlaying, currentSong, nextSong, playbackProgress, setPlaybackProgress]);
+  }, [isPlaying, currentSong, nextSong, setPlaybackProgress]);
   
   const handleProgressClick = (e: React.MouseEvent) => {
     if (!progressRef.current || !currentSong) return;

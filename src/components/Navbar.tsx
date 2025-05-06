@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, User, Bell, Music, Home, Disc3 } from 'lucide-react';
+import { checkActionCode } from 'firebase/auth';
 
 export const Navbar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -15,6 +16,7 @@ export const Navbar: React.FC = () => {
           <Link to="/" className="text-xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">
             VibeLoop
           </Link>
+          <span className="text-xs text-gray-400 ml-2">Powered by Spotify API</span>
         </div>
         
         <div className="hidden md:flex items-center space-x-8">
