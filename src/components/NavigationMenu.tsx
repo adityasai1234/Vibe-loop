@@ -32,6 +32,7 @@ const navigationItems = [
   { name: 'Explore', icon: <Compass size={20} />, path: '/discover', emoji: '🔍' },
   { name: 'Categories', icon: <Music size={20} />, path: '/categories', emoji: '🎵' },
   { name: 'Moods', icon: <Smile size={20} />, path: '#', emoji: '🎭', action: () => setIsMoodPanelOpen(true) },
+  { name: 'Mood Journal', icon: <Disc3 size={20} />, path: '/mood-journal', emoji: '📝' },
   { name: 'Library', icon: <Library size={20} />, path: '/library', emoji: '📚' },
   { name: 'Favorites', icon: <Heart size={20} />, path: '/favorites', emoji: '❤️' },
   { name: 'Settings', icon: <Settings size={20} />, path: '/settings', emoji: '⚙️' },

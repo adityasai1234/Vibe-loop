@@ -69,6 +69,15 @@ export const moodData: MoodData[] = [
   }
 ];
 
+// Journal entry interface
+export interface JournalEntryData {
+  userId: string;
+  mood: string;
+  note?: string;
+  timestamp: number;
+  songs?: (SongMetadata & { id: string })[];
+}
+
 // Firestore service class
 class FirestoreService {
   private db = getFirestore(app);
@@ -168,6 +177,93 @@ class FirestoreService {
       });
     } catch (error) {
       console.error('Error adding song to favorites:', error);
+    }
+  }
+
+  // Get user's journal entries
+  async getUserJournalEntries(userId: string): Promise<any[]> {
+    try {
+      const entriesCollection = collection(this.db, `users/${userId}/journalEntries`);
+      const querySnapshot = await getDocs(entriesCollection);
+      const entries: any[] = [];
+      
+      querySnapshot.forEach((doc) => {
+        entries.push({ id: doc.id, ...doc.data() });
+      });
+      
+      return entries;
+    } catch (error) {
+      console.error('Error fetching journal entries:', error);
+      return [];
+    }
+  }
+
+  // Save a journal entry
+  async saveJournalEntry(entryData: JournalEntryData): Promise<void> {
+    try {
+      const { userId, ...entryFields } = entryData;
+      const entriesCollection = collection(this.db, `users/${userId}/journalEntries`);
+      
+      // Check if an entry for this date already exists
+      const entryDate = new Date(entryData.timestamp);
+      const startOfDay = new Date(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate()).getTime();
+      const endOfDay = new Date(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate() + 1).getTime() - 1;
+      
+      const q = query(
+        entriesCollection,
+        where('timestamp', '>=', startOfDay),
+        where('timestamp', '<=', endOfDay)
+      );
+      
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        // Update existing entry
+        const docRef = doc(entriesCollection, querySnapshot.docs[0].id);
+        await updateDoc(docRef, entryFields);
+      } else {
+        // Create new entry
+        await addDoc(entriesCollection, entryFields);
+      }
+    } catch (error) {
+      console.error('Error saving journal entry:', error);
+    }
+  }
+
+  // Get recently played songs for a user
+  async getRecentlyPlayedSongs(userId: string): Promise<(SongMetadata & { id: string })[]> {
+    try {
+      const userRef = doc(this.db, 'users', userId);
+      const userDoc = await getDoc(userRef);
+      
+      if (!userDoc.exists()) return [];
+      
+      const userData = userDoc.data();
+      const recentSongIds = userData.recentlyPlayed || [];
+      
+      // Fetch song details for each ID
+      const songs: (SongMetadata & { id: string })[] = [];
+      
+      for (const songId of recentSongIds) {
+        // In a real app, you would query the songs collection
+        // This is a simplified example
+        const allMoods = moodData.map(m => `moods/${m.emoji}_${m.mood.toLowerCase()}/songs`);
+        
+        for (const moodPath of allMoods) {
+          const songRef = doc(this.db, moodPath, songId);
+          const songDoc = await getDoc(songRef);
+          
+          if (songDoc.exists()) {
+            songs.push({ id: songDoc.id, ...songDoc.data() } as SongMetadata & { id: string });
+            break;
+          }
+        }
+      }
+      
+      return songs;
+    } catch (error) {
+      console.error('Error fetching recently played songs:', error);
+      return [];
     }
   }
 }
