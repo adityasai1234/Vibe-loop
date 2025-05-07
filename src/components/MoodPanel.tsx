@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { Nfc, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useThemeStore } from '../store/themeStore';
 
@@ -171,3 +171,5 @@ export const MoodPanel: React.FC<MoodPanelProps> = ({ isOpen, onClose, onMoodSel
     </AnimatePresence>
   );
 };
+
+export default MoodPanel;
