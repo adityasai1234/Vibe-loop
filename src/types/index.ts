@@ -19,6 +19,13 @@ export interface User {
   following: number;
   favoriteSongs: string[];
   recentlyPlayed: string[];
+  currentMood?: string;
+  moodHistory?: MoodEntry[];
+}
+
+export interface MoodEntry {
+  mood: string;
+  timestamp: number;
 }
 
 export interface Playlist {
@@ -28,4 +35,17 @@ export interface Playlist {
   songs: string[];
   createdBy: string;
   likes: number;
+}
+
+export interface ThemeState {
+  isDark: boolean;
+  toggleTheme: () => void;
+  syncThemeWithFirebase: (userId: string) => Promise<void>;
+  loadThemeFromFirebase: (userId: string) => Promise<void>;
+}
+
+export interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  login: (username: string, password: string) => Promise<void>;
 }
