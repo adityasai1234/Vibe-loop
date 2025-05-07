@@ -2,7 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Home, Compass, Library, Bookmark, Heart, Clock, Plus, 
-  Mic, Radio, Headphones
+  Mic, Radio, Headphones,
+  UndoDot
 } from 'lucide-react';
 import { playlists } from '../data/playlists';
 import { useThemeStore } from '../store/themeStore';

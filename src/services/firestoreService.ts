@@ -267,6 +267,3 @@ class FirestoreService {
     }
   }
 }
-
-// Export a singleton instance
-export const firestoreService = new FirestoreService();

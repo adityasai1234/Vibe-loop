@@ -3,6 +3,7 @@ import { firestoreService, SongMetadata } from '../services/firestoreService';
 import { useThemeStore } from '../store/themeStore';
 import { MoodEntry } from '../types';
 import { moodData } from '../services/firestoreService';
+import { KeyboardMusic } from 'lucide-react';
 
 interface MoodJournalProps {
   userId?: string;

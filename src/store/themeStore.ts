@@ -66,10 +66,3 @@ export const useThemeStore = create<ThemeState>()(
     }
   )
 );
-
-// Auto-sync theme with Firebase when user logs in
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    useThemeStore.getState().loadThemeFromFirebase(user.uid);
-  }
-});

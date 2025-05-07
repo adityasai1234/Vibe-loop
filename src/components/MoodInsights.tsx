@@ -70,7 +70,7 @@ export const MoodInsights: React.FC<MoodInsightsProps> = ({ userId }) => {
         
         filteredEntries.forEach(entry => {
           if (entry.songs && entry.songs.length > 0) {
-            entry.songs.forEach(song => {
+            entry.songs.forEach(song => {                     
               if (!songMoodMap[song.id]) {
                 songMoodMap[song.id] = {
                   title: song.title,
