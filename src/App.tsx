@@ -5,6 +5,7 @@ import { getFirestore, doc, updateDoc } from 'firebase/firestore';
 import { HomePage } from './pages/HomePage';
 import { DiscoverPage } from './pages/DiscoverPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { MoodJournalPage } from './pages/MoodJournalPage';
 import { Navbar } from './components/Navbar';
 import { NavigationMenu } from './components/NavigationMenu';
 import { MusicPlayer } from './components/MusicPlayer';
@@ -65,6 +66,7 @@ function App() {
               <Route path="/" element={<HomePage currentMood={currentMood} />} />
               <Route path="/discover" element={<DiscoverPage currentMood={currentMood} />} />
               <Route path="/categories" element={<DiscoverPage currentMood={currentMood} />} />
+              <Route path="/mood-journal" element={<MoodJournalPage />} />
               <Route path="/library" element={<ProfilePage />} />
               <Route path="/favorites" element={<ProfilePage />} />
               <Route path="/settings" element={<ProfilePage />} />
