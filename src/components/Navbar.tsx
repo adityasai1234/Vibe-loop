@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, User, Bell, Music, Home, Disc3, Sun, Moon, TrendingUp, Library } from 'lucide-react';
+import { Search, User, Bell, Music, Home, Disc3, Sun, Moon, TrendingUp, Library, LogOut } from 'lucide-react';
 import { useThemeStore } from '../store/themeStore';
+import { useAuth } from '../context/AuthContext';
+import { playlists } from '../data/playlists';
 
 export const Navbar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { isDark, toggleTheme } = useThemeStore();
+  const { logout } = useAuth();
   
   return (
     <nav className={`fixed top-0 w-full backdrop-blur-lg border-b z-50 transition-colors duration-300 ${
@@ -88,6 +91,15 @@ export const Navbar: React.FC = () => {
               <User size={16} />
             </div>
           </Link>
+          
+          {/* Logout button */}
+          <button 
+            onClick={logout}
+            className={`hover:text-red-500 transition-colors p-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
+            aria-label="Logout"
+          >
+            <LogOut size={20} />
+          </button>
         </div>
       </div>
     </nav>

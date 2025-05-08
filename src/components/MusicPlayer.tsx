@@ -4,6 +4,8 @@ import {
   Repeat, Shuffle, Heart, ListMusic, Maximize2, Minimize2 
 } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { app } from '../firebaseConfig';
 
 export const MusicPlayer: React.FC = () => {
   const { 
@@ -186,7 +188,7 @@ export const MusicPlayer: React.FC = () => {
               className={`p-1 ${repeat ? 'text-primary-500' : 'text-gray-400'} hover:text-white transition-colors`}
             >
               <Repeat size={20} />
-            </button>
+          </button>
           </div>
           
           <div className="w-full flex items-center space-x-2">
@@ -227,6 +229,6 @@ export const MusicPlayer: React.FC = () => {
           )}
         </div>
       </div>
-    </div>
+      </div>
   );
 };
