@@ -31,7 +31,14 @@ const navigationItems = [
   { name: 'Home', icon: <Home size={20} />, path: '/', emoji: '🏠' },
   { name: 'Explore', icon: <Compass size={20} />, path: '/discover', emoji: '🔍' },
   { name: 'Categories', icon: <Music size={20} />, path: '/categories', emoji: '🎵' },
-  { name: 'Moods', icon: <Smile size={20} />, path: '#', emoji: '🎭', action: () => setIsMoodPanelOpen(true) },
+  // Moods navigation item should be:
+  { 
+    name: 'Moods', 
+    icon: <Smile size={20} />, 
+    path: '#', 
+    emoji: '🎭', 
+    action: () => setIsMoodPanelOpen(true) 
+  },
   { name: 'Mood Journal', icon: <Disc3 size={20} />, path: '/mood-journal', emoji: '📝' },
   { name: 'Library', icon: <Library size={20} />, path: '/library', emoji: '📚' },
   { name: 'Favorites', icon: <Heart size={20} />, path: '/favorites', emoji: '❤️' },
@@ -94,21 +101,30 @@ export const NavigationMenu: React.FC<NavigationMenuProps> = ({ onMoodSelect }) 
         onClose={() => setIsMoodPanelOpen(false)} 
         onMoodSelect={handleMoodSelect} 
       />
-      {/* Mobile menu button */}
+      {/* Mobile menu button - positioned in the header for better mobile UX */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`md:hidden fixed top-20 right-4 p-2 rounded-full z-50 ${isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'} shadow-lg transition-all duration-300`}
+        className={`md:hidden fixed top-4 left-4 p-2 rounded-full z-50 ${isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'} shadow-lg transition-all duration-300`}
         aria-label="Toggle menu"
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
+      {/* Overlay for mobile menu */}
+      {isOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/50 z-20"
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Navigation menu - responsive for both mobile and desktop */}
       <div
         className={`${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} 
-          fixed top-16 left-0 h-screen w-full md:w-64 transition-transform duration-300 ease-in-out 
-          ${isDark ? 'bg-black/90 text-white' : 'bg-white/90 text-gray-900'} 
-          backdrop-blur-lg border-r z-30 md:flex md:flex-col
+          fixed top-0 left-0 h-screen w-3/4 sm:w-1/2 md:w-60 transition-transform duration-300 ease-in-out 
+          ${isDark ? 'bg-black/95 text-white' : 'bg-white/95 text-gray-900'} 
+          backdrop-blur-lg border-r z-30 md:flex md:flex-col pt-16
           ${isDark ? 'border-white/10' : 'border-gray-200'}`}
       >
         {/* Mobile navigation header with back button */}

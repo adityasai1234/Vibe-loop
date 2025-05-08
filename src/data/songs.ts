@@ -1,3 +1,4 @@
+import { JSAnimation } from 'framer-motion';
 import { Song } from '../types';
 
 export const songs: Song[] = [

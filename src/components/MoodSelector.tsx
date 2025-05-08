@@ -60,8 +60,8 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ onMoodSelect, curren
         What's Your Vibe Today? 🎶
       </h2>
       
-      {/* Mood Selector Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
+      {/* Mood Selector Grid - Responsive for all screen sizes */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-3 sm:gap-4 mb-8 overflow-x-auto pb-2">
         {moodData.map((item) => (
           <button
             key={item.mood}
@@ -82,9 +82,9 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ onMoodSelect, curren
         ))}
       </div>
 
-      {/* Selected Mood Info */}
+      {/* Selected Mood Info - Responsive layout */}
       {selectedMood && (
-        <div className={`rounded-lg p-6 mb-8 transition-all duration-300 ${
+        <div className={`rounded-lg p-4 sm:p-6 mb-6 sm:mb-8 transition-all duration-300 ${
           isDark ? 'bg-gray-800/50' : 'bg-white'
         }`}>
           <div className="flex items-center mb-4">
@@ -113,7 +113,7 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ onMoodSelect, curren
               <div className="animate-pulse text-primary-400">Loading recommendations...</div>
             </div>
           ) : (
-            <div className="flex flex-col sm:flex-row gap-3 mt-4">
+            <div className="flex flex-wrap gap-2 sm:gap-3 mt-4">
               <button 
                 className={`px-4 py-2 rounded-full font-medium transition-colors ${isDark ? 
                   'bg-primary-500 hover:bg-primary-600 text-white' : 
