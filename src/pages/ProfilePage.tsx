@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit, Share2, Users, Music, ListMusic } from 'lucide-react';
+import { Edit, Share2, Users, Music, ListMusic, ClipboardCheckIcon } from 'lucide-react';
 import { SongCard } from '../components/SongCard';
 import { users } from '../data/users';
 import { songs } from '../data/songs';

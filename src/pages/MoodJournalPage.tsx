@@ -31,4 +31,4 @@ export const MoodJournalPage: React.FC = () => {
       </div>
     </div>
   );
-}; 
+};

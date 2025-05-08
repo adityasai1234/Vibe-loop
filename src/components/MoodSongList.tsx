@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MoodSongCard } from './MoodSongCard';
 import { firestoreService, SongMetadata } from '../services/firestoreService';
 import { useThemeStore } from '../store/themeStore';
+import { MousePointerSquareDashed } from 'lucide-react';
 
 interface MoodSongListProps {
   mood: string | null;
