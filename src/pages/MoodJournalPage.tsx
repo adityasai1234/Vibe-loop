@@ -2,6 +2,7 @@ import React from 'react';
 import { MoodJournal } from '../components/MoodJournal';
 import { MoodInsights } from '../components/MoodInsights';
 import { useThemeStore } from '../store/themeStore';
+import { unwrapMotionComponent } from 'framer-motion';
 
 export const MoodJournalPage: React.FC = () => {
   const { isDark } = useThemeStore();
@@ -30,4 +31,4 @@ export const MoodJournalPage: React.FC = () => {
       </div>
     </div>
   );
-};
+}; 

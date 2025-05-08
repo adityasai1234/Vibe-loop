@@ -1,7 +1,8 @@
 import React from 'react';
-import { Play, Heart, MoreHorizontal, Pause } from 'lucide-react';
+import { Play, Heart, MoreHorizontal, Pause, JapaneseYenIcon } from 'lucide-react';
 import { Song } from '../types';
 import { usePlayerStore } from '../store/playerStore';
+import { browserPopupRedirectResolver } from 'firebase/auth';
 
 interface SongCardProps {
   song: Song;
@@ -29,17 +30,17 @@ export const SongCard: React.FC<SongCardProps> = ({ song, size = 'medium' }) => 
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
   
-  // Sizing classes
+  // Sizing classes - improved for responsive design
   const containerClasses = {
     small: 'flex items-center space-x-3 p-2 hover:bg-gray-100/10',
-    medium: 'flex flex-col w-48 p-3 group',
-    large: 'flex flex-col w-64 p-4 group'
+    medium: 'flex flex-col w-full p-3 group',
+    large: 'flex flex-col w-full p-4 group'
   };
   
   const imageClasses = {
     small: 'w-10 h-10 rounded',
-    medium: 'w-full aspect-square rounded-md mb-3 object-cover',
-    large: 'w-full aspect-square rounded-lg mb-4 object-cover'
+    medium: 'w-full aspect-square rounded-md mb-2 sm:mb-3 object-cover',
+    large: 'w-full aspect-square rounded-lg mb-3 sm:mb-4 object-cover'
   };
   
   if (size === 'small') {
@@ -56,7 +57,7 @@ export const SongCard: React.FC<SongCardProps> = ({ song, size = 'medium' }) => 
         </div>
         <button 
           onClick={handlePlay}
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-primary-500 hover:bg-primary-600 text-white transition-all"
+          className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center rounded-full bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white transition-all shadow-md active:shadow-sm active:scale-95"
         >
           {isActive && isPlaying ? <Pause size={16} /> : <Play size={16} />}
         </button>
@@ -76,7 +77,7 @@ export const SongCard: React.FC<SongCardProps> = ({ song, size = 'medium' }) => 
           <div className="absolute inset-0 bg-black/40 rounded-md"></div>
           <button 
             onClick={handlePlay}
-            className="relative z-10 w-12 h-12 flex items-center justify-center rounded-full bg-primary-500 hover:bg-primary-600 text-white transition-all transform hover:scale-105"
+            className="relative z-10 w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-full bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white transition-all transform hover:scale-105 active:scale-95 shadow-lg"
           >
             {isActive && isPlaying ? <Pause size={20} /> : <Play size={20} />}
           </button>

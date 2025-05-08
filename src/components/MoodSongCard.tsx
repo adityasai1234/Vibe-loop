@@ -1,6 +1,7 @@
 import React from 'react';
 import { SongMetadata } from '../services/firestoreService';
 import { useThemeStore } from '../store/themeStore';
+import { DivideCircle, KanbanSquareDashed } from 'lucide-react';
 
 interface MoodSongCardProps {
   song: SongMetadata & { id?: string };

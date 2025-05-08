@@ -368,4 +368,4 @@ export const MoodInsights: React.FC<MoodInsightsProps> = ({ userId }) => {
       )}
     </div>
   );
-};
+}
