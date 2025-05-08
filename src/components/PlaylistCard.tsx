@@ -3,6 +3,7 @@ import { Play, Heart, Pause, LucideAlignHorizontalJustifyEnd, AlignVerticalJusti
 import { Playlist } from '../types';
 import { usePlayerStore } from '../store/playerStore';
 import { songs } from '../data/songs';
+import { playlists } from '../data/playlists';
 
 interface PlaylistCardProps {
   playlist: Playlist;
