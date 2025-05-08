@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { auth } from '../firebaseConfig';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -24,19 +26,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   // Simple login function with hardcoded credentials
-  const login = (email: string, password: string): boolean => {
-    if (email === 'admin@gmail.com' && password === 'admin123') {
-      setIsAuthenticated(true);
-      localStorage.setItem('auth', 'true');
-      return true;
+  const login = async (email: string, password: string) => {
+    try {
+      // Hardcoded validation
+      if (email === 'admin@vibeloop.com' && password === 'vibe123') {
+        localStorage.setItem("auth", "true");
+        setIsAuthenticated(true);
+        return true;
+      }
+      throw new Error('Invalid credentials');
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
     }
-    return false;
   };
 
-  // Logout function
   const logout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem('auth');
+    signOut(auth).then(() => {
+      localStorage.removeItem("auth");
+      setIsAuthenticated(false);
+    });
   };
 
   const value = {

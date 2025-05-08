@@ -110,13 +110,14 @@ export const LoginPage: React.FC = () => {
               ) : 'Sign in'}
             </button>
           </div>
-          
-          <div className="text-center text-xs text-gray-500">
-            <p>Use the following credentials:</p>
-            <p>Email: admin@gmail.com</p>
-            <p>Password: admin123</p>
-          </div>
         </form>
+        
+        // Update the credentials display section
+        <div className="text-center text-xs text-gray-500">
+          <p>Use the following credentials:</p>
+          <p>Email: admin@vibeloop.com</p>
+          <p>Password: vibe123</p>
+        </div>
       </div>
     </div>
   );
