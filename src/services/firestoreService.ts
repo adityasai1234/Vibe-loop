@@ -290,3 +290,4 @@ export class FirestoreService {
 
 // Export an instance of FirestoreService to be used throughout the app
 export const firestoreService = new FirestoreService();
+export default firestoreService;
