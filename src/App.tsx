@@ -7,6 +7,8 @@ import { DiscoverPage } from './pages/DiscoverPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { MoodJournalPage } from './pages/MoodJournalPage';
 import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
+import { ForgotPassword } from './pages/ForgotPassword';
 import { Navbar } from './components/Navbar';
 import { NavigationMenu } from './components/NavigationMenu';
 import { MusicPlayer } from './components/MusicPlayer';
@@ -108,7 +110,11 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <AppWithAuth />
+        <Routes>
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/*" element={<AppWithAuth />} />
+        </Routes>
       </Router>
     </AuthProvider>
   );

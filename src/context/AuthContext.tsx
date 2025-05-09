@@ -1,11 +1,25 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { User } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import {
+  signInWithGoogle,
+  loginWithEmailPassword,
+  registerWithEmailPassword,
+  sendPasswordReset,
+  logoutUser
+} from '../services/authService';
 
 interface AuthContextType {
+  currentUser: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => boolean;
-  logout: () => void;
+  isLoading: boolean;
+  error: string | null;
+  loginWithEmail: (email: string, password: string) => Promise<void>;
+  registerWithEmail: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  logout: () => Promise<void>;
+  clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -15,43 +29,105 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Check if user is already authenticated on initial load
+  // Listen for auth state changes
   useEffect(() => {
-    const storedAuth = localStorage.getItem('auth');
-    if (storedAuth === 'true') {
-      setIsAuthenticated(true);
-    }
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+      setIsAuthenticated(!!user);
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  // Simple login function with hardcoded credentials
-  const login = async (email: string, password: string) => {
+  const clearError = () => setError(null);
+
+  // Login with email and password
+  const loginWithEmail = async (email: string, password: string) => {
     try {
-      // Hardcoded validation
-      if (email === 'admin@vibeloop.com' && password === 'vibe123') {
-        localStorage.setItem("auth", "true");
-        setIsAuthenticated(true);
-        return true;
-      }
-      throw new Error('Invalid credentials');
-    } catch (error) {
-      console.error("Login error:", error);
-      throw error;
+      setIsLoading(true);
+      clearError();
+      await loginWithEmailPassword(email, password);
+    } catch (err: any) {
+      setError(err.message || 'Failed to login');
+      throw err;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    signOut(auth).then(() => {
-      localStorage.removeItem("auth");
-      setIsAuthenticated(false);
-    });
+  // Register with email and password
+  const registerWithEmail = async (email: string, password: string) => {
+    try {
+      setIsLoading(true);
+      clearError();
+      await registerWithEmailPassword(email, password);
+    } catch (err: any) {
+      setError(err.message || 'Failed to register');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Login with Google
+  const loginWithGoogle = async () => {
+    try {
+      setIsLoading(true);
+      clearError();
+      await signInWithGoogle();
+    } catch (err: any) {
+      setError(err.message || 'Failed to login with Google');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Reset password
+  const resetPassword = async (email: string) => {
+    try {
+      setIsLoading(true);
+      clearError();
+      await sendPasswordReset(email);
+    } catch (err: any) {
+      setError(err.message || 'Failed to send password reset email');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Logout
+  const logout = async () => {
+    try {
+      setIsLoading(true);
+      clearError();
+      await logoutUser();
+    } catch (err: any) {
+      setError(err.message || 'Failed to logout');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const value = {
+    currentUser,
     isAuthenticated,
-    login,
-    logout
+    isLoading,
+    error,
+    loginWithEmail,
+    registerWithEmail,
+    loginWithGoogle,
+    resetPassword,
+    logout,
+    clearError
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -65,3 +141,6 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
+
+// Export auth instance for direct access if needed
+export { auth };

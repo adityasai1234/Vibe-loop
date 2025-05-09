@@ -48,4 +48,4 @@ export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   login: (username: string, password: string) => Promise<void>;
-}
+};
