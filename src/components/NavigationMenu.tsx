@@ -30,6 +30,8 @@ const categories = [
 const navigationItems = [
   { name: 'Home', icon: <Home size={20} />, path: '/', emoji: '🏠' },
   { name: 'Explore', icon: <Compass size={20} />, path: '/discover', emoji: '🔍' },
+  { name: 'Search', icon: <Search size={20} />, path: '/search', emoji: '🔎' },
+  { name: 'Simple Search', icon: <Search size={20} />, path: '/simple-search', emoji: '🔍' },
   { name: 'Categories', icon: <Music size={20} />, path: '/categories', emoji: '🎵' },
   // Moods navigation item should be:
   { 

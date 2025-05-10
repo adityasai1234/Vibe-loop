@@ -91,3 +91,99 @@ export const songs: Song[] = [
     likes: 2194
   }
 ];
+
+// Search and filter songs
+export const searchSongs = ({
+  query = '',
+  mood = [],
+  activity = [],
+  timeOfDay = [],
+  genre = '',
+  limit = 20,
+  offset = 0
+}: {
+  query?: string;
+  mood?: string[];
+  activity?: string[];
+  timeOfDay?: string[];
+  genre?: string;
+  limit?: number;
+  offset?: number;
+}) => {
+  // Convert query to lowercase for case-insensitive search
+  const searchQuery = query.toLowerCase();
+  
+  // Filter songs based on search query and filters
+  let filteredSongs = songs;
+  
+  // Apply text search if query is provided
+  if (searchQuery) {
+    filteredSongs = filteredSongs.filter(song => 
+      song.title.toLowerCase().includes(searchQuery) ||
+      song.artist.toLowerCase().includes(searchQuery) ||
+      song.genre.toLowerCase().includes(searchQuery)
+    );
+  }
+  
+  // Apply genre filter
+  if (genre) {
+    filteredSongs = filteredSongs.filter(song => song.genre === genre);
+  }
+  
+  // Sort by popularity (likes) by default
+  filteredSongs.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+  
+  // Calculate total before pagination
+  const total = filteredSongs.length;
+  
+  // Apply pagination
+  const paginatedSongs = filteredSongs.slice(offset, offset + limit);
+  
+  return {
+    documents: paginatedSongs,
+    total,
+    hasMore: total > offset + limit
+  };
+};
+
+// Get mood suggestions based on time of day
+export const getMoodSuggestionsByTime = (): string[] => {
+  const currentHour = new Date().getHours();
+  
+  // Map time of day to moods
+  if (currentHour >= 5 && currentHour < 12) {
+    // Morning: 5 AM - 12 PM
+    return ['energetic', 'happy'];
+  } else if (currentHour >= 12 && currentHour < 17) {
+    // Afternoon: 12 PM - 5 PM
+    return ['confident', 'energetic'];
+  } else if (currentHour >= 17 && currentHour < 21) {
+    // Evening: 5 PM - 9 PM
+    return ['relaxed', 'nostalgic'];
+  } else {
+    // Night: 9 PM - 5 AM
+    return ['chill', 'dreamy'];
+  }
+};
+
+// Get activity suggestions based on time of day
+export const getActivitySuggestions = (): string[] => {
+  const currentHour = new Date().getHours();
+  
+  if (currentHour >= 5 && currentHour < 9) {
+    // Early morning
+    return ['meditation', 'workout'];
+  } else if (currentHour >= 9 && currentHour < 12) {
+    // Morning
+    return ['study', 'reading'];
+  } else if (currentHour >= 12 && currentHour < 17) {
+    // Afternoon
+    return ['study', 'commuting', 'gaming'];
+  } else if (currentHour >= 17 && currentHour < 21) {
+    // Evening
+    return ['relaxing', 'party', 'driving'];
+  } else {
+    // Night
+    return ['sleeping', 'relaxing', 'reading'];
+  }
+};
