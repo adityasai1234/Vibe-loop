@@ -6,6 +6,7 @@ import {
 import { usePlayerStore } from '../store/playerStore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { app } from '../firebaseConfig';
+import '../styles/playerResponsive.css'; // Import responsive fixes for player
 
 export const MusicPlayer: React.FC = () => {
   const { 
@@ -100,9 +101,9 @@ export const MusicPlayer: React.FC = () => {
     return null;
   } 
   return (
-    <div className={`fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-lg text-white border-t border-white/10 z-50 transition-all duration-300 ${expanded ? 'h-96' : 'h-20'}`}>
+    <div className={`fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-lg text-white border-t border-white/10 z-50 transition-all duration-300 ${expanded ? 'h-96' : ''} music-player-container`}>
       {expanded && (
-        <div className="pt-6 px-8 flex items-center justify-between">
+        <div className="pt-6 px-8 flex items-center justify-between relative z-10">
           <div className="flex items-center space-x-6">
             <img 
               src={currentSong.albumArt} 
@@ -134,8 +135,9 @@ export const MusicPlayer: React.FC = () => {
         </div>
       )}
       
-      <div className={`flex items-center justify-between px-4 ${expanded ? 'mt-6' : 'h-full'}`}>
-        <div className="flex items-center space-x-4 w-1/4">
+      <div className={`relative flex items-center px-4 ${expanded ? 'mt-6' : 'h-full'} player-container`}>
+        {/* Left section - Song info */}
+        <div className="flex items-center space-x-4 flex-shrink-0 song-info-container">
           {!expanded && (
             <>
               <img 
@@ -143,13 +145,13 @@ export const MusicPlayer: React.FC = () => {
                 alt={currentSong.title} 
                 className="w-12 h-12 rounded"
               />
-              <div className="flex flex-col">
+              <div className="flex flex-col song-info">
                 <p className="font-medium truncate">{currentSong.title}</p>
                 <p className="text-sm text-gray-400 truncate">{currentSong.artist}</p>
               </div>
               <button 
                 onClick={toggleLike} 
-                className={`p-1 ${liked ? 'text-accent-500' : 'text-gray-400'}`}
+                className={`p-1 ${liked ? 'text-accent-500' : 'text-gray-400'} control-button`}
               >
                 <Heart size={16} fill={liked ? 'currentColor' : 'none'} />
               </button>
@@ -157,42 +159,43 @@ export const MusicPlayer: React.FC = () => {
           )}
         </div>
         
-        <div className="flex flex-col items-center justify-center w-2/4">
-          <div className="flex items-center space-x-4 mb-1">
+        {/* Center section - Player controls - Absolutely positioned to center */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center player-controls-container">
+          <div className="flex items-center space-x-4 mb-1 player-controls">
             <button 
               onClick={toggleShuffle} 
-              className={`p-1 ${shuffle ? 'text-primary-500' : 'text-gray-400'} hover:text-white transition-colors`}
+              className={`p-1 ${shuffle ? 'text-primary-500' : 'text-gray-400'} hover:text-white transition-colors control-button`}
             >
               <Shuffle size={20} />
             </button>
             <button 
               onClick={prevSong} 
-              className="p-2 text-white hover:text-gray-200 transition-colors"
+              className="p-2 text-white hover:text-gray-200 transition-colors control-button"
             >
               <SkipBack size={20} />
             </button>
             <button 
               onClick={togglePlayPause} 
-              className="w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 flex items-center justify-center transition-colors"
+              className="w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 flex items-center justify-center transition-colors control-button"
             >
               {isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-1" />}
             </button>
             <button 
               onClick={nextSong} 
-              className="p-2 text-white hover:text-gray-200 transition-colors"
+              className="p-2 text-white hover:text-gray-200 transition-colors control-button"
             >
               <SkipForward size={20} />
             </button>
             <button 
               onClick={toggleRepeat} 
-              className={`p-1 ${repeat ? 'text-primary-500' : 'text-gray-400'} hover:text-white transition-colors`}
+              className={`p-1 ${repeat ? 'text-primary-500' : 'text-gray-400'} hover:text-white transition-colors control-button`}
             >
               <Repeat size={20} />
           </button>
           </div>
           
-          <div className="w-full flex items-center space-x-2">
-            <span className="text-xs text-gray-400 w-10 text-right">{currentTime}</span>
+          <div className="w-full max-w-md flex items-center space-x-2 progress-container player-progress">
+            <span className="text-xs text-gray-400 w-10 text-right time-display">{currentTime}</span>
             <div 
               ref={progressRef}
               onClick={handleProgressClick}
@@ -205,12 +208,13 @@ export const MusicPlayer: React.FC = () => {
                 <div className="absolute top-1/2 right-0 w-3 h-3 bg-white rounded-full transform -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </div>
             </div>
-            <span className="text-xs text-gray-400 w-10">{totalTime}</span>
+            <span className="text-xs text-gray-400 w-10 text-left time-display">{totalTime}</span>
           </div>
         </div>
         
-        <div className="flex items-center justify-end space-x-3 w-1/4">
-          <button onClick={toggleMute} className="text-gray-400 hover:text-white">
+        {/* Right section - Volume controls */}
+        <div className="ml-auto flex items-center justify-end space-x-3 flex-shrink-0 volume-controls">
+          <button onClick={toggleMute} className="text-gray-400 hover:text-white volume-button control-button">
             <VolumeIcon size={20} />
           </button>
           <input
@@ -220,13 +224,42 @@ export const MusicPlayer: React.FC = () => {
             step={0.01}
             value={volume}
             onChange={handleVolumeChange}
-            className="w-24 accent-primary-500"
+            className="w-24 accent-primary-500 volume-slider"
           />
           {!expanded && (
-            <button onClick={toggleExpand} className="text-gray-400 hover:text-white ml-2">
+            <button onClick={toggleExpand} className="text-gray-400 hover:text-white ml-2 control-button">
               <Maximize2 size={20} />
             </button>
           )}
+        </div>
+      </div>
+      <div className="player-container fixed-center">
+        <div className="player-controls absolute-center">
+          <button 
+            onClick={toggleShuffle}
+            className={`control-button ${shuffle ? 'text-primary-400' : 'text-gray-400'}`}
+          >
+            <Shuffle size={20} />
+          </button>
+          <button className="control-button">
+            <SkipBack size={24} />
+          </button>
+          <button className="play-button">
+            {isPlaying ? (
+              <Pause size={32} fill="currentColor" />
+            ) : (
+              <Play size={32} fill="currentColor" />
+            )}
+          </button>
+          <button className="control-button">
+            <SkipForward size={24} />
+          </button>
+          <button 
+            onClick={toggleRepeat}
+            className={`control-button ${repeat ? 'text-primary-400' : 'text-gray-400'}`}
+          >
+            <Repeat size={20} />
+          </button>
         </div>
       </div>
       </div>

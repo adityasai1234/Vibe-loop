@@ -1,0 +1,357 @@
+/* Music Player Responsive Fixes
+ * Addresses UI overlap issues in the music player component on mobile devices
+ */
+
+/* Base player container fixes */
+.music-player-container {
+  position: relative;
+  z-index: 50;
+  width: 100%;
+}
+
+/* Ensure proper stacking and accessibility of controls */
+.player-controls {
+  position: relative;
+  z-index: 10;
+}
+
+.player-progress {
+  position: relative;
+  z-index: 5;
+}
+
+/* Fix for the music player progress bar */
+.progress-container {
+  position: relative;
+  z-index: 5;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Ensure the progress bar is clickable */
+.progress-container > div {
+  position: relative;
+  z-index: 6;
+  height: 4px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+/* Fix for the time displays */
+.time-display {
+  position: relative;
+  z-index: 7;
+  user-select: none;
+}
+
+/* Player controls container - ensure it's always centered */
+.player-controls-container {
+  width: auto;
+  z-index: 20;
+  /* Ensure it stays above other elements */
+}
+
+/* Ensure controls remain centered in expanded state */
+.music-player-container.h-96 .player-controls-container {
+  top: auto;
+  bottom: 1.5rem;
+}
+
+/* Progress container max width */
+.player-progress {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Mobile-specific fixes */
+@media (max-width: 768px) {
+  /* Adjust layout for smaller screens */
+  .music-player-container {
+    padding: 0.5rem;
+  }
+  
+  /* Fix song info display */
+  .song-info {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Ensure controls are properly spaced */
+  .player-controls {
+    gap: 0.25rem;
+    justify-content: center;
+  }
+  
+  /* Make play button more accessible */
+  .player-controls button {
+    position: relative;
+    z-index: 15;
+  }
+  
+  /* Ensure player controls container is properly centered */
+  .player-controls-container {
+    width: auto;
+    max-width: 100%;
+    transform: translateX(-50%) !important;
+    left: 50% !important;
+  }
+  
+  /* Limit progress bar width on small screens */
+  .player-progress {
+    max-width: 220px;
+  }
+  
+  /* Adjust volume controls */
+  .volume-controls {
+    position: relative;
+    z-index: 10;
+  }
+  
+  /* Hide volume slider on very small screens */
+  @media (max-width: 480px) {
+    .volume-slider {
+      width: 60px;
+    }
+    
+    /* Ensure song info container doesn't overflow */
+    .song-info-container {
+      max-width: 30%;
+    }
+    
+    /* Make control buttons more compact */
+    .player-controls {
+      gap: 0.15rem;
+    }
+    
+    .control-button {
+      min-width: 32px;
+      min-height: 32px;
+      padding: 0.25rem;
+    }
+    
+    /* Ensure progress bar is properly sized */
+    .player-progress {
+      max-width: 180px;
+    }
+  }
+  
+  /* Landscape mode adjustments */
+  @media (max-height: 480px) and (orientation: landscape) {
+    .music-player-container {
+      min-height: 60px;
+      padding-bottom: 0.25rem;
+    }
+    
+    .player-controls-container {
+      width: auto;
+      min-width: 80px;
+    }
+    
+    /* Compact controls for landscape */
+    .player-controls {
+      gap: 0.15rem;
+    }
+    
+    .control-button {
+      min-width: 30px;
+      min-height: 30px;
+      padding: 0.2rem;
+    }
+    
+    /* Ensure progress bar fits */
+    .player-progress {
+      max-width: 160px;
+    }
+  }
+  
+  /* Fix progress bar */
+  .progress-container {
+    padding: 0 0.5rem;
+  }
+  
+  /* Ensure time indicators are visible */
+  .time-display {
+    min-width: 35px;
+    text-align: center;
+  }
+  
+  /* Fix for the music player shown in screenshot */
+  .music-player-container {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+  }
+}
+
+/* Small mobile fixes */
+@media (max-width: 480px) {
+  /* Maintain horizontal layout but optimize spacing */
+  .player-container {
+    flex-wrap: wrap;
+    padding: 0.5rem 0.25rem;
+    gap: 0.5rem;
+  }
+  
+  /* Adjust song info */
+  .song-info-container {
+    width: 35%;
+    flex-shrink: 0;
+  }
+  
+  .song-info {
+    max-width: 80px;
+  }
+  
+  /* Optimize controls layout */
+  .player-controls-container {
+    width: 60%;
+    order: 2;
+  }
+  
+  /* Make controls more compact */
+  .player-controls {
+    gap: 0.25rem;
+  }
+  
+  /* Adjust progress bar to full width */
+  .progress-container {
+    width: 100%;
+    order: 3;
+    margin-top: 0.25rem;
+  }
+  
+  /* Ensure time displays are visible but compact */
+  .time-display {
+    min-width: 28px;
+    font-size: 0.65rem;
+  }
+  
+  /* Minimize volume controls */
+  .volume-controls {
+    width: auto;
+    position: absolute;
+    right: 0.5rem;
+    top: 0.5rem;
+  }
+  
+  /* Hide volume slider on very small screens */
+  .volume-slider {
+    display: none;
+  }
+  
+  /* Keep volume button visible */
+  .volume-button {
+    display: flex;
+  }
+  
+  /* Ensure touch targets are large enough */
+  .control-button {
+    min-width: 36px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Fix for the specific UI overlap in the screenshot */
+  .music-player-container {
+    height: auto !important;
+    min-height: 70px;
+    padding-bottom: 0.5rem;
+  }
+}
+
+/* Add these styles to fix remaining resizing issues */
+
+.fixed-center {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+}
+
+.absolute-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 60;
+}
+
+.play-button {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.play-button:hover {
+  transform: scale(1.05);
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.control-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+}
+
+.control-button:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Fix for very small screens */
+@media (max-width: 480px) {
+  .absolute-center {
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .play-button {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .song-info {
+    max-width: 120px;
+  }
+  
+  .song-info-container {
+    max-width: 30%;
+  }
+}
+
+/* Fix for landscape mode */
+@media (max-height: 480px) and (orientation: landscape) {
+  .music-player-container {
+    height: auto !important;
+    padding: 8px 0;
+  }
+  
+  .player-container {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .progress-container {
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+}

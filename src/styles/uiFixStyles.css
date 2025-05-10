@@ -1,0 +1,54 @@
+/* UI Fix Styles - Prevents overlapping elements and ensures proper stacking context */
+
+/* Base stacking context classes */
+.oauth-field-wrapper {
+  position: relative;
+  z-index: 10;
+}
+
+.overlapping-element {
+  z-index: 1 !important;
+}
+
+/* Container spacing and layout */
+.google-signin-config {
+  padding-bottom: 1.5rem;
+  margin-top: 1rem;
+}
+
+.signin-config-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Ensure input fields are always focusable and on top */
+input[type="text"],
+input[type="password"] {
+  pointer-events: auto;
+  z-index: 100;
+  position: relative;
+}
+
+/* Responsive layout adjustments */
+@media (max-width: 768px) {
+  .signin-config-container {
+    flex-direction: column;
+  }
+  
+  .mood-action-buttons {
+    margin-top: 1rem;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .signin-config-container {
+    padding: 0.5rem;
+  }
+  
+  .google-signin-config {
+    padding-bottom: 1rem;
+  }
+}
