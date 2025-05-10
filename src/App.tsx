@@ -9,6 +9,8 @@ import { MoodJournalPage } from './pages/MoodJournalPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ForgotPassword } from './pages/ForgotPassword';
+import SearchPage from './pages/SearchPage';
+import SimpleSearchPage from './pages/SimpleSearchPage';
 import { Navbar } from './components/Navbar';
 import { NavigationMenu } from './components/NavigationMenu';
 import { MusicPlayer } from './components/MusicPlayer';
@@ -70,6 +72,8 @@ const AppContent: React.FC = () => {
           <Routes>
             <Route path="/" element={<HomePage currentMood={currentMood} />} />
             <Route path="/discover" element={<DiscoverPage currentMood={currentMood} />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/simple-search" element={<SimpleSearchPage />} />
             <Route path="/categories" element={<DiscoverPage currentMood={currentMood} />} />
             <Route path="/mood-journal" element={<MoodJournalPage />} />
             <Route path="/library" element={<ProfilePage />} />
