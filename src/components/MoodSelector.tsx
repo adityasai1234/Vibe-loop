@@ -3,6 +3,7 @@ import { getAuth } from 'firebase/auth';
 import { app } from '../firebaseConfig';
 import { useThemeStore } from '../store/themeStore';
 import { firestoreService, moodData, SongMetadata } from '../services/firestoreService';
+import '../styles/uiFixStyles.css'; // Import UI fix styles
 
 // Using moodData imported from firestoreService
 
@@ -55,13 +56,13 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ onMoodSelect, curren
   }, [currentMood]);
 
   return (
-    <div className="w-full">
-      <h2 className={`text-2xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+    <div className="w-full signin-config-container relative">
+      <h2 className={`text-2xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'} relative z-10`}>
         What's Your Vibe Today? 🎶
       </h2>
       
-      {/* Mood Selector Grid - Responsive for all screen sizes */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-3 sm:gap-4 mb-8 overflow-x-auto pb-2">
+      {/* Mood Selector Grid - Responsive for all screen sizes with improved stacking context */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-3 sm:gap-4 mb-8 overflow-x-auto pb-2 relative z-10 google-signin-config">
         {moodData.map((item) => (
           <button
             key={item.mood}
@@ -73,6 +74,7 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ onMoodSelect, curren
                 (isDark ? 'bg-gray-800/50 hover:bg-gray-700/50' : 'bg-white hover:bg-gray-100')}
               ${isDark ? 'text-white' : 'text-gray-900'}
               shadow-md hover:shadow-lg transform hover:-translate-y-1
+              relative z-10 pointer-events-auto
             `}
           >
             <span className="text-4xl mb-2" role="img" aria-label={item.mood}>{item.emoji}</span>
@@ -82,11 +84,11 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ onMoodSelect, curren
         ))}
       </div>
 
-      {/* Selected Mood Info - Responsive layout */}
+      {/* Selected Mood Info - Responsive layout with improved stacking context */}
       {selectedMood && (
-        <div className={`rounded-lg p-4 sm:p-6 mb-6 sm:mb-8 transition-all duration-300 ${
-          isDark ? 'bg-gray-800/50' : 'bg-white'
-        }`}>
+        <div className={`rounded-lg p-4 sm:p-6 mb-6 sm:mb-8 transition-all duration-300 relative
+          ${isDark ? 'bg-gray-800/50' : 'bg-white'}
+          oauth-field-wrapper z-10`}>
           <div className="flex items-center mb-4">
             <span className="text-4xl mr-3">
               {moodData.find(m => m.mood === selectedMood)?.emoji}
@@ -99,11 +101,11 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ onMoodSelect, curren
             </div>
           </div>
           
-          <div className="space-y-2">
-            <p className="font-medium">Suggested tracks:</p>
-            <ul className="list-disc list-inside space-y-1 opacity-80 pl-2">
+          <div className="space-y-2 relative z-10">
+            <p className="font-medium relative z-10 pointer-events-auto">Suggested tracks:</p>
+            <ul className="list-disc list-inside space-y-1 opacity-80 pl-2 relative z-10">
               {moodData.find(m => m.mood === selectedMood)?.examples.map((example, index) => (
-                <li key={index}>{example}</li>
+                <li key={index} className="pointer-events-auto">{example}</li>
               ))}
             </ul>
           </div>
@@ -114,26 +116,27 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ onMoodSelect, curren
             </div>
           ) : (
             <div className="flex flex-wrap gap-2 sm:gap-3 mt-4">
-              <button 
-                className={`px-4 py-2 rounded-full font-medium transition-colors ${isDark ? 
-                  'bg-primary-500 hover:bg-primary-600 text-white' : 
-                  'bg-primary-500 hover:bg-primary-600 text-white'}`}
-              >
-                Play {selectedMood} Playlist
-              </button>
-              <button 
-                className={`px-4 py-2 rounded-full font-medium transition-colors ${isDark ? 
-                  'bg-white/10 hover:bg-white/20 text-white' : 
-                  'bg-gray-200 hover:bg-gray-300 text-gray-800'}`}
-                onClick={() => {
-                  // Shuffle mood - select a random mood
-                  const randomIndex = Math.floor(Math.random() * moodData.length);
-                  const randomMood = moodData[randomIndex].mood;
-                  handleMoodClick(randomMood);
-                }}
-              >
-                Shuffle Mood
-              </button>
+              {/* Action buttons with improved z-index and positioning */}
+              <div className="mood-action-buttons relative z-20 flex flex-wrap gap-2 sm:gap-3">
+                <button 
+                  className={`px-4 py-2 rounded-full font-medium transition-colors relative z-20 pointer-events-auto
+                    ${isDark ? 'bg-primary-500 hover:bg-primary-600 text-white' : 'bg-primary-500 hover:bg-primary-600 text-white'}`}
+                >
+                  Play {selectedMood} Playlist
+                </button>
+                <button 
+                  className={`px-4 py-2 rounded-full font-medium transition-colors relative z-20 pointer-events-auto
+                    ${isDark ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'}`}
+                  onClick={() => {
+                    // Shuffle mood - select a random mood
+                    const randomIndex = Math.floor(Math.random() * moodData.length);
+                    const randomMood = moodData[randomIndex].mood;
+                    handleMoodClick(randomMood);
+                  }}
+                >
+                  Shuffle Mood
+                </button>
+              </div>
             </div>
           )}
         </div>

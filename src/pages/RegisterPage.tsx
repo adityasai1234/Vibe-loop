@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useThemeStore } from '../store/themeStore';
 import { Disc3, Mail, Lock, User, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import '../styles/uiFixStyles.css'; // Import UI fix styles
 
 export const RegisterPage: React.FC = () => {
   const { isDark } = useThemeStore();
@@ -57,7 +58,7 @@ export const RegisterPage: React.FC = () => {
 
   return (
     <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-black' : 'bg-gray-50'}`}>
-      <div className={`w-full max-w-md p-8 space-y-8 rounded-lg shadow-lg ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
+      <div className={`w-full max-w-md p-8 space-y-8 rounded-lg shadow-lg ${isDark ? 'bg-gray-900' : 'bg-white'} z-50 relative oauth-field-wrapper signin-config-container`}>
         <div className="text-center">
           <motion.div 
             initial={{ scale: 0.9, opacity: 0 }}
@@ -114,7 +115,7 @@ export const RegisterPage: React.FC = () => {
                     autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 ${isDark
+                    className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 relative z-100 pointer-events-auto ${isDark
                       ? 'bg-gray-800 border-gray-700 text-white'
                       : 'bg-white border-gray-300 text-gray-900'
                     }`}
@@ -138,7 +139,7 @@ export const RegisterPage: React.FC = () => {
                     autoComplete="new-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 ${isDark
+                    className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 relative z-100 pointer-events-auto ${isDark
                       ? 'bg-gray-800 border-gray-700 text-white'
                       : 'bg-white border-gray-300 text-gray-900'
                     }`}
@@ -163,7 +164,7 @@ export const RegisterPage: React.FC = () => {
                     autoComplete="new-password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 ${isDark
+                    className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 relative z-100 pointer-events-auto ${isDark
                       ? 'bg-gray-800 border-gray-700 text-white'
                       : 'bg-white border-gray-300 text-gray-900'
                     }`}

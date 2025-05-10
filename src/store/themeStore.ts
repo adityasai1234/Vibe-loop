@@ -66,3 +66,6 @@ export const useThemeStore = create<ThemeState>()(
     }
   )
 );
+
+export default useThemeStore;
+// ... 
