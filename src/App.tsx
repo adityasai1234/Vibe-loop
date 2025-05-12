@@ -11,6 +11,7 @@ import { RegisterPage } from './pages/RegisterPage';
 import { ForgotPassword } from './pages/ForgotPassword';
 import SearchPage from './pages/SearchPage';
 import SimpleSearchPage from './pages/SimpleSearchPage';
+import { BohemianRhapsodyPage } from './pages/BohemianRhapsodyPage';
 import { Navbar } from './components/Navbar';
 import { NavigationMenu } from './components/NavigationMenu';
 import { MusicPlayer } from './components/MusicPlayer';
@@ -80,6 +81,7 @@ const AppContent: React.FC = () => {
             <Route path="/favorites" element={<ProfilePage />} />
             <Route path="/settings" element={<ProfilePage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/bohemian-rhapsody" element={<BohemianRhapsodyPage />} />
           </Routes>
         </div>
       </main>

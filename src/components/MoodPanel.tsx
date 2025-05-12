@@ -27,7 +27,7 @@ const moodData = [
     emoji: '😡',
     mood: 'Angry',
     genres: ['Rock', 'Metal', 'Rap'],
-    examples: ['Break Free', 'Urban Rage']
+    examples: ['Bohemian Rhapsody', 'Break Free', 'Urban Rage']
   },
   {
     emoji: '😌',

@@ -33,6 +33,8 @@ const navigationItems = [
   { name: 'Search', icon: <Search size={20} />, path: '/search', emoji: '🔎' },
   { name: 'Simple Search', icon: <Search size={20} />, path: '/simple-search', emoji: '🔍' },
   { name: 'Categories', icon: <Music size={20} />, path: '/categories', emoji: '🎵' },
+  // Featured song
+  { name: 'Bohemian Rhapsody', icon: <Music size={20} />, path: '/bohemian-rhapsody', emoji: '🎸' },
   // Moods navigation item should be:
   { 
     name: 'Moods', 

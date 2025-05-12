@@ -7,12 +7,12 @@ console.log(`Preparing to seed ${sampleSongs.length} songs`);
 seedSongsToCobalt()
   .then(success => {
     if (success) {
-      console.log('✅ Successfully seeded songs to Cobalt CMS!');
+      console.log(' Successfully seeded songs to Cobalt CMS!');
       console.log(`${sampleSongs.length} songs have been added to the collection.`);
     } else {
-      console.error('❌ Failed to seed songs to Cobalt CMS.');
+      console.error(' Failed to seed songs to Cobalt CMS.');
     }
   })
   .catch(error => {
-    console.error('❌ Error seeding songs:', error);
+    console.error(' Error seeding songs:', error);
   });

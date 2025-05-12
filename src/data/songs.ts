@@ -1,7 +1,18 @@
-import { JSAnimation } from 'framer-motion';
 import { Song } from '../types';
 
 export const songs: Song[] = [
+  {
+    id: 'bohemian-rhapsody',
+    title: 'Bohemian Rhapsody',
+    artist: 'Queen',
+    albumArt: 'https://upload.wikimedia.org/wikipedia/en/9/9f/Bohemian_Rhapsody.png',
+    audioSrc: '/music/bohemian_rhapsody.mp3',
+    duration: 354, // 5:54 in seconds
+    genre: 'Rock',
+    releaseDate: '1975',
+    mood: ['Angry', 'Reflective'],
+    tags: ['classic', 'rock', 'queen']
+  },
   {
     id: '1',
     title: 'Midnight Stroll',
