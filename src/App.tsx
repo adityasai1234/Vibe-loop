@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { AudioProvider } from './context/AudioContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+// We're using BrowserRouter (aliased as Router) with Routes and Route components
+// No need for createBrowserRouter here
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, updateDoc } from 'firebase/firestore';
 import { HomePage } from './pages/HomePage';
@@ -11,7 +15,8 @@ import { RegisterPage } from './pages/RegisterPage';
 import { ForgotPassword } from './pages/ForgotPassword';
 import SearchPage from './pages/SearchPage';
 import SimpleSearchPage from './pages/SimpleSearchPage';
-import { BohemianRhapsodyPage } from './pages/BohemianRhapsodyPage';
+import { BohemianRhapsodyPage } from './pages/otherpage';
+import { PlayButtonDemoPage } from './pages/PlayButtonDemoPage';
 import { Navbar } from './components/Navbar';
 import { NavigationMenu } from './components/NavigationMenu';
 import { MusicPlayer } from './components/MusicPlayer';
@@ -82,6 +87,7 @@ const AppContent: React.FC = () => {
             <Route path="/settings" element={<ProfilePage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/bohemian-rhapsody" element={<BohemianRhapsodyPage />} />
+            <Route path="/play-button-demo" element={<PlayButtonDemoPage />} />
           </Routes>
         </div>
       </main>
@@ -95,7 +101,7 @@ const AppContent: React.FC = () => {
 function App() {
   const { isDark } = useThemeStore();
   const [isLoading, setIsLoading] = useState(true);
-
+  
   // Effect to handle theme and loading state
   useEffect(() => {
     // Simulate loading state for smooth transitions
@@ -112,19 +118,20 @@ function App() {
       </div>
     );
   }
-
+  
+  // Use BrowserRouter with future flags
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/*" element={<AppWithAuth />} />
-        </Routes>
-      </Router>
+      <AudioProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </AudioProvider>
     </AuthProvider>
   );
 }
+
+
 
 // Component that conditionally renders based on auth state
 const AppWithAuth: React.FC = () => {

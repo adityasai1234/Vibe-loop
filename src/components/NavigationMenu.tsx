@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Menu, X, Music, TrendingUp, Coffee, Dumbbell, Brain, Moon as MoonIcon,
-  Home, Search, Library, Heart, Settings, Disc3, Compass, Smile
+  Home, Search, Library, Heart, Settings, Disc3, Compass, Smile, Play, Pause
 } from 'lucide-react';
 import { useThemeStore } from '../store/themeStore';
+import { useAudio } from '../context/AudioContext';
 import { MoodPanel } from './MoodPanel';
 
 // Define mood emojis with their corresponding mood names
@@ -26,22 +27,28 @@ const categories = [
   { name: 'Sleep', icon: <MoonIcon size={18} />, emoji: '😴' },
 ];
 
-// Define main navigation items
+// Define main navigation items - we'll add the Moods action later
 const navigationItems = [
   { name: 'Home', icon: <Home size={20} />, path: '/', emoji: '🏠' },
   { name: 'Explore', icon: <Compass size={20} />, path: '/discover', emoji: '🔍' },
   { name: 'Search', icon: <Search size={20} />, path: '/search', emoji: '🔎' },
   { name: 'Simple Search', icon: <Search size={20} />, path: '/simple-search', emoji: '🔍' },
   { name: 'Categories', icon: <Music size={20} />, path: '/categories', emoji: '🎵' },
-  // Featured song
-  { name: 'Bohemian Rhapsody', icon: <Music size={20} />, path: '/bohemian-rhapsody', emoji: '🎸' },
-  // Moods navigation item should be:
+  // Featured song - will be handled specially for play/pause functionality
+  { 
+    name: 'Bohemian Rhapsody', 
+    icon: <Music size={20} />, 
+    path: '/bohemian-rhapsody', 
+    emoji: '🎸',
+    special: 'bohemian'
+  },
+  // Moods navigation item placeholder (will be updated in the component)
   { 
     name: 'Moods', 
     icon: <Smile size={20} />, 
     path: '#', 
     emoji: '🎭', 
-    action: () => setIsMoodPanelOpen(true) 
+    action: null
   },
   { name: 'Mood Journal', icon: <Disc3 size={20} />, path: '/mood-journal', emoji: '📝' },
   { name: 'Library', icon: <Library size={20} />, path: '/library', emoji: '📚' },
@@ -60,7 +67,11 @@ export const NavigationMenu: React.FC<NavigationMenuProps> = ({ onMoodSelect }) 
   const [activeSection, setActiveSection] = useState<string>('main'); // 'main', 'moods', 'categories'
   const [isMoodPanelOpen, setIsMoodPanelOpen] = useState(false);
   const { isDark } = useThemeStore();
+  const { isPlaying, currentSong, play, pause } = useAudio();
   const location = useLocation();
+  
+  // Bohemian Rhapsody song URL - using GitHub Pages hosted version to avoid 500 error
+  const bohemianRhapsodyUrl = "https://adityasai1234.github.io/static-site-for-vibeloop/youtube_fJ9rUzIMcZQ_audio.mp3";
 
   // Close menu when route changes
   useEffect(() => {
@@ -95,6 +106,21 @@ export const NavigationMenu: React.FC<NavigationMenuProps> = ({ onMoodSelect }) 
   // Handle section change (for mobile navigation)
   const handleSectionChange = (section: string) => {
     setActiveSection(section);
+  };
+  
+  // Handle Bohemian Rhapsody play/pause
+  const handleBohemianPlayPause = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Check if this song is currently playing
+    const isBohemianPlaying = isPlaying && currentSong === bohemianRhapsodyUrl;
+    
+    if (isBohemianPlaying) {
+      pause();
+    } else {
+      play(bohemianRhapsodyUrl, "Bohemian Rhapsody", "Queen");
+    }
   };
 
   return (
@@ -133,7 +159,7 @@ export const NavigationMenu: React.FC<NavigationMenuProps> = ({ onMoodSelect }) 
       >
         {/* Mobile navigation header with back button */}
         {activeSection !== 'main' && (
-          <div className="md:hidden flex items-center p-4 border-b ${isDark ? 'border-white/10' : 'border-gray-200'}">
+          <div className={`md:hidden flex items-center p-4 border-b ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
             <button 
               onClick={() => setActiveSection('main')}
               className="flex items-center space-x-2 text-sm font-medium"
@@ -145,7 +171,7 @@ export const NavigationMenu: React.FC<NavigationMenuProps> = ({ onMoodSelect }) 
         )}
         
         {/* Logo for sidebar */}
-        <div className="hidden md:flex items-center justify-center p-4 mb-4 border-b ${isDark ? 'border-white/10' : 'border-gray-200'}">
+        <div className={`hidden md:flex items-center justify-center p-4 mb-4 border-b ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
           <Link to="/" className="flex items-center">
             <div className="text-primary-500 mr-2">
               <Disc3 size={24} strokeWidth={2} />
@@ -176,7 +202,7 @@ export const NavigationMenu: React.FC<NavigationMenuProps> = ({ onMoodSelect }) 
                     </button>
                   ) : item.name === 'Moods' ? (
                     <button
-                      onClick={item.action}
+                      onClick={() => setIsMoodPanelOpen(true)}
                       className={`flex items-center justify-between w-full p-3 rounded-md transition-colors
                         ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
                     >
@@ -186,6 +212,32 @@ export const NavigationMenu: React.FC<NavigationMenuProps> = ({ onMoodSelect }) 
                       </div>
                       <span className="text-xs">{item.emoji}</span>
                     </button>
+                  ) : item.special === 'bohemian' ? (
+                    <div className="flex items-center justify-between">
+                      <Link
+                        to={item.path}
+                        className={`flex-grow flex items-center justify-between p-3 rounded-l-md transition-colors
+                          ${location.pathname === item.path ? 
+                            (isDark ? 'bg-primary-500/20 text-primary-400' : 'bg-primary-100 text-primary-600') : 
+                            (isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100')}`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <span className="text-current">{item.icon}</span>
+                           <span>{item.name}</span>
+                           {isPlaying && currentSong === bohemianRhapsodyUrl && (
+                             <span className="ml-2 inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                           )}
+                        </div>
+                        <span className="text-xs">{item.emoji}</span>
+                      </Link>
+                      <button
+                        onClick={handleBohemianPlayPause}
+                        className={`p-3 rounded-r-md transition-colors ${isDark ? 'bg-primary-500/30 hover:bg-primary-500/50 text-white' : 'bg-primary-100 hover:bg-primary-200 text-primary-700'}`}
+                        aria-label={(isPlaying && currentSong === bohemianRhapsodyUrl) ? 'Pause' : 'Play'}
+                       >
+                         {(isPlaying && currentSong === bohemianRhapsodyUrl) ? <Pause size={20} /> : <Play size={20} />}
+                      </button>
+                    </div>
                   ) : (
                     <Link
                       to={item.path}
@@ -262,8 +314,8 @@ export const NavigationMenu: React.FC<NavigationMenuProps> = ({ onMoodSelect }) 
       </div>
 
       {/* Mobile bottom navigation bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-opacity-95 backdrop-blur-md border-t z-40
-        ${isDark ? 'bg-black/90 border-white/10' : 'bg-white/90 border-gray-200'}">
+      <div className={`md:hidden fixed bottom-0 left-0 right-0 bg-opacity-95 backdrop-blur-md border-t z-40
+        ${isDark ? 'bg-black/90 border-white/10' : 'bg-white/90 border-gray-200'}`}>
         <div className="flex justify-around items-center p-2">
           {navigationItems.slice(0, 5).map((item) => (
             <Link

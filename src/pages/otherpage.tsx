@@ -1,5 +1,7 @@
 import React from 'react';
 import { SongDetail } from '../components/SongDetail';
+import { SongPlayer } from '../components/SongPlayer';
+import { AudioPlayer } from '../components/AudioPlayer';
 import { useThemeStore } from '../store/themeStore';
 
 export const BohemianRhapsodyPage: React.FC = () => {
@@ -13,6 +15,31 @@ export const BohemianRhapsodyPage: React.FC = () => {
         </h1>
         
         <SongDetail showYoutubeLink={true} />
+        
+        {/* GitHub Pages hosted MP3 player */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">
+            Listen Now
+          </h2>
+          <SongPlayer 
+            songTitle="Bohemian Rhapsody"
+            artist="Queen"
+            audioSrc="/music/youtube_fJ9rUzIMcZQ_audio.mp3"
+            coverArt="https://upload.wikimedia.org/wikipedia/en/9/9f/Bohemian_Rhapsody.png"
+          />
+        </div>
+        
+        {/* Simple Play/Pause Controls */}
+        <div className="mt-6">
+          <h2 className="text-xl font-bold mb-4 bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">
+            Quick Controls
+          </h2>
+          <AudioPlayer 
+            audioSrc="/music/youtube_fJ9rUzIMcZQ_audio.mp3"
+            songTitle="Bohemian Rhapsody"
+            artist="Queen"
+          />
+        </div>
         
         <div className={`mt-8 p-6 rounded-xl ${isDark ? 'bg-gray-900/70 text-white/80' : 'bg-white/90 text-gray-700'} border ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
           <h2 className="text-xl font-bold mb-4">About This Song</h2>

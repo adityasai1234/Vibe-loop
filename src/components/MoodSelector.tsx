@@ -144,3 +144,5 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ onMoodSelect, curren
     </div>
   );
 };
+
+export default MoodSelector;
