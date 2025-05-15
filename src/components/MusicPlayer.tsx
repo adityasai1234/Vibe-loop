@@ -7,6 +7,7 @@ import { usePlayerStore } from '../store/playerStore';
 import { useAudio } from '../context/AudioContext';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { app } from '../firebaseConfig';
+import { PlayerControls } from './PlayerControls';
 import '../styles/playerResponsive.css'; // Import responsive fixes for player
 
 export const MusicPlayer: React.FC = () => {
@@ -221,21 +222,9 @@ export const MusicPlayer: React.FC = () => {
           </div>
           
           <div className="w-full max-w-md flex items-center space-x-2 progress-container player-progress">
-            <span className="text-xs text-gray-400 w-10 text-right time-display">{currentTime}</span>
-            <div 
-              ref={progressRef}
-              onClick={handleProgressClick}
-              className="flex-1 h-1 bg-gray-700 rounded-full overflow-hidden cursor-pointer group"
-            >
-              <div 
-                className="h-full bg-primary-500 group-hover:bg-primary-400 relative"
-                style={{ width: `${playbackProgress}%` }}
-              >
-                <div className="absolute top-1/2 right-0 w-3 h-3 bg-white rounded-full transform -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              </div>
-            </div>
-            <span className="text-xs text-gray-400 w-10 text-left time-display">{totalTime}</span>
-          </div>
+          {/* Replace with our new PlayerControls component */}
+          <PlayerControls minimal={!expanded} />
+        </div>
         </div>
         
         {/* Right section - Volume controls */}

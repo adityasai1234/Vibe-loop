@@ -10,6 +10,10 @@ interface AudioContextType {
     title: string;
     artist: string;
   } | null;
+  duration: number;
+  currentTime: number;
+  formatTime: (time: number) => string;
+  progress: number;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -18,22 +22,67 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSong, setCurrentSong] = useState<string | null>(null);
   const [songInfo, setSongInfo] = useState<{ title: string; artist: string } | null>(null);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Initialize audio element
   useEffect(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio();
+      
+      // Add event listeners for time updates and metadata loading
+      audioRef.current.addEventListener('timeupdate', handleTimeUpdate);
+      audioRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
+      audioRef.current.addEventListener('durationchange', handleDurationChange);
     }
 
     // Clean up on unmount
     return () => {
       if (audioRef.current) {
+        audioRef.current.removeEventListener('timeupdate', handleTimeUpdate);
+        audioRef.current.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        audioRef.current.removeEventListener('durationchange', handleDurationChange);
         audioRef.current.pause();
         audioRef.current.src = '';
       }
     };
   }, []);
+  
+  // Handle time updates for progress tracking
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+      if (audioRef.current.duration) {
+        setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
+      }
+    }
+  };
+  
+  // Handle metadata loading to get duration
+  const handleLoadedMetadata = () => {
+    if (audioRef.current && !isNaN(audioRef.current.duration)) {
+      setDuration(audioRef.current.duration);
+      console.log(`Audio duration loaded: ${audioRef.current.duration}s`);
+    }
+  };
+  
+  // Handle duration changes
+  const handleDurationChange = () => {
+    if (audioRef.current && !isNaN(audioRef.current.duration)) {
+      setDuration(audioRef.current.duration);
+      console.log(`Audio duration updated: ${audioRef.current.duration}s`);
+    }
+  };
+  
+  // Format time in minutes:seconds
+  const formatTime = (time: number): string => {
+    if (isNaN(time)) return '0:00';
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60).toString().padStart(2, '0');
+    return `${minutes}:${seconds}`;
+  };
 
   // Play function
   const play = async (songUrl: string, songTitle = 'Unknown Song', artist = 'Unknown Artist') => {
@@ -96,7 +145,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     play,
     pause,
     audioRef,
-    songInfo
+    songInfo,
+    duration,
+    currentTime,
+    formatTime,
+    progress
   };
 
   return (

@@ -50,7 +50,7 @@ export const MoodSongCard: React.FC<MoodSongCardProps> = ({
               title: song.title,
               artist: song.artist,
               albumArt: song.coverImageUrl,
-              duration: song.duration || 180, // Default duration if not provided
+              duration: 0, // Will be updated by audio element's loadedmetadata event
               audioUrl: song.audioSrc,
               genre: song.genre || '',
               releaseDate: song.releaseDate || ''
