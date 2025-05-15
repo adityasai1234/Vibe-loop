@@ -104,14 +104,3 @@ Each song in the Cobalt CMS collection includes the following metadata:
 }
 ```
 
-## Technologies Used
-
-- React with TypeScript
-- Firebase (Authentication, Firestore)
-- Cobalt CMS for song data management
-- Tailwind CSS for styling
-- Zustand for state management
-- Fuse.js for fuzzy search capabilities
-
-        
-- More sophisticated mood suggestions based on weather and user history
