@@ -2,6 +2,7 @@ import React from 'react';
 import { Play, Heart, Pause, LucideAlignHorizontalJustifyEnd, AlignVerticalJustifyEnd } from 'lucide-react';
 import { Playlist } from '../types';
 import { usePlayerStore } from '../store/playerStore';
+import { useAudio } from '../context/AudioContext';
 import { songs } from '../data/songs';
 import { playlists } from '../data/playlists';
 
@@ -11,6 +12,7 @@ interface PlaylistCardProps {
 
 export const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist }) => {
   const { setCurrentSong, togglePlayPause, isPlaying, currentSong } = usePlayerStore();
+  const { play: playAudio, pause: pauseAudio } = useAudio();
   
   const playlistSongs = songs.filter(song => playlist.songs.includes(song.id));
   const firstSong = playlistSongs[0];
@@ -20,8 +22,12 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist }) => {
     e.stopPropagation();
     
     if (isPlaylistPlaying) {
+      pauseAudio();
       togglePlayPause();
     } else if (firstSong) {
+      // Play the first song in the playlist
+      const songUrl = firstSong.audioUrl || firstSong.audioSrc || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${firstSong.id}_audio.mp3`;
+      playAudio(songUrl, firstSong.title, firstSong.artist);
       setCurrentSong(firstSong);
     }
   };

@@ -59,5 +59,4 @@ export const PlayButtonDemoPage: React.FC = () => {
     </div>
   );
 };
-
 export default PlayButtonDemoPage;

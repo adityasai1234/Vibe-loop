@@ -17,6 +17,8 @@ import SearchPage from './pages/SearchPage';
 import SimpleSearchPage from './pages/SimpleSearchPage';
 import { BohemianRhapsodyPage } from './pages/otherpage';
 import { PlayButtonDemoPage } from './pages/PlayButtonDemoPage';
+import { AlbumCoverDemo } from './pages/AlbumCoverDemo';
+import { AlbumClickPlayDemo } from './pages/AlbumClickPlayDemo';
 import { Navbar } from './components/Navbar';
 import { NavigationMenu } from './components/NavigationMenu';
 import { MusicPlayer } from './components/MusicPlayer';
@@ -88,6 +90,8 @@ const AppContent: React.FC = () => {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/bohemian-rhapsody" element={<BohemianRhapsodyPage />} />
             <Route path="/play-button-demo" element={<PlayButtonDemoPage />} />
+            <Route path="/album-cover-demo" element={<AlbumCoverDemo />} />
+            <Route path="/album-click-play" element={<AlbumClickPlayDemo />} />
           </Routes>
         </div>
       </main>

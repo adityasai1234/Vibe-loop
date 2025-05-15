@@ -7,7 +7,8 @@ export interface Song {
   genre: string;
   albumArt: string;
   duration: number;
-  audioSrc: string;
+  audioSrc?: string;
+  audioUrl?: string; // Added for compatibility with our implementation
   releaseDate?: string;
   likes?: number;
   mood?: string[];

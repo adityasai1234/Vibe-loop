@@ -274,4 +274,3 @@ export const getActivitySuggestions = async (latitude: number, longitude: number
     return ['study', 'relaxing']; // Default activities
   }
 };
-

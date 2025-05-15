@@ -142,3 +142,5 @@ export const PlayButton: React.FC<PlayButtonProps> = ({
     </div>
   );
 };
+
+export default PlayButton;

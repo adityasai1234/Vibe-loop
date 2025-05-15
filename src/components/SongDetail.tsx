@@ -3,6 +3,7 @@ import { Play, Pause, Heart, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useThemeStore } from '../store/themeStore';
 import { usePlayerStore } from '../store/playerStore';
+import { useAudio } from '../context/AudioContext';
 import { Song } from '../types';
 
 interface SongDetailProps {
@@ -29,14 +30,25 @@ export const SongDetail: React.FC<SongDetailProps> = ({
 }) => {
   const { isDark } = useThemeStore();
   const { currentSong, isPlaying, setCurrentSong, togglePlayPause } = usePlayerStore();
+  const { play: playAudio, pause: pauseAudio } = useAudio();
   const [isLiked, setIsLiked] = useState(false);
   
   const isActive = currentSong?.id === song.id;
   
   const handlePlay = () => {
     if (isActive) {
+      if (isPlaying) {
+        pauseAudio();
+      } else {
+        // Resume playing the current song
+        const songUrl = song.audioUrl || song.audioSrc || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${song.id}_audio.mp3`;
+        playAudio(songUrl, song.title, song.artist);
+      }
       togglePlayPause();
     } else {
+      // Play a new song
+      const songUrl = song.audioUrl || song.audioSrc || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${song.id}_audio.mp3`;
+      playAudio(songUrl, song.title, song.artist);
       setCurrentSong(song);
     }
   };

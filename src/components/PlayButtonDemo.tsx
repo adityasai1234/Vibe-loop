@@ -97,3 +97,5 @@ export const PlayButtonDemo: React.FC = () => {
     </div>
   );
 };
+
+export default PlayButtonDemo;

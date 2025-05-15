@@ -4,6 +4,7 @@ import {
   Repeat, Shuffle, Heart, ListMusic, Maximize2, Minimize2 
 } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
+import { useAudio } from '../context/AudioContext';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { app } from '../firebaseConfig';
 import '../styles/playerResponsive.css'; // Import responsive fixes for player
@@ -21,6 +22,9 @@ export const MusicPlayer: React.FC = () => {
     setPlaybackProgress
   } = usePlayerStore();
   
+  // Use AudioContext for actual audio playback
+  const { play: playAudio, pause: pauseAudio, isPlaying: isAudioPlaying } = useAudio();
+  
   const [expanded, setExpanded] = useState(false);
   const [liked, setLiked] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -30,6 +34,17 @@ export const MusicPlayer: React.FC = () => {
   const progressRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<number | null>(null);
   
+  // Simulate playback progress
+  // Sync AudioContext state with player store state
+  useEffect(() => {
+    // If AudioContext is playing but player store says it's not, sync them
+    if (isAudioPlaying !== isPlaying) {
+      if (isAudioPlaying) {
+        togglePlayPause(); // Set player store to playing
+      }
+    }
+  }, [isAudioPlaying, isPlaying, togglePlayPause]);
+
   // Simulate playback progress
   useEffect(() => {
     if (isPlaying && currentSong) {
@@ -175,7 +190,18 @@ export const MusicPlayer: React.FC = () => {
               <SkipBack size={20} />
             </button>
             <button 
-              onClick={togglePlayPause} 
+              onClick={() => {
+                // Toggle play/pause using AudioContext
+                if (isPlaying) {
+                  pauseAudio();
+                } else if (currentSong) {
+                  // Use the song's ID to construct the URL or use audioUrl if available
+                  const songUrl = currentSong.audioUrl || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${currentSong.id}_audio.mp3`;
+                  playAudio(songUrl, currentSong.title, currentSong.artist);
+                }
+                // Also update the player store state
+                togglePlayPause();
+              }}
               className="w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 flex items-center justify-center transition-colors control-button"
             >
               {isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-1" />}
@@ -244,7 +270,21 @@ export const MusicPlayer: React.FC = () => {
           <button className="control-button">
             <SkipBack size={24} />
           </button>
-          <button className="play-button">
+          <button 
+            className="play-button"
+            onClick={() => {
+              // Toggle play/pause using AudioContext
+              if (isPlaying) {
+                pauseAudio();
+              } else if (currentSong) {
+                // Use the song's ID to construct the URL or use audioUrl if available
+                const songUrl = currentSong.audioUrl || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${currentSong.id}_audio.mp3`;
+                playAudio(songUrl, currentSong.title, currentSong.artist);
+              }
+              // Also update the player store state
+              togglePlayPause();
+            }}
+          >
             {isPlaying ? (
               <Pause size={32} fill="currentColor" />
             ) : (
@@ -265,3 +305,4 @@ export const MusicPlayer: React.FC = () => {
       </div>
   );
 };
+export default MusicPlayer;

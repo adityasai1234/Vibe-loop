@@ -344,3 +344,4 @@ export const NavigationMenu: React.FC<NavigationMenuProps> = ({ onMoodSelect }) 
     </div>
   );
 };
+export default NavigationMenu;

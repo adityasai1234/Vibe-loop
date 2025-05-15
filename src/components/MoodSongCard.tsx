@@ -1,6 +1,8 @@
 import React from 'react';
 import { SongMetadata } from '../services/firestoreService';
 import { useThemeStore } from '../store/themeStore';
+import { usePlayerStore } from '../store/playerStore';
+import { useAudio } from '../context/AudioContext';
 import { DivideCircle, KanbanSquareDashed } from 'lucide-react';
 
 interface MoodSongCardProps {
@@ -19,6 +21,10 @@ export const MoodSongCard: React.FC<MoodSongCardProps> = ({
   onRateMoodMatch
 }) => {
   const { isDark } = useThemeStore();
+  const { setCurrentSong, togglePlayPause, isPlaying, currentSong } = usePlayerStore();
+  const { play: playAudio, pause: pauseAudio } = useAudio();
+  
+  const isActive = currentSong?.id === song.id;
   
   return (
     <div 
@@ -35,7 +41,47 @@ export const MoodSongCard: React.FC<MoodSongCardProps> = ({
         {/* Play Button Overlay */}
         <div 
           className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
-          onClick={onPlay}
+          onClick={(e) => {
+            e.stopPropagation();
+            
+            // Convert SongMetadata to Song format for player store
+            const songForPlayer = {
+              id: song.id || '',
+              title: song.title,
+              artist: song.artist,
+              albumArt: song.coverImageUrl,
+              duration: song.duration || 180, // Default duration if not provided
+              audioUrl: song.audioUrl,
+              genre: song.genre || '',
+              releaseDate: song.releaseDate || ''
+            };
+            
+            // Check if this is Bohemian Rhapsody
+            const isBohemianRhapsody = song.title === "Bohemian Rhapsody" || song.id === "fJ9rUzIMcZQ";
+            
+            if (isActive) {
+              if (isPlaying) {
+                pauseAudio();
+              } else {
+                // Resume playing the current song
+                const songUrl = isBohemianRhapsody
+                  ? "https://adityasai1234.github.io/static-site-for-vibeloop/youtube_fJ9rUzIMcZQ_audio.mp3"
+                  : (song.audioUrl || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${song.id}_audio.mp3`);
+                playAudio(songUrl, song.title, song.artist);
+              }
+              togglePlayPause();
+            } else {
+              // Play a new song
+              const songUrl = isBohemianRhapsody
+                ? "https://adityasai1234.github.io/static-site-for-vibeloop/youtube_fJ9rUzIMcZQ_audio.mp3"
+                : (song.audioUrl || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${song.id}_audio.mp3`);
+              playAudio(songUrl, song.title, song.artist);
+              setCurrentSong(songForPlayer);
+            }
+            
+            // Still call the original onPlay if provided
+            if (onPlay) onPlay();
+          }}
         >
           <div className="w-12 h-12 rounded-full bg-primary-500 flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" className="w-6 h-6">

@@ -209,3 +209,4 @@ export const SimpleSearchBar: React.FC<SimpleSearchBarProps> = ({
     </div>
   );
 };
+export default SimpleSearchBar;
