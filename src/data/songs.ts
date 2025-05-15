@@ -2,6 +2,19 @@ import { Song } from '../types';
 
 export const songs: Song[] = [
   {
+    id: 'sunflower',
+    title: 'Sunflower',
+    artist: 'Post Malone & Swae Lee',
+    albumArt: '/images/sunflower-cover.png',
+    audioSrc: '/music/youtube_ApXoWvfEYVU_audio.mp3',
+    duration: 158, // 2:38 in seconds
+    genre: 'Hip Hop',
+    releaseDate: '2018',
+    likes: 3500,
+    mood: ['Happy', 'Chill'],
+    tags: ['soundtrack', 'spiderverse', 'pop']
+  },
+  {
     id: 'bohemian-rhapsody',
     title: 'Bohemian Rhapsody',
     artist: 'Queen',

@@ -195,8 +195,8 @@ export const MusicPlayer: React.FC = () => {
                 if (isPlaying) {
                   pauseAudio();
                 } else if (currentSong) {
-                  // Use the song's ID to construct the URL or use audioUrl if available
-                  const songUrl = currentSong.audioUrl || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${currentSong.id}_audio.mp3`;
+                  // Use the song's audioSrc or construct URL from ID
+    const songUrl = currentSong.audioSrc || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${currentSong.id}_audio.mp3`;
                   playAudio(songUrl, currentSong.title, currentSong.artist);
                 }
                 // Also update the player store state
@@ -277,8 +277,8 @@ export const MusicPlayer: React.FC = () => {
               if (isPlaying) {
                 pauseAudio();
               } else if (currentSong) {
-                // Use the song's ID to construct the URL or use audioUrl if available
-                const songUrl = currentSong.audioUrl || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${currentSong.id}_audio.mp3`;
+                // Use the song's audioSrc or construct URL from ID
+    const songUrl = currentSong.audioSrc || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${currentSong.id}_audio.mp3`;
                 playAudio(songUrl, currentSong.title, currentSong.artist);
               }
               // Also update the player store state

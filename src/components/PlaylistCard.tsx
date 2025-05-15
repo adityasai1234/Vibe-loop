@@ -26,7 +26,7 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist }) => {
       togglePlayPause();
     } else if (firstSong) {
       // Play the first song in the playlist
-      const songUrl = firstSong.audioUrl || firstSong.audioSrc || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${firstSong.id}_audio.mp3`;
+      const songUrl = firstSong.audioSrc || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${firstSong.id}_audio.mp3`;
       playAudio(songUrl, firstSong.title, firstSong.artist);
       setCurrentSong(firstSong);
     }

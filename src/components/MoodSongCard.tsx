@@ -51,7 +51,7 @@ export const MoodSongCard: React.FC<MoodSongCardProps> = ({
               artist: song.artist,
               albumArt: song.coverImageUrl,
               duration: song.duration || 180, // Default duration if not provided
-              audioUrl: song.audioUrl,
+              audioUrl: song.audioSrc,
               genre: song.genre || '',
               releaseDate: song.releaseDate || ''
             };
@@ -65,8 +65,8 @@ export const MoodSongCard: React.FC<MoodSongCardProps> = ({
               } else {
                 // Resume playing the current song
                 const songUrl = isBohemianRhapsody
-                  ? "https://adityasai1234.github.io/static-site-for-vibeloop/youtube_fJ9rUzIMcZQ_audio.mp3"
-                  : (song.audioUrl || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${song.id}_audio.mp3`);
+                ? "https://adityasai1234.github.io/static-site-for-vibeloop/youtube_fJ9rUzIMcZQ_audio.mp3"
+                : (song.audioSrc || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${song.id}_audio.mp3`);
                 playAudio(songUrl, song.title, song.artist);
               }
               togglePlayPause();
@@ -74,7 +74,7 @@ export const MoodSongCard: React.FC<MoodSongCardProps> = ({
               // Play a new song
               const songUrl = isBohemianRhapsody
                 ? "https://adityasai1234.github.io/static-site-for-vibeloop/youtube_fJ9rUzIMcZQ_audio.mp3"
-                : (song.audioUrl || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${song.id}_audio.mp3`);
+                : (song.audioSrc || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${song.id}_audio.mp3`);
               playAudio(songUrl, song.title, song.artist);
               setCurrentSong(songForPlayer);
             }

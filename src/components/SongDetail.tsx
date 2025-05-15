@@ -41,13 +41,13 @@ export const SongDetail: React.FC<SongDetailProps> = ({
         pauseAudio();
       } else {
         // Resume playing the current song
-        const songUrl = song.audioUrl || song.audioSrc || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${song.id}_audio.mp3`;
+        const songUrl = song.audioSrc || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${song.id}_audio.mp3`;
         playAudio(songUrl, song.title, song.artist);
       }
       togglePlayPause();
     } else {
       // Play a new song
-      const songUrl = song.audioUrl || song.audioSrc || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${song.id}_audio.mp3`;
+      const songUrl = song.audioSrc || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${song.id}_audio.mp3`;
       playAudio(songUrl, song.title, song.artist);
       setCurrentSong(song);
     }
