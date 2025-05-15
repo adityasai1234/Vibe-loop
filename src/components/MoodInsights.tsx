@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { firestoreService, moodData } from '../services/firestoreService';
 import { useThemeStore } from '../store/themeStore';
 import { UserCheck2 } from 'lucide-react';
+import { users } from '../data/users';
 
 interface MoodInsightsProps {
   userId?: string;
@@ -370,3 +371,4 @@ export const MoodInsights: React.FC<MoodInsightsProps> = ({ userId }) => {
     </div>
   );
 };
+export default MoodInsights;

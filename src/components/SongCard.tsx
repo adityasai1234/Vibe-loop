@@ -1,7 +1,8 @@
 import React from 'react';
-import { Play, Heart, MoreHorizontal, Pause, JapaneseYenIcon } from 'lucide-react';
+import { Play, Heart, MoreHorizontal, Pause, JapaneseYenIcon, CheckCircle2 } from 'lucide-react';
 import { Song } from '../types';
 import { usePlayerStore } from '../store/playerStore';
+import { useAudio } from '../context/AudioContext';
 import { browserPopupRedirectResolver } from 'firebase/auth';
 
 interface SongCardProps {
@@ -11,6 +12,7 @@ interface SongCardProps {
 
 export const SongCard: React.FC<SongCardProps> = ({ song, size = 'medium' }) => {
   const { currentSong, isPlaying, setCurrentSong, togglePlayPause } = usePlayerStore();
+  const { play: playAudio, pause: pauseAudio } = useAudio();
   
   const isActive = currentSong?.id === song.id;
   
@@ -18,8 +20,18 @@ export const SongCard: React.FC<SongCardProps> = ({ song, size = 'medium' }) => 
     e.stopPropagation();
     
     if (isActive) {
+      if (isPlaying) {
+        pauseAudio();
+      } else {
+        // Resume playing the current song
+        const songUrl = song.audioSrc || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${song.id}_audio.mp3`;
+        playAudio(songUrl, song.title, song.artist);
+      }
       togglePlayPause();
     } else {
+      // Play a new song
+      const songUrl = song.audioSrc || `https://adityasai1234.github.io/static-site-for-vibeloop/youtube_${song.id}_audio.mp3`;
+      playAudio(songUrl, song.title, song.artist);
       setCurrentSong(song);
     }
   };

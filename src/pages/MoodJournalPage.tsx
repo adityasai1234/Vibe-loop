@@ -32,3 +32,5 @@ export const MoodJournalPage: React.FC = () => {
     </div>
   );
 };
+
+export default MoodJournalPage;

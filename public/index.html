@@ -1,100 +1,58 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>My Firebase Site</title>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bohemian Rhapsody Player</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      background: #f4f4f4;
+    }
 
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/9.6.1/firebase-app-compat.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/9.6.1/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/9.6.1/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/9.6.1/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/9.6.1/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/9.6.1/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/9.6.1/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/9.6.1/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/9.6.1/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/9.6.1/firebase-performance-compat.js"></script>
+    .song-card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      text-align: center;
+    }
 
-    <!-- initialize the SDK after all desired features are loaded -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+    .song-card img {
+      width: 100%;
+      border-radius: 8px;
+    }
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
-    <script>
-      // Firebase project configuration
-      const firebaseConfig = {
-        apiKey: "AIzaSyB5I-j7pmSojstgtnlcDPWHjDxEwPfF35A",
-        authDomain: "vibe-loop-b6f4c.firebaseapp.com",
-        databaseURL: "https://vibe-loop-b6f4c-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "vibe-loop-b6f4c",
-        storageBucket: "vibe-loop-b6f4c.firebasestorage.app",
-        messagingSenderId: "797761591399",
-        appId: "1:797761591399:web:93bec6ad1ca5d500d25cc2",
-        measurementId: "G-M9J08T9DE4"
-      };
-      // Initialize Firebase
-      const app = firebase.initializeApp(firebaseConfig);
-      const storage = firebase.storage();
-    </script>
+    .song-card audio {
+      width: 100%;
+      margin-top: 20px;
+    }
 
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
-    </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
+    .song-card h2 {
+      margin: 12px 0 4px;
+    }
 
-    <h1>Welcome to My Firebase Site!</h1>
-    <p>Your current URL: <span id="url"></span></p>
-    <script>
-      document.getElementById('url').innerText = window.location.href;
-    </script>
-
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-
-
-        try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
-        }
-      });
-    </script>
-  </body>
+    .song-card p {
+      margin: 4px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="song-card">
+    <img src="https://upload.wikimedia.org/wikipedia/en/9/9f/Bohemian_Rhapsody.png" alt="Bohemian Rhapsody Cover">
+    <h2>Bohemian Rhapsody</h2>
+    <p><strong>Artist:</strong> Queen</p>
+    <p><strong>Genre:</strong> Rock</p>
+    <audio controls>
+      <source src="music/youtube_fJ9rUzIMcZQ_audio.mp3" type="audio/mpeg" />
+      Your browser does not support the audio tag.
+    </audio>
+    <p><a href="https://www.youtube.com/watch?v=fJ9rUzIMcZQ" target="_blank">Watch on YouTube</a></p>
+  </div>
+</body>
 </html>

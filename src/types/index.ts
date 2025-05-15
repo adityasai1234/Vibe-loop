@@ -8,6 +8,10 @@ export interface Song {
   genre: string;
   releaseDate: string;
   likes: number;
+  tags?: string[];
+  mood?: string[];
+  activity?: string[];
+  timeOfDay?: string[];
 }
 
 export interface User {
