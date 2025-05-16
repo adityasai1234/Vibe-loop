@@ -5,7 +5,7 @@ export const songs: Song[] = [
     id: 'sunflower',
     title: 'Sunflower',
     artist: 'Post Malone & Swae Lee',
-    albumArt: '/images/sunflower-cover.png',
+    albumArt: '/assets/images/sunflower.jpg',
     audioSrc: '/music/youtube_ApXoWvfEYVU_audio.mp3',
     duration: 158, // 2:38 in seconds
     genre: 'Hip Hop',
