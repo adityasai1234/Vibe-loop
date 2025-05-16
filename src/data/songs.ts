@@ -113,7 +113,24 @@ export const songs: Song[] = [
     genre: 'Pop',
     releaseDate: '2023-07-21',
     likes: 2194
+  },
+  {
+    id: 'viva-la-vida',
+    title: 'Viva La Vida',
+    artist: 'Coldplay',
+    albumArt: '/assets/images/viva-la-vida.png',
+    audioSrc: '/music/vivalavida.mp3',
+    duration: 242, // 4:02 in seconds
+    genre: 'Alternative Rock',
+    releaseDate: '2008',
+    likes: 4500,
+    mood: ['Uplifting', 'Energetic'],
+    tags: ['rock', 'anthem', 'popular']
   }
+  
+
+
+
 ];
 
 // Search and filter songs
