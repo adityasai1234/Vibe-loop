@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SongCard } from '../components/SongCard';
 import { PlaylistCard } from '../components/PlaylistCard';
 import { MoodSelector } from '../components/MoodSelector';
 import { MoodSongList } from '../components/MoodSongList';
+import { MoodShuffle } from '../components/MoodShuffle';
 import { songs } from '../data/songs';
 import { playlists } from '../data/playlists';
 import { users } from '../data/users';
@@ -93,6 +94,11 @@ export const HomePage: React.FC<HomePageProps> = ({ currentMood: initialMood }) 
         : 'bg-gradient-to-b from-gray-50 via-white to-gray-50 text-gray-900'
     }`}>
       <div className="px-4 sm:px-6 py-8 max-w-7xl mx-auto">
+        {/* Mood Shuffle Component */}
+        <section className="mb-10">
+          <MoodShuffle />
+        </section>
+        
         {/* Mood Selector Component */}
         <section className="mb-10">
           <MoodSelector onMoodSelect={handleMoodSelect} currentMood={currentMood} />
