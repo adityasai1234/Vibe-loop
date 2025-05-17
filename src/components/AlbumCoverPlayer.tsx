@@ -47,6 +47,11 @@ export const AlbumCoverPlayer: React.FC<AlbumCoverPlayerProps> = ({
     }
   };
 
+  // Use Spider-Man mask image for Sunflower song
+  const finalCoverArt = songTitle.toLowerCase() === 'sunflower' 
+    ? '/assets/images/spiderman-mask.svg' // Use the Spider-Man mask SVG image
+    : coverArt;
+    
   return (
     <div 
       className={`album-cover-player relative cursor-pointer ${className}`}
@@ -54,7 +59,7 @@ export const AlbumCoverPlayer: React.FC<AlbumCoverPlayerProps> = ({
       aria-label={isThisSongPlaying ? `Pause ${songTitle} by ${artist}` : `Play ${songTitle} by ${artist}`}
     >
       <img 
-        src={coverArt} 
+        src={finalCoverArt} 
         alt={`${songTitle} by ${artist}`}
         className="w-full h-full object-cover rounded-lg transition-transform hover:scale-105 duration-300"
       />
