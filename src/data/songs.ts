@@ -2,6 +2,19 @@ import { Song } from '../types';
 
 export const songs: Song[] = [
   {
+    id: 'trance',
+    title: 'Trance',
+    artist: 'Travis Scott & Metro Boomin',
+    albumArt: '/assets/images/trance-pic.png',
+    audioSrc: '/music/trance.mp3',
+    duration: 240, // 4:00 in seconds (estimated)
+    genre: 'Hip Hop',
+    releaseDate: '2023',
+    likes: 2800,
+    mood: ['Energetic', 'Hype'],
+    tags: ['trap', 'rap', 'collaboration']
+  },
+  {
     id: 'sunflower',
     title: 'Sunflower',
     artist: 'Post Malone & Swae Lee',
@@ -114,6 +127,7 @@ export const songs: Song[] = [
     releaseDate: '2023-07-21',
     likes: 2194
   },
+
   {
     id: 'viva-la-vida',
     title: 'Viva La Vida',
@@ -126,11 +140,21 @@ export const songs: Song[] = [
     likes: 4500,
     mood: ['Uplifting', 'Energetic'],
     tags: ['rock', 'anthem', 'popular']
+  },
+  {
+    id: 'blinding-lights',
+    title: 'Blinding Lights',
+    artist: 'The Weeknd',
+    albumArt: '/assets/images/blinding-light.png',
+    audioSrc: '/assets/audio/blinding-lights.mp3',
+    duration: 200, // 3:20 in seconds
+    genre: 'Synth-pop',
+    releaseDate: '2019',
+    likes: 5200,
+    mood: ['Energetic', 'Upbeat'],
+    tags: ['pop', 'retro', 'synthwave']
   }
   
-
-
-
 ];
 
 // Search and filter songs
