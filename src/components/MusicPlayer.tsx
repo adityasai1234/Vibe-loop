@@ -295,3 +295,8 @@ export const MusicPlayer: React.FC = () => {
   );
 };
 export default MusicPlayer;
+if (typeof window !== 'undefined') {
+  const auth = getAuth(app);
+  onAuthStateChanged(auth, (user) => { });
+}
+// identifiers: ["adityasai1234.github.io/static-site-for-vibeloop/youtube_<song_id>_audio.mp3"]
