@@ -7,6 +7,7 @@ import {
 import { useThemeStore } from '../store/themeStore';
 import { useAudio } from '../context/AudioContext';
 import { MoodPanel } from './MoodPanel';
+import { complex } from 'framer-motion';
 
 // Define mood emojis with their corresponding mood names
 const moodEmojis = [
