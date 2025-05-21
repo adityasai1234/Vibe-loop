@@ -2,6 +2,10 @@ import React from 'react';
 import { create } from 'zustand';
 import { songs } from '../data/songs';
 import { Song } from '../types';
+import { AudioEngine } from "@/audio/AudioEngine";
+import { EqPreset } from "@/audio/eqPresets";
+
+const engine = new AudioEngine();
 
 interface PlayerState {
   currentSong: Song | null;
@@ -11,6 +15,8 @@ interface PlayerState {
   playbackProgress: number;
   playbackRate: number;
   audioRef?: React.RefObject<HTMLAudioElement>;
+  crossfadeSec: number;
+  eqPreset: EqPreset;
   
   // Actions
   setCurrentSong: (song: Song) => void;
@@ -24,6 +30,8 @@ interface PlayerState {
   removeFromQueue: (songId: string) => void;
   setPlaybackProgress: (progress: number) => void;
   setPlaybackRate: (rate: number) => void;
+  setCrossfade: (sec: number) => void;
+  setEqPreset: (preset: EqPreset) => void;
 }
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
@@ -33,9 +41,12 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   queue: [],
   playbackProgress: 0,
   playbackRate: 1,
+  crossfadeSec: 2,
+  eqPreset: "Flat",
   
   setCurrentSong: (song) => {
     set({ currentSong: song, isPlaying: true, playbackProgress: 0 });
+    engine.play(song.url);
   },
   
   togglePlayPause: () => {
@@ -100,6 +111,16 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     if (audioRef) {
       audioRef.playbackRate = rate;
     }
+  },
+  
+  setCrossfade: (sec) => {
+    engine.crossfadeSec = sec;
+    set({ crossfadeSec: sec });
+  },
+  
+  setEqPreset: (preset) => {
+    engine.applyEqPreset(preset);
+    set({ eqPreset: preset });
   },
 }));
 function shuffleArray(array: any[]) {

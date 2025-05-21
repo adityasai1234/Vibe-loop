@@ -6,6 +6,7 @@ import { MoodSongList } from '../components/MoodSongList';
 import { MoodShuffle } from '../components/MoodShuffle';
 import TimeBasedGreeting from '../components/TimeBasedGreeting';
 import MoodStreak from '../components/MoodStreak';
+import { DailyDiscoveryMix } from '../components/DailyDiscoveryMix';
 import { songs } from '../data/songs';
 import { playlists } from '../data/playlists';
 import { users } from '../data/users';
@@ -96,6 +97,11 @@ export const HomePage: React.FC<HomePageProps> = ({ currentMood: initialMood }) 
         : 'bg-gradient-to-b from-gray-50 via-white to-gray-50 text-gray-900'
     }`}>
       <div className="px-4 sm:px-6 py-8 max-w-7xl mx-auto">
+        {/* Daily Discovery Mix Component */}
+        <section className="mb-6">
+          <DailyDiscoveryMix currentMood={currentMood} limit={5} />
+        </section>
+        
         {/* Time-based Greeting */}
         <section className="mb-6">
           <TimeBasedGreeting username={currentUser.name} />

@@ -539,7 +539,6 @@ export const SearchBar = React.forwardRef<SearchBarHandle, SearchBarProps>((
           <p className="text-gray-400">No songs found. Try a different search or filter.</p>
         </div>
       )}
-      
       {results.length > 0 && (
         <div>
           <p className="text-sm text-gray-400 mb-4">{total} songs found</p>
