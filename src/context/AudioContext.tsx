@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
+import { usePlayerStore } from '../store/playerStore';
 
 interface AudioContextType {
   isPlaying: boolean;
@@ -37,6 +38,17 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       audioRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
       audioRef.current.addEventListener('durationchange', handleDurationChange);
     }
+    
+    // Sync playback rate from player store
+    const unsubscribe = usePlayerStore.subscribe(
+      (state) => state.playbackRate,
+      (playbackRate) => {
+        if (audioRef.current) {
+          audioRef.current.playbackRate = playbackRate;
+          console.log(`Playback rate set to: ${playbackRate}`);
+        }
+      }
+    );
 
     // Clean up on unmount
     return () => {
@@ -47,6 +59,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         audioRef.current.pause();
         audioRef.current.src = '';
       }
+      unsubscribe();
     };
   }, []);
   

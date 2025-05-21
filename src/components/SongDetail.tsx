@@ -52,7 +52,10 @@ export const SongDetail: React.FC<SongDetailProps> = ({
       setCurrentSong(song);
     }
   };
-  
+  if (isActive && !isPlaying) {
+    // Pause the audio if the song is not playing
+    pauseAudio();
+  }
   const toggleLike = () => {
     setIsLiked(!isLiked);
   };

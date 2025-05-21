@@ -86,4 +86,4 @@ const MoodMusicPage: React.FC = () => {
   );
 };
 
-export default MoodMusicPage; 
+export default MoodMusicPage;

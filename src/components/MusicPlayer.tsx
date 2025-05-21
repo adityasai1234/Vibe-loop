@@ -8,6 +8,10 @@ import { useAudio } from '../context/AudioContext';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { app } from '../firebaseConfig';
 import { PlayerControls } from './PlayerControls';
+import PlaybackRateControl from './PlaybackRateControl';
+import SleepTimer from './SleepTimer';
+import SongLyrics from './SongLyrics';
+import ShareButton from './ShareButton';
 import '../styles/playerResponsive.css'; // Import responsive fixes for player
 
 export const MusicPlayer: React.FC = () => {
@@ -119,36 +123,44 @@ export const MusicPlayer: React.FC = () => {
   return (
     <div className={`fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-lg text-white border-t border-white/10 z-50 transition-all duration-300 ${expanded ? 'h-96' : ''} music-player-container`}>
       {expanded && (
-        <div className="pt-6 px-8 flex items-center justify-between relative z-10">
-          <div className="flex items-center space-x-6">
-            <img 
-              src={currentSong.albumArt} 
-              alt={currentSong.title} 
-              className="w-48 h-48 rounded-lg shadow-lg"
-            />
-            <div className="flex flex-col">
-              <h2 className="text-2xl font-bold">{currentSong.title}</h2>
-              <p className="text-gray-400">{currentSong.artist}</p>
-              <p className="text-sm text-gray-500 mt-2">{currentSong.genre} • {currentSong.releaseDate}</p>
-              <div className="flex items-center mt-4 space-x-4">
-                <button 
-                  onClick={toggleLike} 
-                  className={`rounded-full p-2 ${liked ? 'text-accent-500 hover:text-accent-600' : 'text-white hover:text-gray-200'}`}
-                >
-                  <Heart size={20} fill={liked ? 'currentColor' : 'none'} />
-                </button>
-                <button className="text-white hover:text-gray-200 rounded-full p-2">
-                  <ListMusic size={20} />
-                </button>
+        <>
+          <div className="pt-6 px-8 flex items-center justify-between relative z-10">
+            <div className="flex items-center space-x-6">
+              <img 
+                src={currentSong.albumArt} 
+                alt={currentSong.title} 
+                className="w-48 h-48 rounded-lg shadow-lg"
+              />
+              <div className="flex flex-col">
+                <h2 className="text-2xl font-bold">{currentSong.title}</h2>
+                <p className="text-gray-400">{currentSong.artist}</p>
+                <p className="text-sm text-gray-500 mt-2">{currentSong.genre} • {currentSong.releaseDate}</p>
+                <div className="flex items-center mt-4 space-x-4">
+                  <button 
+                    onClick={toggleLike} 
+                    className={`rounded-full p-2 ${liked ? 'text-accent-500 hover:text-accent-600' : 'text-white hover:text-gray-200'}`}
+                  >
+                    <Heart size={20} fill={liked ? 'currentColor' : 'none'} />
+                  </button>
+                  <button className="text-white hover:text-gray-200 rounded-full p-2">
+                    <ListMusic size={20} />
+                  </button>
+                  <PlaybackRateControl className="ml-2" />
+                  <ShareButton song={currentSong} />
+                </div>
               </div>
             </div>
+            <div className="self-start flex flex-col items-end gap-4">
+              <button onClick={toggleExpand} className="text-white hover:text-gray-200 p-2">
+                <Minimize2 size={20} />
+              </button>
+              <SleepTimer />
+            </div>
           </div>
-          <div className="self-start">
-            <button onClick={toggleExpand} className="text-white hover:text-gray-200 p-2">
-              <Minimize2 size={20} />
-            </button>
+          <div className="px-8 mt-6">
+            <SongLyrics />
           </div>
-        </div>
+        </>
       )}
       
       <div className={`relative flex items-center px-4 ${expanded ? 'mt-6' : 'h-full'} player-container`}>
@@ -227,7 +239,7 @@ export const MusicPlayer: React.FC = () => {
         </div>
         </div>
         
-        {/* Right section - Volume controls */}
+        {/* Right section - Volume control and playback rate */}
         <div className="ml-auto flex items-center justify-end space-x-3 flex-shrink-0 volume-controls">
           <button onClick={toggleMute} className="text-gray-400 hover:text-white volume-button control-button">
             <VolumeIcon size={20} />
@@ -242,9 +254,12 @@ export const MusicPlayer: React.FC = () => {
             className="w-24 accent-primary-500 volume-slider"
           />
           {!expanded && (
-            <button onClick={toggleExpand} className="text-gray-400 hover:text-white ml-2 control-button">
-              <Maximize2 size={20} />
-            </button>
+            <>
+              <PlaybackRateControl minimal={true} className="ml-2" />
+              <button onClick={toggleExpand} className="text-gray-400 hover:text-white ml-2 control-button">
+                <Maximize2 size={20} />
+              </button>
+            </>
           )}
         </div>
       </div>

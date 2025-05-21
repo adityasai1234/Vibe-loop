@@ -2,6 +2,19 @@ import { Song } from '../types';
 
 export const songs: Song[] = [
   {
+    id: 'my-eyes',
+    title: 'My Eyes',
+    artist: 'Travis Scott',
+    albumArt: '/assets/images/my-eyes-album-cover.png',
+    audioSrc: '/music/my-eyes.mp3',
+    duration: 218, // 3:38 in seconds (estimated)
+    genre: 'Hip Hop',
+    releaseDate: '2023',
+    likes: 3200,
+    mood: ['Chill', 'Atmospheric'],
+    tags: ['trap', 'rap', 'melodic']
+  },
+  {
     id: 'trance',
     title: 'Trance',
     artist: 'Travis Scott & Metro Boomin',

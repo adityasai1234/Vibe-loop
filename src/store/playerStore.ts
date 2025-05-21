@@ -1,3 +1,4 @@
+import React from 'react';
 import { create } from 'zustand';
 import { songs } from '../data/songs';
 import { Song } from '../types';
@@ -8,6 +9,8 @@ interface PlayerState {
   volume: number;
   queue: Song[];
   playbackProgress: number;
+  playbackRate: number;
+  audioRef?: React.RefObject<HTMLAudioElement>;
   
   // Actions
   setCurrentSong: (song: Song) => void;
@@ -20,6 +23,7 @@ interface PlayerState {
   addToQueue: (song: Song) => void;
   removeFromQueue: (songId: string) => void;
   setPlaybackProgress: (progress: number) => void;
+  setPlaybackRate: (rate: number) => void;
 }
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
@@ -28,6 +32,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   volume: 0.7,
   queue: [],
   playbackProgress: 0,
+  playbackRate: 1,
   
   setCurrentSong: (song) => {
     set({ currentSong: song, isPlaying: true, playbackProgress: 0 });
@@ -87,4 +92,20 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
   
   setPlaybackProgress: (progress) => set({ playbackProgress: progress }),
+  
+  setPlaybackRate: (rate) => {
+    set({ playbackRate: rate });
+    // sync immediately to <audio> element if mounted
+    const audioRef = get().audioRef?.current;
+    if (audioRef) {
+      audioRef.playbackRate = rate;
+    }
+  },
 }));
+function shuffleArray(array: any[]) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+shuffleArray(songs);

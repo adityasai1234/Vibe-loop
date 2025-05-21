@@ -12,6 +12,7 @@ export interface Song {
   mood?: string[];
   activity?: string[];
   timeOfDay?: string[];
+  intensity?: number;
 }
 
 export interface User {
