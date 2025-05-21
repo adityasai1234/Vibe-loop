@@ -80,27 +80,23 @@ users/{uid}/moodHistory: [{mood, timestamp}]
 3. Set up Cobalt CMS environment variables in a `.env` file:
    ```
    COBALT_PROJECT_ID=your-project-id
-   COBALT_API_KEY=your-api-key
    ```
-4. Seed the songs collection: `npm run seed-songs`
-5. Start the development server: `npm run dev`
+4. Start the development server: `npm run dev`
+5. Open your browser to `http://localhost:5173`
 
-### Song Data Structure
+## Tech Stack
 
-Each song in the Cobalt CMS collection includes the following metadata:
+- React with TypeScript
+- Vite for fast development
+- Tailwind CSS for styling
+- Firebase for authentication and data storage
+- Cobalt CMS for content management
 
-```json
-{
-  "title": "Snowman",
-  "artist": "WYS",
-  "genre": "Lo-fi",
-  "tags": ["chill", "study", "rainy", "lofi", "relax"],
-  "duration": 198,
-  "albumArt": "/images/lofi/snowman.jpg",
-  "releaseDate": "2022-03-15",
-  "mood": ["chill", "relaxed"],
-  "activity": ["study", "reading"],
-  "timeOfDay": ["night", "evening"]
-}
-```
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 

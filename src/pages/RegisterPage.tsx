@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useThemeStore } from '../store/themeStore';
 import { Disc3, Mail, Lock, User, AlertCircle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { findDimensionValueType, motion } from 'framer-motion';
 import '../styles/uiFixStyles.css'; // Import UI fix styles
 
 export const RegisterPage: React.FC = () => {
