@@ -107,5 +107,3 @@ export const AlbumGrid: React.FC<AlbumGridProps> = ({
     </div>
   );
 };
-
-export default AlbumGrid;

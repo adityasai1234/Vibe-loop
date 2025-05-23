@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { AudioProvider } from './context/AudioContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useDominantColor } from './hooks/useDominantColor';
+import ThemeGradient from './components/ThemeGradient';
 
 // We're using BrowserRouter (aliased as Router) with Routes and Route components
 // No need for createBrowserRouter here
@@ -32,6 +34,9 @@ const AppContent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const auth = getAuth();
   const { logout } = useAuth();
+  
+  // Initialize dominant color detection
+  useDominantColor();
 
   // Handle mood selection and store in state
   const handleMoodSelect = (mood: string) => {
@@ -71,9 +76,11 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-gray-900'}`}>
-      <Navbar />
-      <NavigationMenu onMoodSelect={handleMoodSelect} />
+    <>
+      <ThemeGradient />
+      <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-gray-900'}`}>
+        <Navbar />
+        <NavigationMenu onMoodSelect={handleMoodSelect} />
       
       <main className="transition-all duration-300 ease-in-out pt-16 md:pl-64 pb-16 md:pb-0">
         <div className="container mx-auto p-4">
@@ -97,7 +104,8 @@ const AppContent: React.FC = () => {
       </main>
       
       <MusicPlayer />
-    </div>
+      </div>
+    </>
   );
 };
 
