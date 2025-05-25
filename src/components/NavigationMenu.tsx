@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Menu, X, Music, TrendingUp, Coffee, Dumbbell, Brain, Moon as MoonIcon,
-  Home, Search, Library, Heart, Settings, Disc3, Compass, Smile, Play, Pause
+  Home, Search, Library, Heart, Settings, Disc3, Compass, Smile, Play, Pause, Users
 } from 'lucide-react';
 import { useThemeStore } from '../store/themeStore';
 import { useAudio } from '../context/AudioContext';
@@ -52,6 +52,7 @@ const navigationItems = [
     action: null
   },
   { name: 'Mood Journal', icon: <Disc3 size={20} />, path: '/mood-journal', emoji: '📝' },
+  { name: 'Community', icon: <Users size={20} />, path: '/community', emoji: '🎉' },
   { name: 'Library', icon: <Library size={20} />, path: '/library', emoji: '📚' },
   { name: 'Favorites', icon: <Heart size={20} />, path: '/favorites', emoji: '❤️' },
   { name: 'Settings', icon: <Settings size={20} />, path: '/settings', emoji: '⚙️' },
