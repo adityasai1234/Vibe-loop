@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Pause, Heart, ExternalLink } from 'lucide-react';
+import { Play, Pause, Heart, ExternalLink, CookingPot } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useThemeStore } from '../store/themeStore';
 import { usePlayerStore } from '../store/playerStore';

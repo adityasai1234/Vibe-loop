@@ -21,6 +21,7 @@ import { BohemianRhapsodyPage } from './pages/otherpage';
 import { PlayButtonDemoPage } from './pages/PlayButtonDemoPage';
 import { AlbumCoverDemo } from './pages/AlbumCoverDemo';
 import { AlbumClickPlayDemo } from './pages/AlbumClickPlayDemo';
+import { Community } from './pages/Community';
 import { Navbar } from './components/Navbar';
 import { NavigationMenu } from './components/NavigationMenu';
 import { MusicPlayer } from './components/MusicPlayer';
@@ -91,6 +92,7 @@ const AppContent: React.FC = () => {
             <Route path="/simple-search" element={<SimpleSearchPage />} />
             <Route path="/categories" element={<DiscoverPage currentMood={currentMood} />} />
             <Route path="/mood-journal" element={<MoodJournalPage />} />
+            <Route path="/community" element={<Community />} />
             <Route path="/library" element={<ProfilePage />} />
             <Route path="/favorites" element={<ProfilePage />} />
             <Route path="/settings" element={<ProfilePage />} />
