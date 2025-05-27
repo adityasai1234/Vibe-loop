@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "vibe-loop-b6f4c",
+    "site": "vibe-loop-b6f4c", // Your actual site ID
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "headers": [

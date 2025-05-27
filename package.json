@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "deploy": "firebase deploy",
-    "seed-songs": "node scripts/seedSongs.js"
+    "seed-songs": "node scripts/seedSongs.js",
+    "serve:firebase": "firebase emulators:start --only hosting",
+    "serve": "npm run build && npm run serve:firebase"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

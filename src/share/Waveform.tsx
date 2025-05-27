@@ -210,4 +210,4 @@ const Waveform: React.FC<WaveformProps> = ({
   );
 };
 
-export default Waveform;
+export { Waveform };

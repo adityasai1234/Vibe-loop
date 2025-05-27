@@ -21,7 +21,7 @@ import { BohemianRhapsodyPage } from './pages/otherpage';
 import { PlayButtonDemoPage } from './pages/PlayButtonDemoPage';
 import { AlbumCoverDemo } from './pages/AlbumCoverDemo';
 import { AlbumClickPlayDemo } from './pages/AlbumClickPlayDemo';
-import { Community } from './pages/Community';
+import Community from './pages/Community';
 import { Navbar } from './components/Navbar';
 import { NavigationMenu } from './components/NavigationMenu';
 import { MusicPlayer } from './components/MusicPlayer';
