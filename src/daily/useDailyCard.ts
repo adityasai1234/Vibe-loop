@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { useBadgeStore } from '../store/badgeStore';
-import { useAuthContext } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { XP_REWARDS } from '../gamify/badges';
 
 export interface DailyCard {
@@ -20,7 +20,7 @@ export interface DailyCardState {
 }
 
 export const useDailyCard = () => {
-  const { user } = useAuthContext();
+  const { currentUser: user } = useAuth();
   const { addXP, updateDailyCardStreak } = useBadgeStore();
   const [state, setState] = useState<DailyCardState>({
     card: null,

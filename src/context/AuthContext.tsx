@@ -4,20 +4,8 @@ import { Auth, User, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, si
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../firebaseConfig';
 
-export interface UserProfile {
-  uid: string;
-  email: string | null;
-  displayName: string | null;
-  photoURL: string | null;
-  username?: string;
-  bio?: string;
-  themeColor?: string;
-  earnedBadges?: string[];
-  createdAt?: any; // Firestore ServerTimestamp
-  // Add other profile fields as needed
-}
-
-interface AuthContextType {
+// Interface for the context type (not exported directly but used by useAuth)
+interface AuthContextType { 
   currentUser: User | null;
   userProfile: UserProfile | null;
   loading: boolean;
@@ -26,8 +14,10 @@ interface AuthContextType {
   setUserProfileData: (profileData: Partial<UserProfile>) => Promise<void>;
 }
 
+// Context object (not exported directly)
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Named export: AuthProvider component
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -149,10 +139,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
-export const useAuth = (): AuthContextType => {
+// Named export: useAuthContext hook (renamed from useAuth)
+export const useAuthContext = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuthContext must be used within an AuthProvider');
   }
   return context;
 };
+
+// Named export: UserProfile interface
+export interface UserProfile { 
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+  username?: string;
+  bio?: string;
+  themeColor?: string;
+  earnedBadges?: string[];
+  createdAt?: any; // Firestore ServerTimestamp
+  // Add other profile fields as needed
+}

@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Lottie from 'lottie-react';
 import { BADGES, Badge, XP_TIERS } from './badges';
 import { useBadgeStore } from '../store/badgeStore';
-import { useAuthContext } from '../context/AuthContext'; // This line is correct now
+// Corrected import and usage:
+import { useAuth } from '../context/AuthContext'; 
 
 interface BadgeCabinetProps {
   isOpen: boolean;
@@ -11,13 +12,16 @@ interface BadgeCabinetProps {
 }
 
 const BadgeCabinet: React.FC<BadgeCabinetProps> = ({ isOpen, onClose }) => {
-  const { user } = useAuthContext();
+  // Corrected hook usage:
+  const { currentUser: user } = useAuth(); // Assuming you need 'user' which is 'currentUser' in AuthContext
+  // If you need the full userProfile, it would be: const { userProfile } = useAuth();
+  
   const { xp, level, unlockedBadges, initializeBadges, isLoading } = useBadgeStore();
   const [newlyUnlockedBadge, setNewlyUnlockedBadge] = useState<Badge | null>(null);
   const [animationData, setAnimationData] = useState<{ [key: string]: any }>({});
 
   useEffect(() => {
-    if (user?.uid) {
+    if (user?.uid) { // Use currentUser.uid (aliased as user.uid here)
       initializeBadges(user.uid);
     }
   }, [user?.uid, initializeBadges]);
@@ -220,5 +224,9 @@ const BadgeCabinet: React.FC<BadgeCabinetProps> = ({ isOpen, onClose }) => {
     </>
   );
 };
+
+// Example of accessing user data if needed (adjust based on your actual needs)
+// console.log(user?.displayName);
+// console.log(userProfile?.username);
 
 export default BadgeCabinet;
