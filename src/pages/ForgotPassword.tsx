@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useThemeStore } from '../store/themeStore';
 import { Disc3, Mail, AlertCircle, ArrowLeft, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { userInfo } from 'os';
 
 export const ForgotPassword: React.FC = () => {
   const { isDark } = useThemeStore();
