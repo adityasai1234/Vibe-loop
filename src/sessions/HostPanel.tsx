@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useSessionStore } from '../store/sessionStore';
 import { usePlayerStore } from '../store/playerStore';
-import { useAuthContext } from '../context/AuthContext';
+import { useAuthContext } from '../context/AuthContext'; // Changed from useAuth
 import { useBadgeStore } from '../store/badgeStore';
 import { Song } from '../types';
 import { XP_REWARDS } from '../gamify/badges';
@@ -12,7 +12,7 @@ interface HostPanelProps {
 }
 
 const HostPanel: React.FC<HostPanelProps> = ({ onSessionCreated }) => {
-  const { user } = useAuthContext();
+  const { currentUser: user } = useAuthContext(); // Changed from useAuth()
   const { currentSong, queue } = usePlayerStore();
   const { 
     currentSession, 
@@ -202,106 +202,114 @@ const HostPanel: React.FC<HostPanelProps> = ({ onSessionCreated }) => {
         </div>
       </div>
 
-      {/* Current Song */}
-      {currentSession.currentSong && (
-        <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-4 mb-6">
+      {/* Current Song & Controls (Host Only) */}
+      {currentSong && (
+        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-6">
           <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
             Now Playing:
           </p>
-          <div className="flex items-center gap-3">
-            <img 
-              src={currentSession.currentSong.albumArt} 
-              alt={currentSession.currentSong.title}
-              className="w-12 h-12 rounded-lg object-cover"
-            />
-            <div>
-              <p className="font-medium text-gray-900 dark:text-white">
-                {currentSession.currentSong.title}
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {currentSession.currentSong.artist}
-              </p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img 
+                src={currentSong.albumArt} 
+                alt={currentSong.title}
+                className="w-12 h-12 rounded-lg object-cover"
+              />
+              <div className="text-left">
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {currentSong.title}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {currentSong.artist}
+                </p>
+              </div>
             </div>
+            {/* Basic playback controls for host - can be expanded */}
+            {/* <button onClick={() => updatePlayback({ isPlaying: !currentSession?.playbackState.isPlaying })}>
+              {currentSession?.playbackState.isPlaying ? 'Pause' : 'Play'}
+            </button> */}
           </div>
         </div>
       )}
 
-      {/* Queue Management */}
-      <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-        <div className="flex items-center justify-between mb-4">
-          <h4 className="font-medium text-gray-900 dark:text-white">
-            Queue ({currentSession.queue.length})
-          </h4>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setShowQueueManager(!showQueueManager)}
-            className="text-blue-500 hover:text-blue-600 text-sm font-medium"
-          >
-            {showQueueManager ? 'Hide' : 'Manage'}
-          </motion.button>
-        </div>
-        
-        {showQueueManager && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="space-y-2"
-          >
-            {currentSession.queue.map((song, index) => (
-              <div key={`${song.id}-${index}`} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <img 
-                  src={song.albumArt} 
-                  alt={song.title}
-                  className="w-10 h-10 rounded object-cover"
-                />
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900 dark:text-white text-sm">
-                    {song.title}
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {song.artist}
-                  </p>
+      {/* Participants List */}
+      <div className="mb-6">
+        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+          Listeners ({participants.length})
+        </h4>
+        {participants.length > 0 ? (
+          <ul className="space-y-2">
+            {participants.map(participant => (
+              <li 
+                key={participant.id}
+                className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded-lg"
+              >
+                <div className="flex items-center gap-2">
+                  <img 
+                    src={participant.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(participant.name)}&background=random`}
+                    alt={participant.name}
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <span className="text-sm text-gray-900 dark:text-white">
+                    {participant.name}
+                  </span>
                 </div>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => handleRemoveFromQueue(song.id)}
-                  className="text-red-500 hover:text-red-600 p-1"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </motion.button>
-              </div>
+                {/* Add kick/mute options here if needed */}
+              </li>
             ))}
-            
-            {currentSession.queue.length === 0 && (
-              <p className="text-center text-gray-500 dark:text-gray-400 py-8">
-                Queue is empty. Add songs to keep the party going! 🎵
-              </p>
-            )}
-          </motion.div>
+          </ul>
+        ) : (
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            No one else has joined yet.
+          </p>
         )}
       </div>
 
-      {/* Participants */}
-      <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
-        <h4 className="font-medium text-gray-900 dark:text-white mb-3">
-          Listeners ({participants.length})
-        </h4>
-        <div className="flex flex-wrap gap-2">
-          {participants.map((participant, index) => (
-            <div key={index} className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-full px-3 py-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-gray-900 dark:text-white">
-                {participant.name}
-              </span>
-            </div>
-          ))}
-        </div>
+      {/* Queue Management (Optional - can be a separate component) */}
+      <div className="mb-6">
+        <button 
+          onClick={() => setShowQueueManager(!showQueueManager)}
+          className="text-blue-500 hover:text-blue-600 text-sm font-medium mb-3"
+        >
+          {showQueueManager ? 'Hide' : 'Show'} Queue Manager (Host Only)
+        </button>
+
+        {showQueueManager && (
+          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <h5 className="text-md font-semibold text-gray-900 dark:text-white mb-2">
+              Session Queue ({queue.length})
+            </h5>
+            {queue.length > 0 ? (
+              <ul className="space-y-2">
+                {queue.map(song => (
+                  <li key={song.id} className="flex items-center justify-between p-2 bg-white dark:bg-gray-600 rounded">
+                    <span className="text-sm text-gray-900 dark:text-white">{song.title} - {song.artist}</span>
+                    <button 
+                      onClick={() => handleRemoveFromQueue(song.id)}
+                      className="text-red-500 hover:text-red-600 text-xs"
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-gray-600 dark:text-gray-400">Queue is empty.</p>
+            )}
+            {/* Add song search/add to queue functionality here */}
+          </div>
+        )}
       </div>
+
+      {/* Debug Info (Optional) */}
+      {/* 
+      <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg text-xs">
+        <h4 className="font-bold mb-2">Debug Info:</h4>
+        <pre className="whitespace-pre-wrap break-all">
+          {JSON.stringify({ currentSession, isHost, isConnected, participants, user }, null, 2)}
+        </pre>
+      </div>
+      */}
     </div>
   );
 };
