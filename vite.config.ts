@@ -35,6 +35,10 @@ export default defineConfig({
       }
     }),
   ],
+  server: {
+    host: '0.0.0.0', // Listen on all network interfaces
+    port: 5000,      // You can change this port if needed
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')

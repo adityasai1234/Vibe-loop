@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
-import { BadgeCabinet } from '../gamify/BadgeCabinet';
-import { SurpriseCard } from '../daily/SurpriseCard';
-import { HostPanel } from '../sessions/HostPanel';
-import { ListenerPanel } from '../sessions/ListenerPanel';
+import React, { useState, useRef } from 'react'; // Added useRef
+import BadgeCabinet from '../gamify/BadgeCabinet'; // Corrected import
+import SurpriseCard from '../daily/SurpriseCard';
+import HostPanel from '../sessions/HostPanel'; // Changed from named to default import
+import ListenerPanel from '../sessions/ListenerPanel'; // This is correct for a default export
 import { EmojiOverlay } from '../sessions/EmojiOverlay';
-import { Waveform } from '../share/Waveform';
-import { SnippetExporter } from '../share/SnippetExporter';
+// import { Waveform } from '../share/Waveform'; // Assuming Waveform might be used later or remove if not
+// import { SnippetExporter } from '../share/SnippetExporter'; // Assuming SnippetExporter might be used later or remove if not
 import { useSessionStore } from '../store/sessionStore';
 import { usePlayerStore } from '../store/playerStore';
-import { useAuthContext } from '@/contexts/AuthContext';
+import { useAuthContext } from '../context/AuthContext'; // Corrected path if it was '../contexts/AuthContext'
+import { useBadgeStore } from '../store/badgeStore'; // Added missing import
 import { motion } from 'framer-motion';
-import { Sparkles, Users, Share2, Trophy } from 'lucide-react';
+// import { Sparkles, Users, Share2, Trophy } from 'lucide-react'; // Assuming these might be used later or remove if not
 
 type TabType = 'badges' | 'daily' | 'sessions' | 'share';
 

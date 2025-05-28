@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Lottie from 'lottie-react';
 import { BADGES, Badge, XP_TIERS } from './badges';
 import { useBadgeStore } from '../store/badgeStore';
-import { useAuthContext } from '../context/AuthContext';
+import { useAuthContext } from '../context/AuthContext'; // This line is correct now
 
 interface BadgeCabinetProps {
   isOpen: boolean;
