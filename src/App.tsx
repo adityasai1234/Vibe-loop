@@ -38,7 +38,7 @@ import RequireAuthImport from './components/RequireAuth'; // Added for protected
 
 // Store and Context imports
 import { useThemeStore } from './store/themeStore';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider, useAuthContext } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast'; // Added for notifications
 
 // Main App component that requires authentication
@@ -47,7 +47,7 @@ const AppContent: React.FC = () => {
   const [currentMood, setCurrentMood] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const auth = getAuth();
-  const { logout, currentUser } = useAuth(); // Added currentUser for checks
+  const { signOutUser: logout, currentUser } = useAuthContext();
   
   useDominantColor();
 

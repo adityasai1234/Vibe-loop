@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth, UserProfile } from '../context/AuthContext';
+import { useAuthContext, UserProfile } from '../context/AuthContext';
 import { db } from '../firebaseConfig';
 import { collection, query, where, getDocs, setDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { useDebounce } from '../hooks/useDebounce'; // Assuming you have a debounce hook
@@ -8,7 +8,7 @@ import { useDebounce } from '../hooks/useDebounce'; // Assuming you have a debou
 const USERNAME_REGEX = /^[a-z0-9_]{3,15}$/;
 
 const ChooseUsernamePage: React.FC = () => {
-  const { currentUser, userProfile, setUserProfileData, loading: authLoading } = useAuth();
+  const { currentUser, userProfile, setUserProfileData, loading: authLoading } = useAuthContext();
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [isValid, setIsValid] = useState(false);

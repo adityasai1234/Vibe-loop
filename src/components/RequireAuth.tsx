@@ -1,13 +1,13 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuthContext } from '../context/AuthContext';
 
 interface RequireAuthProps {
   children: JSX.Element;
 }
 
 const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
-  const { currentUser, loading } = useAuth();
+  const { currentUser, loading } = useAuthContext();
   const location = useLocation();
 
   if (loading) {

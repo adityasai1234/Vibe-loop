@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useAuth, UserProfile } from '../context/AuthContext';
+import { useAuthContext, UserProfile } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db } from '../firebaseConfig'; // Ensure db is exported from firebaseConfig
@@ -29,7 +29,7 @@ const themeColorOptions = [
 ];
 
 const ProfilePage: React.FC = () => {
-  const { currentUser, userProfile, setUserProfileData, loading: authLoading } = useAuth();
+  const { currentUser, userProfile, setUserProfileData, loading: authLoading } = useAuthContext();
   const navigate = useNavigate();
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(userProfile?.photoURL || null);

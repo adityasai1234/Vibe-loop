@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useSessionStore } from '../store/sessionStore';
 import { usePlayerStore } from '../store/playerStore';
-import { useAuthContext } from '../context/AuthContext'; // Changed from useAuth
+import { useAuthContext } from '../context/AuthContext';
 import { useBadgeStore } from '../store/badgeStore';
 import { Song } from '../types';
 import { XP_REWARDS } from '../gamify/badges';
@@ -12,7 +12,7 @@ interface HostPanelProps {
 }
 
 const HostPanel: React.FC<HostPanelProps> = ({ onSessionCreated }) => {
-  const { currentUser: user } = useAuthContext(); // Changed from useAuth()
+  const { currentUser: user } = useAuthContext();
   const { currentSong, queue } = usePlayerStore();
   const { 
     currentSession, 

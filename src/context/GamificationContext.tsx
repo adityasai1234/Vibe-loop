@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { firestoreService } from '../services/firestoreService'; // Assuming firestoreService is set up for this
 import { UserGamificationData, EarnedBadge, BadgeDefinition, MoodLog, SongPlayLog, calculateLevel } from '../types/gamification';
-import { useAuth } from './AuthContext'; // Assuming an AuthContext provides the current user
+import { useAuthContext } from './AuthContext';
 import { onSnapshot, doc } from 'firebase/firestore';
 import { db } from '../firebaseConfig'; // Assuming db export from firebaseConfig
 
@@ -18,7 +18,7 @@ interface GamificationContextType {
 const GamificationContext = createContext<GamificationContextType | undefined>(undefined);
 
 export const GamificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthContext();
   const [gamificationData, setGamificationData] = useState<UserGamificationData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);

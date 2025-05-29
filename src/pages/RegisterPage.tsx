@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuthContext } from '../context/AuthContext';
 import { useThemeStore } from '../store/themeStore';
 import { Disc3, Mail, Lock, User, AlertCircle } from 'lucide-react';
 import { findDimensionValueType, motion } from 'framer-motion';
@@ -8,7 +8,7 @@ import '../styles/uiFixStyles.css'; // Import UI fix styles
 
 export const RegisterPage: React.FC = () => {
   const { isDark } = useThemeStore();
-  const { registerWithEmail, error, isLoading, clearError } = useAuth();
+  const { registerWithEmail, error, loading: isLoading, clearError } = useAuthContext();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
