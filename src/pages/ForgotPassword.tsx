@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuthContext } from '../context/AuthContext';
 import { useThemeStore } from '../store/themeStore';
 import { Disc3, Mail, AlertCircle, ArrowLeft, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -8,7 +8,7 @@ import { userInfo } from 'os';
 
 export const ForgotPassword: React.FC = () => {
   const { isDark } = useThemeStore();
-  const { resetPassword, error, isLoading, clearError } = useAuth();
+  const { resetPassword, error, loading: isLoading, clearError } = useAuthContext();
   
   const [email, setEmail] = useState('');
   const [localError, setLocalError] = useState('');

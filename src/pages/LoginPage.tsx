@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuthContext } from '../context/AuthContext';
 import { GoogleIcon } from '../components/icons/GoogleIcon'; // Assuming you'll create this
 
 const LoginPage: React.FC = () => {
-  const { currentUser, signInWithGoogle, loading } = useAuth();
+  const { currentUser, signInWithGoogle, loading } = useAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/'; // Get redirect location or default to home

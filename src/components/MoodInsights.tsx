@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { firestoreService, moodData } from '../services/firestoreService';
-import { useAuth } from '../context/AuthContext';
+import { useAuthContext } from '../context/AuthContext';
 import { useThemeStore } from '../store/themeStore';
 import { UserCheck2 } from 'lucide-react';
 import { users } from '../data/users';
@@ -31,6 +31,7 @@ export const MoodInsights: React.FC<MoodInsightsProps> = ({ userId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'all'>('week');
   const [insights, setInsights] = useState<string[]>([]);
+  const { currentUser } = useAuthContext();
 
   useEffect(() => {
     if (!userId) return;

@@ -4,7 +4,7 @@ import Lottie from 'lottie-react';
 import { BADGES, Badge, XP_TIERS } from './badges';
 import { useBadgeStore } from '../store/badgeStore';
 // Corrected import and usage:
-import { useAuth } from '../context/AuthContext'; 
+import { useAuthContext } from '../context/AuthContext'; 
 
 interface BadgeCabinetProps {
   isOpen: boolean;
@@ -13,8 +13,8 @@ interface BadgeCabinetProps {
 
 const BadgeCabinet: React.FC<BadgeCabinetProps> = ({ isOpen, onClose }) => {
   // Corrected hook usage:
-  const { currentUser: user } = useAuth(); // Assuming you need 'user' which is 'currentUser' in AuthContext
-  // If you need the full userProfile, it would be: const { userProfile } = useAuth();
+  const { currentUser: user } = useAuthContext(); // Assuming you need 'user' which is 'currentUser' in AuthContext
+  // If you need the full userProfile, it would be: const { userProfile } = useAuthContext();
   
   const { xp, level, unlockedBadges, initializeBadges, isLoading } = useBadgeStore();
   const [newlyUnlockedBadge, setNewlyUnlockedBadge] = useState<Badge | null>(null);

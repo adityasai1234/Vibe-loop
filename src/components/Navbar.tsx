@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuthContext } from '../context/AuthContext';
 import { LogOut, User, Settings, Sun, Moon } from 'lucide-react';
 import { useThemeStore } from '../store/themeStore'; // Assuming you have a theme store
 
 export const Navbar: React.FC = () => {
-  const { currentUser, userProfile, signOutUser, loading: authLoading } = useAuth();
+  const { currentUser, userProfile, signOutUser, loading: authLoading } = useAuthContext();
   const { isDark, toggleTheme } = useThemeStore();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
