@@ -7,36 +7,52 @@ const LoginPage: React.FC = () => {
   const { currentUser, signInWithGoogle, loading } = useAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || '/'; // Get redirect location or default to home
+  
+  // Get the path the user was trying to access, or default to '/'
+  const from = location.state?.from || '/';
 
   useEffect(() => {
+    // If user is already logged in, redirect them
     if (!loading && currentUser) {
-      // If user is already logged in, redirect them from where they came or to home
-      // This also handles the case where a user lands on /login but is already authenticated
-      navigate(from, { replace: true });
+      // If they have a username, send them to their intended destination
+      if (currentUser.displayName) {
+        navigate(from, { replace: true });
+      } else {
+        // If they don't have a username, send them to choose one
+        navigate('/choose-username', { 
+          state: { from },
+          replace: true 
+        });
+      }
     }
   }, [currentUser, loading, navigate, from]);
 
   const handleGoogleSignIn = async () => {
     try {
       await signInWithGoogle();
-      // Navigation will be handled by AuthContext or useEffect above
-      // after currentUser state updates and username check is complete.
+      // Navigation will be handled by the useEffect above
     } catch (error) {
       console.error('Google Sign-In Failed:', error);
       // You might want to show a toast notification here
-      // e.g., toast.error('Sign-in failed. Please try again.');
     }
   };
 
+  // Show loading state while checking auth
   if (loading) {
-    return <div className="flex justify-center items-center h-screen bg-gray-900 text-white">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    );
   }
-  
-  // If user is already logged in (e.g. due to async nature of auth state), don't render login button
-  // This check is mostly for the brief moment before useEffect redirects
+
+  // If user is already logged in, show loading while redirecting
   if (currentUser) {
-    return <div className="flex justify-center items-center h-screen bg-gray-900 text-white">Redirecting...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    );
   }
 
   return (
@@ -48,13 +64,17 @@ const LoginPage: React.FC = () => {
         </p>
         <button
           onClick={handleGoogleSignIn}
-          disabled={loading} // Disable button while auth state is loading
+          disabled={loading}
           className="w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-purple-500 disabled:opacity-70 disabled:cursor-not-allowed transition duration-150 ease-in-out"
         >
           <GoogleIcon className="w-5 h-5 mr-3" />
           Sign in with Google
         </button>
-        {loading && <p className="mt-4 text-sm text-gray-400">Attempting to sign you in...</p>}
+        {loading && (
+          <p className="mt-4 text-sm text-gray-400">
+            Signing you in...
+          </p>
+        )}
       </div>
     </div>
   );
