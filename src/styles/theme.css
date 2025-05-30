@@ -1,0 +1,110 @@
+:root {
+  --primary-color: #ff006e;
+  --secondary-color: #00c5ff;
+  --background-color: #ffffff;
+  --text-color: #1a1a1a;
+  --card-background: #f8f9fa;
+  --accent-color: #ff6b6b;
+  --mood-happy: #ff6b6b;
+  --mood-sad: #6c5ce7;
+  --mood-energetic: #00d8ff;
+  --mood-calm: #a8e063;
+  --gradient-start: #ff006e;
+  --gradient-end: #00c5ff;
+}
+
+[data-theme="dark"] {
+  --primary-color: #ff006e;
+  --secondary-color: #00c5ff;
+  --background-color: #1a1a1a;
+  --text-color: #ffffff;
+  --card-background: #2d2d2d;
+  --accent-color: #ff6b6b;
+  --mood-happy: #ff6b6b;
+  --mood-sad: #6c5ce7;
+  --mood-energetic: #00d8ff;
+  --mood-calm: #a8e063;
+  --gradient-start: #ff006e;
+  --gradient-end: #00c5ff;
+}
+
+[data-theme="light"] {
+  --background-color: var(--background-light);
+  --text-color: var(--text-dark);
+  --card-bg: var(--card-bg-light);
+}
+
+/* Mood-based color themes */
+[data-mood="happy"] {
+  --primary-color: #f43f5e;
+  --accent-color: #f87171;
+}
+
+[data-mood="sad"] {
+  --primary-color: #3b82f6;
+  --accent-color: #60a5fa;
+}
+
+[data-mood="energetic"] {
+  --primary-color: #22c55e;
+  --accent-color: #4ade80;
+}
+
+[data-mood="calm"] {
+  --primary-color: #60a5fa;
+  --accent-color: #bfdbfe;
+}
+
+/* Global styles */
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.card {
+  background-color: var(--card-bg);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Animation for mood transitions */
+@keyframes moodTransition {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.mood-enter {
+  animation: moodTransition 0.5s ease-out forwards;
+}
+
+/* Music player styles */
+.music-player {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--card-bg);
+  padding: 1rem;
+  box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.1);
+  z-index: 1000;
+}
+
+/* Album art styles */
+.album-art {
+  width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  transition: transform 0.3s ease-in-out;
+}
+
+.album-art:hover {
+  transform: scale(1.05);
+}

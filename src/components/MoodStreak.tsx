@@ -3,7 +3,7 @@ import { getAuth } from 'firebase/auth';
 import { firestoreService } from '../services/firestoreService';
 import { useThemeStore } from '../store/themeStore';
 
-const MoodStreak: React.FC = () => {
+export const MoodStreak: React.FC = () => {
   const [streakCount, setStreakCount] = useState(0);
   const { isDark } = useThemeStore();
   const auth = getAuth();
@@ -59,4 +59,4 @@ const MoodStreak: React.FC = () => {
   );
 };
 
-export default MoodStreak;
+

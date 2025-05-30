@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AudioProvider } from './context/AudioContext';
 import { GamificationProvider } from './context/GamificationContext';
 import { ToastProvider } from './components/ui/ToastQueue';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { useDominantColor } from './hooks/useDominantColor';
 import ThemeGradient from './components/ThemeGradient';
 
@@ -47,6 +47,7 @@ const AppContent: React.FC = () => {
   const [currentMood, setCurrentMood] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const auth = getAuth();
+  const navigate = useNavigate();
   const { signOutUser: logout, currentUser } = useAuthContext();
   
   useDominantColor();
@@ -153,7 +154,7 @@ const AppContent: React.FC = () => {
 
 function AppProviders({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider> {/* AuthProvider should be at the top */}
+    <AuthProvider>
       <AudioProvider>
         <ToastProvider>
           <GamificationProvider>
@@ -210,10 +211,9 @@ function App() {
   
   return (
     <AppProviders>
-        <Router>
-          {/* AppContent will now handle its internal routing based on auth state from useAuth */}
-          <AppContent /> 
-        </Router>
+      <Router>
+        <AppContent />
+      </Router>
     </AppProviders>
   );
 }
