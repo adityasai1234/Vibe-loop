@@ -11,14 +11,14 @@ export enum BadgeRarity {
   LEGENDARY = 'legendary',
 }
 
-export interface BadgeCriteria {
+export type BadgeCriteria = {
   type: 'distinct_moods' | 'mood_streak' | 'distinct_genres' | 'songs_in_genre' | 'seasonal_event';
   value: number | string; // e.g., 5 (distinct moods), 7 (mood streak), 'christmas_2024'
   genre?: string; // For GENRE_COLLECTOR type
   season?: string; // For SEASONAL_ACHIEVEMENT type
-}
+};
 
-export interface BadgeDefinition {
+export type BadgeDefinition = {
   id: string; // e.g., 'mood_explorer_level_1', 'genre_collector_pop_fanatic'
   name: string;
   description: string;
@@ -27,15 +27,15 @@ export interface BadgeDefinition {
   criteria: BadgeCriteria[];
   iconUrl: string; // URL to badge icon
   xpReward: number;
-}
+};
 
-export interface EarnedBadge {
+export type EarnedBadge = {
   badgeId: string;
   earnedAt: number; // Timestamp
   seen?: boolean; // To track if the user has viewed the badge notification
-}
+};
 
-export interface UserGamificationData {
+export type UserGamificationData = {
   userId: string;
   xp: number;
   level: number; // Calculated from XP
@@ -47,25 +47,25 @@ export interface UserGamificationData {
   genreCollectorBadges: EarnedBadge[];
   lastStreakMultiplierUpdate?: number; // Timestamp
   currentStreakMultiplier: number;
-}
+};
 
-export interface MoodLog {
+export type MoodLog = {
   userId: string;
   mood: string;
   timestamp: number;
   source?: string; // e.g., 'mood_selector', 'journal_entry'
-}
+};
 
-export interface SongPlayLog {
+export type SongPlayLog = {
   userId: string;
   songId: string;
   genre: string;
   mood?: string; // If available from song metadata
   timestamp: number;
   durationPlayed?: number; // Optional: seconds played
-}
+};
 
-export interface SeasonalConfiguration {
+export type SeasonalConfiguration = {
   seasonId: string; // e.g., 'summer_2024', 'winter_holidays_2024'
   name: string;
   startDate: number; // Timestamp
@@ -73,7 +73,7 @@ export interface SeasonalConfiguration {
   description?: string;
   active: boolean;
   relatedBadges: string[]; // IDs of BadgeDefinition for this season
-}
+};
 
 // Helper functions (can be in a separate utility file if preferred)
 

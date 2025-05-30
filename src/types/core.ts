@@ -1,17 +1,7 @@
-// Export all types from gamification
-export type {
-  UserGamificationData,
-  MoodLog,
-  BadgeType,
-  BadgeRarity,
-  BadgeCriteria,
-  BadgeDefinition,
-  EarnedBadge,
-  SongPlayLog,
-  SeasonalConfiguration
-} from './gamification';
+import { UserGamificationData, MoodLog } from './gamification';
 
-// Core types
+export type { UserGamificationData, MoodLog };
+
 export type Song = {
   id: string;
   title: string;
@@ -52,15 +42,7 @@ export type Playlist = {
   likes: number;
 };
 
-export type ThemeState = {
-  isDark: boolean;
-  toggleTheme: () => void;
-  syncThemeWithFirebase: (userId: string) => Promise<void>;
-  loadThemeFromFirebase: (userId: string) => Promise<void>;
-};
-
-export type AuthState = {
-  user: User | null;
-  isAuthenticated: boolean;
-  login: (username: string, password: string) => Promise<void>;
+export type MoodEntry = {
+  mood: string;
+  timestamp: number;
 };

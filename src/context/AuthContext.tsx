@@ -57,7 +57,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const AuthProvider = ({ children, navigate }: { children: ReactNode; navigate?: (path: string) => void }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -265,6 +265,8 @@ export const useAuthContext = () => {
   }
   return context;
 };
+
+export const useAuth = useAuthContext; // Export useAuth as an alias for useAuthContext
 
 // UserProfile interface is removed as it's not part of the user's direct example for AuthContext.tsx
 // If it's used by the 'user: any' type, it should be defined elsewhere or inline.
