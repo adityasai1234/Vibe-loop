@@ -1,24 +1,31 @@
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
-import { 
-  getAuth, 
-  GoogleAuthProvider, 
-  signInWithPopup, 
+// src/context/AuthContext.tsx
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from 'react';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  User as FirebaseUser
-} from "firebase/auth";
-import { 
-  doc, 
-  getDoc, 
-  setDoc, 
+} from 'firebase/auth';
+import {
+  doc,
+  getDoc,
+  setDoc,
   updateDoc,
-  serverTimestamp 
-} from "firebase/firestore";
-import { db } from "../firebaseConfig";
+  serverTimestamp,
+} from 'firebase/firestore';
+import { db } from '../firebaseConfig';
 
-// NOTE: Firebase imports and navigate are removed as they are not in the user's example structure
-// If they are needed, they should be re-added and integrated into the new login/logout logic.
-
+/* ------------------------------------------------------------------ */
+/* Types                                                               */
+/* ------------------------------------------------------------------ */
 interface User {
   uid: string;
   email: string | null;
@@ -55,126 +62,84 @@ interface AuthContextType {
   clearError: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+/* ------------------------------------------------------------------ */
+/* Context (NOTE: `null`, not `undefined`)                             */
+/* ------------------------------------------------------------------ */
+const AuthContext = createContext<AuthContextType | null>(null);
 
-export const AuthProvider = ({ children, navigate }: { children: ReactNode; navigate?: (path: string) => void }) => {
+/* ------------------------------------------------------------------ */
+/* Provider                                                            */
+/* ------------------------------------------------------------------ */
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const auth = getAuth();
+
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const auth = getAuth();
 
-  // Listen for auth state changes
+  /* --------------------  auth state listener  -------------------- */
   useEffect(() => {
-    let unsubscribeAuth: (() => void) | undefined;
-
-    const initializeAuth = async () => {
+    const stop = onAuthStateChanged(auth, async fbUser => {
       try {
-        // Set up auth state listener
-        unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
-          try {
-            if (firebaseUser) {
-              // Convert Firebase user to our User type
-              const user: User = {
-                uid: firebaseUser.uid,
-                email: firebaseUser.email,
-                displayName: firebaseUser.displayName,
-                photoURL: firebaseUser.photoURL
-              };
-              setCurrentUser(user);
+        if (fbUser) {
+          const user: User = {
+            uid: fbUser.uid,
+            email: fbUser.email,
+            displayName: fbUser.displayName,
+            photoURL: fbUser.photoURL,
+          };
+          setCurrentUser(user);
 
-              // Fetch user profile from Firestore
-              const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-              if (userDoc.exists()) {
-                setUserProfile(userDoc.data() as UserProfile);
-              } else {
-                // Create initial profile if it doesn't exist
-                const initialProfile: UserProfile = {
-                  username: '',
-                  email: firebaseUser.email || undefined,
-                  displayName: firebaseUser.displayName || undefined,
-                  photoURL: firebaseUser.photoURL || undefined,
-                  createdAt: new Date(),
-                  hasCompletedOnboarding: false
-                };
-                await setDoc(doc(db, 'users', firebaseUser.uid), initialProfile);
-                setUserProfile(initialProfile);
-              }
-            } else {
-              // Clear all user data when signed out
-              setCurrentUser(null);
-              setUserProfile(null);
-            }
-          } catch (err) {
-            console.error('Error in auth state change:', err);
-            setError(err as Error);
-          } finally {
-            setLoading(false);
+          const snap = await getDoc(doc(db, 'users', fbUser.uid));
+          if (snap.exists()) {
+            setUserProfile(snap.data() as UserProfile);
+          } else {
+            const blank: UserProfile = {
+              username: '',
+              email: fbUser.email ?? undefined,
+              displayName: fbUser.displayName ?? undefined,
+              photoURL: fbUser.photoURL ?? undefined,
+              createdAt: new Date(),
+              hasCompletedOnboarding: false,
+            };
+            await setDoc(doc(db, 'users', fbUser.uid), blank);
+            setUserProfile(blank);
           }
-        });
+        } else {
+          setCurrentUser(null);
+          setUserProfile(null);
+        }
       } catch (err) {
-        console.error('Error setting up auth listener:', err);
         setError(err as Error);
+      } finally {
         setLoading(false);
       }
-    };
+    });
 
-    initializeAuth();
-
-    // Cleanup function
-    return () => {
-      if (unsubscribeAuth) {
-        unsubscribeAuth();
-      }
-    };
+    return stop; // cleanup
   }, [auth]);
 
-  // Memoize signOutUser to prevent unnecessary re-renders
-  const signOutUser = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Sign out from Firebase
-      await firebaseSignOut(auth);
-      
-      // Clear local state (though this should also happen via onAuthStateChanged)
-      setCurrentUser(null);
-      setUserProfile(null);
-      
-      // Note: No need to manually clear tokens as Firebase handles this
-      // The onAuthStateChanged listener will trigger and update the state
-    } catch (err) {
-      console.error('Sign out error:', err);
-      setError(err as Error);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, [auth]);
-
+  /* --------------------  actions  -------------------- */
   const signInWithGoogle = async () => {
     try {
       setLoading(true);
       const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      
-      // Check if user profile exists
-      const userDoc = await getDoc(doc(db, 'users', result.user.uid));
-      if (!userDoc.exists()) {
-        // Create initial profile for new users
-        const initialProfile: UserProfile = {
+      const { user } = await signInWithPopup(auth, provider);
+
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (!snap.exists()) {
+        const blank: UserProfile = {
           username: '',
-          email: result.user.email || undefined,
-          displayName: result.user.displayName || undefined,
-          photoURL: result.user.photoURL || undefined,
+          email: user.email ?? undefined,
+          displayName: user.displayName ?? undefined,
+          photoURL: user.photoURL ?? undefined,
           createdAt: new Date(),
-          hasCompletedOnboarding: false
+          hasCompletedOnboarding: false,
         };
-        await setDoc(doc(db, 'users', result.user.uid), initialProfile);
+        await setDoc(doc(db, 'users', user.uid), blank);
       }
     } catch (err) {
-      console.error('Google sign-in error:', err);
       setError(err as Error);
       throw err;
     } finally {
@@ -182,55 +147,28 @@ export const AuthProvider = ({ children, navigate }: { children: ReactNode; navi
     }
   };
 
-  const registerWithEmail = async (email: string, password: string) => {
+  const signOutUser = useCallback(async () => {
     try {
       setLoading(true);
-      // Implement email registration logic
-      // This is a placeholder
-      setCurrentUser({
-        uid: 'temp-uid',
-        email,
-        displayName: null,
-        photoURL: null
-      });
+      await firebaseSignOut(auth);
     } catch (err) {
       setError(err as Error);
+      throw err;
     } finally {
       setLoading(false);
     }
-  };
+  }, [auth]);
 
-  const resetPassword = async (email: string) => {
-    try {
-      setLoading(true);
-      // Implement password reset logic
-      // This is a placeholder
-    } catch (err) {
-      setError(err as Error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const registerWithEmail = async () => {/* stub */};
+  const resetPassword     = async () => {/* stub */};
 
   const setUserProfileData = async (data: Partial<UserProfile>) => {
     if (!currentUser) throw new Error('No user logged in');
-    
     try {
       setLoading(true);
-      const userRef = doc(db, 'users', currentUser.uid);
-      
-      // Update Firestore
-      await updateDoc(userRef, {
-        ...data,
-        updatedAt: serverTimestamp()
-      });
-      
-      // Update local state
-      setUserProfile(prev => prev ? { ...prev, ...data } : null);
-    } catch (err) {
-      console.error('Profile update error:', err);
-      setError(err as Error);
-      throw err;
+      const ref = doc(db, 'users', currentUser.uid);
+      await updateDoc(ref, { ...data, updatedAt: serverTimestamp() });
+      setUserProfile(prev => (prev ? { ...prev, ...data } : prev));
     } finally {
       setLoading(false);
     }
@@ -238,7 +176,7 @@ export const AuthProvider = ({ children, navigate }: { children: ReactNode; navi
 
   const clearError = () => setError(null);
 
-  const value = {
+  const value: AuthContextType = {
     currentUser,
     userProfile,
     loading,
@@ -248,25 +186,20 @@ export const AuthProvider = ({ children, navigate }: { children: ReactNode; navi
     registerWithEmail,
     resetPassword,
     setUserProfileData,
-    clearError
+    clearError,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
 
-export const useAuthContext = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuthContext must be used within an AuthProvider");
-  }
-  return context;
-};
+/* ------------------------------------------------------------------ */
+/* Hook everyone else uses                                            */
+/* ------------------------------------------------------------------ */
+export function useAuth(): AuthContextType {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within <AuthProvider>');
+  return ctx;
+}
 
-export const useAuth = useAuthContext; // Export useAuth as an alias for useAuthContext
-
-// UserProfile interface is removed as it's not part of the user's direct example for AuthContext.tsx
-// If it's used by the 'user: any' type, it should be defined elsewhere or inline.
+/* optional alias so old code keeps working */
+export const useAuthContext = useAuth;
