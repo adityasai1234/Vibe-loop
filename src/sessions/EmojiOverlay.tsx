@@ -14,7 +14,11 @@ interface EmojiOverlayProps {
   containerRef?: React.RefObject<HTMLDivElement>;
 }
 
-const EmojiOverlay: React.FC<EmojiOverlayProps> = ({ containerRef }) => {
+// Remove the default export at the bottom:
+// export default EmojiOverlay;
+
+// And change the component declaration to a named export:
+export const EmojiOverlay: React.FC<EmojiOverlayProps> = ({ containerRef }) => {
   const { emojiReactions } = useSessionStore();
   const [floatingEmojis, setFloatingEmojis] = useState<FloatingEmoji[]>([]);
 
@@ -181,5 +185,3 @@ const EmojiOverlay: React.FC<EmojiOverlayProps> = ({ containerRef }) => {
     </div>
   );
 };
-
-export default EmojiOverlay;

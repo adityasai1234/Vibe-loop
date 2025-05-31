@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { firestoreService, moodData } from '../services/firestoreService';
+import { useAuth } from '../context/AuthContext';
 import { useThemeStore } from '../store/themeStore';
 import { UserCheck2 } from 'lucide-react';
 import { users } from '../data/users';

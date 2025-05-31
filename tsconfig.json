@@ -1,5 +1,7 @@
 {
-  "files": [],
+  "compilerOptions": {
+    // compilerOptions can be left empty here or include solution-wide settings
+  },
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
