@@ -1,205 +1,239 @@
-// src/context/AuthContext.tsx
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  ReactNode,
-} from 'react';
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-} from 'firebase/auth';
-import {
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  serverTimestamp,
-} from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import React, { createContext, useContext, useState, useRef, useEffect, ReactNode } from 'react';
+import { usePlayerStore } from '../store/playerStore';
+import { useAuth } from '/src/context/AuthContext.tsx';
 
-/* ------------------------------------------------------------------ */
-/* Types                                                               */
-/* ------------------------------------------------------------------ */
-interface User {
-  uid: string;
-  email: string | null;
-  displayName: string | null;
-  photoURL: string | null;
+interface AudioContextType {
+  isPlaying: boolean;
+  currentSong: string | null;
+  play: (songUrl: string, songTitle?: string, artist?: string) => Promise<void>;
+  pause: () => void;
+  audioRef: React.RefObject<HTMLAudioElement>;
+  songInfo: {
+    title: string;
+    artist: string;
+  } | null;
+  duration: number;
+  currentTime: number;
+  formatTime: (time: number) => string;
+  progress: number;
 }
 
-export interface UserProfile {
-  username: string;
-  bio?: string;
-  avatarUrl?: string;
-  preferences?: {
-    theme?: 'light' | 'dark';
-    notifications?: boolean;
+const AudioContext = createContext<AudioContextType | undefined>(undefined);
+
+export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentSong, setCurrentSong] = useState<string | null>(null);
+  const [songInfo, setSongInfo] = useState<{ title: string; artist: string } | null>(null);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Initialize audio element
+  useEffect(() => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+      
+      // Add event listeners for time updates and metadata loading
+      audioRef.current.addEventListener('timeupdate', handleTimeUpdate);
+      audioRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
+      audioRef.current.addEventListener('durationchange', handleDurationChange);
+    }
+    
+    // Sync playback rate from player store
+    const unsubscribe = usePlayerStore.subscribe(
+      (state) => state.playbackRate,
+      (playbackRate) => {
+        if (audioRef.current) {
+          audioRef.current.playbackRate = playbackRate;
+          console.log(`Playback rate set to: ${playbackRate}`);
+        }
+      }
+    );
+
+    // Clean up on unmount
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.removeEventListener('timeupdate', handleTimeUpdate);
+        audioRef.current.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        audioRef.current.removeEventListener('durationchange', handleDurationChange);
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+      unsubscribe();
+    };
+  }, []);
+  
+  // Handle time updates for progress tracking
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+      if (audioRef.current.duration) {
+        setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
+      }
+    }
   };
+  
+  // Handle metadata loading to get duration
+  const handleLoadedMetadata = () => {
+    if (audioRef.current && !isNaN(audioRef.current.duration)) {
+      setDuration(audioRef.current.duration);
+      console.log(`Audio duration loaded: ${audioRef.current.duration}s`);
+    }
+  };
+  
+  // Handle duration changes
+  const handleDurationChange = () => {
+    if (audioRef.current && !isNaN(audioRef.current.duration)) {
+      setDuration(audioRef.current.duration);
+      console.log(`Audio duration updated: ${audioRef.current.duration}s`);
+    }
+  };
+  
+  // Format time in minutes:seconds
+  const formatTime = (time: number): string => {
+    if (isNaN(time)) return '0:00';
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60).toString().padStart(2, '0');
+    return `${minutes}:${seconds}`;
+  };
+
+  // Play function
+  const play = async (songUrl: string, songTitle = 'Unknown Song', artist = 'Unknown Artist') => {
+    if (!audioRef.current) return;
+
+    // If it's a different song, load the new source
+    if (currentSong !== songUrl) {
+      console.log(`Loading audio from: ${songUrl}`);
+      audioRef.current.src = songUrl;
+      audioRef.current.load();
+      setCurrentSong(songUrl);
+      setSongInfo({ title: songTitle, artist });
+      
+      // Add event listeners for debugging
+      audioRef.current.addEventListener('canplay', () => {
+        console.log('Audio can play now');
+      });
+      
+      audioRef.current.addEventListener('error', (e) => {
+        console.error('Audio element error:', e);
+        const error = audioRef.current?.error;
+        if (error) {
+          console.error('MediaError code:', error.code, 'MediaError message:', error.message);
+        }
+      });
+    }
+
+    try {
+      console.log('Attempting to play audio...');
+      const playPromise = audioRef.current.play();
+      await playPromise;
+      setIsPlaying(true);
+      console.log(`Successfully playing: ${songTitle} by ${artist}`);
+    } catch (err) {
+      console.error('Playback error:', err);
+      // Check for common autoplay policy issues
+      if (err instanceof DOMException && err.name === 'NotAllowedError') {
+        console.warn('Autoplay policy prevented playback. User interaction required.');
+      }
+      // Check for network errors
+      if (err instanceof DOMException && err.name === 'NetworkError') {
+        console.error('Network error loading audio. Possible CORS issue or invalid URL.');
+      }
+      
+      throw err; // Propagate error to component for UI handling
+    }
+  };
+
+  // Pause function
+  const pause = () => {
+    if (!audioRef.current) return;
+    audioRef.current.pause();
+    setIsPlaying(false);
+    console.log('Audio paused.');
+  };
+
+  const value = {
+    isPlaying,
+    currentSong,
+    play,
+    pause,
+    audioRef,
+    songInfo,
+    duration,
+    currentTime,
+    formatTime,
+    progress
+  };
+
+  return (
+    <AudioContext.Provider value={value}>
+      {children}
+      {/* Hidden audio element */}
+      <audio id="vibeloopAudio" className="hidden">
+        <source src="" type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
+    </AudioContext.Provider>
+  );
+};
+
+export const useAudio = (): AudioContextType => {
+  const context = useContext(AudioContext);
+  if (context === undefined) {
+    throw new Error('useAudio must be used within an AudioProvider');
+  }
+  return context;
+};
+
+interface User {
+  id: string;
+  name: string;
+  uid: string;  // Add uid property
+  username?: string;
+  email?: string;
+  displayName?: string;
+  photoURL?: string;
+}
+
+interface UserProfile {
+  photoURL?: string;
   displayName?: string;
   email?: string;
-  photoURL?: string;
-  themeColor?: string;
-  createdAt?: Date;
-  hasCompletedOnboarding?: boolean;
+  username?: string;
 }
 
 interface AuthContextType {
-  currentUser: User | null;
-  userProfile: UserProfile | null;
-  loading: boolean;
-  error: Error | null;
-  signInWithGoogle: () => Promise<void>;
-  signOutUser: () => Promise<void>;
-  registerWithEmail: (email: string, password: string) => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
-  setUserProfileData: (data: Partial<UserProfile>) => Promise<void>;
-  clearError: () => void;
+  user: User | null;
+  currentUser?: User | null; // Add currentUser property
+  setUser: (u: User | null) => void;
+  userProfile?: UserProfile;
+  signOutUser?: () => Promise<void>; // Ensure signOutUser is properly defined
+  loading?: boolean;
 }
 
-/* ------------------------------------------------------------------ */
-/* Context (NOTE: `null`, not `undefined`)                             */
-/* ------------------------------------------------------------------ */
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/* ------------------------------------------------------------------ */
-/* Provider                                                            */
-/* ------------------------------------------------------------------ */
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const auth = getAuth();
-
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  /* --------------------  auth state listener  -------------------- */
-  useEffect(() => {
-    const stop = onAuthStateChanged(auth, async fbUser => {
-      try {
-        if (fbUser) {
-          const user: User = {
-            uid: fbUser.uid,
-            email: fbUser.email,
-            displayName: fbUser.displayName,
-            photoURL: fbUser.photoURL,
-          };
-          setCurrentUser(user);
-
-          const snap = await getDoc(doc(db, 'users', fbUser.uid));
-          if (snap.exists()) {
-            setUserProfile(snap.data() as UserProfile);
-          } else {
-            const blank: UserProfile = {
-              username: '',
-              email: fbUser.email ?? undefined,
-              displayName: fbUser.displayName ?? undefined,
-              photoURL: fbUser.photoURL ?? undefined,
-              createdAt: new Date(),
-              hasCompletedOnboarding: false,
-            };
-            await setDoc(doc(db, 'users', fbUser.uid), blank);
-            setUserProfile(blank);
-          }
-        } else {
-          setCurrentUser(null);
-          setUserProfile(null);
-        }
-      } catch (err) {
-        setError(err as Error);
-      } finally {
-        setLoading(false);
-      }
-    });
-
-    return stop; // cleanup
-  }, [auth]);
-
-  /* --------------------  actions  -------------------- */
-  const signInWithGoogle = async () => {
-    try {
-      setLoading(true);
-      const provider = new GoogleAuthProvider();
-      const { user } = await signInWithPopup(auth, provider);
-
-      const snap = await getDoc(doc(db, 'users', user.uid));
-      if (!snap.exists()) {
-        const blank: UserProfile = {
-          username: '',
-          email: user.email ?? undefined,
-          displayName: user.displayName ?? undefined,
-          photoURL: user.photoURL ?? undefined,
-          createdAt: new Date(),
-          hasCompletedOnboarding: false,
-        };
-        await setDoc(doc(db, 'users', user.uid), blank);
-      }
-    } catch (err) {
-      setError(err as Error);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const signOutUser = useCallback(async () => {
-    try {
-      setLoading(true);
-      await firebaseSignOut(auth);
-    } catch (err) {
-      setError(err as Error);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, [auth]);
-
-  const registerWithEmail = async () => {/* stub */};
-  const resetPassword     = async () => {/* stub */};
-
-  const setUserProfileData = async (data: Partial<UserProfile>) => {
-    if (!currentUser) throw new Error('No user logged in');
-    try {
-      setLoading(true);
-      const ref = doc(db, 'users', currentUser.uid);
-      await updateDoc(ref, { ...data, updatedAt: serverTimestamp() });
-      setUserProfile(prev => (prev ? { ...prev, ...data } : prev));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const clearError = () => setError(null);
-
-  const value: AuthContextType = {
-    currentUser,
-    userProfile,
-    loading,
-    error,
-    signInWithGoogle,
-    signOutUser,
-    registerWithEmail,
-    resetPassword,
-    setUserProfileData,
-    clearError,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-/* ------------------------------------------------------------------ */
-/* Hook everyone else uses                                            */
-/* ------------------------------------------------------------------ */
-export function useAuth(): AuthContextType {
+export const useAuthContext = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within <AuthProvider>');
+  if (!ctx) {
+    throw new Error('useAuthContext must be used within AuthProvider');
+  }
   return ctx;
-}
+};
 
-/* optional alias so old code keeps working */
-export const useAuthContext = useAuth;
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+
+  const signOutUser = async () => {
+    // Example implementation for signing out
+    setUser(null);
+    console.log('User signed out');
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, setUser, signOutUser }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
