@@ -54,14 +54,14 @@ export const MusicPlayer: React.FC = () => {
   useEffect(() => {
     if (isPlaying && currentSong) {
       intervalRef.current = window.setInterval(() => {
-        setPlaybackProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(intervalRef.current!);
-            nextSong();
-            return 0;
-          }
-          return prev + (100 / (currentSong.duration)) * 0.1;
-        });
+        const newProgress = playbackProgress + (100 / (currentSong.duration)) * 0.1;
+        if (newProgress >= 100) {
+          clearInterval(intervalRef.current!);
+          nextSong();
+          setPlaybackProgress(0);
+        } else {
+          setPlaybackProgress(newProgress);
+        }
       }, 100);
     } else if (intervalRef.current) {
       clearInterval(intervalRef.current);

@@ -1,160 +1,77 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuthContext, UserProfile } from '../context/AuthContext';
-import { db } from '../firebaseConfig';
-import { collection, query, where, getDocs, setDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { useDebounce } from '../hooks/useDebounce'; // Assuming you have a debounce hook
+import { useAuthContext } from '../context/AuthContext';
+import { firestoreService } from '../services/firestoreService';
+import { useGamification } from '../context/GamificationContext';
+import { UserGamificationData } from '../types/gamification';
 
-const USERNAME_REGEX = /^[a-z0-9_]{3,15}$/;
+const ChooseUsernamePage = () => {
+  const { currentUser } = useAuthContext();
+  const { gamificationData } = useGamification();
+  const [username, setUsername] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
-const ChooseUsernamePage: React.FC = () => {
-  const { currentUser, userProfile, setUserProfileData, loading: authLoading } = useAuthContext();
-  const navigate = useNavigate();
-  const [username, setUsername] = useState('');
-  const [isValid, setIsValid] = useState(false);
-  const [isUnique, setIsUnique] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const debouncedUsername = useDebounce(username, 500);
-
-  const checkUsernameUniqueness = useCallback(async (uname: string) => {
-    if (!uname || !USERNAME_REGEX.test(uname)) {
-      setIsUnique(true); // Don't check if invalid or empty
-      return;
+  useEffect(() => {
+    if (gamificationData) {
+      // If user data already exists, redirect or show a message
     }
-    setIsLoading(true);
-    setError(null);
-    try {
-      const usersRef = collection(db, 'users');
-      const q = query(usersRef, where('username', '==', uname));
-      const querySnapshot = await getDocs(q);
-      setIsUnique(querySnapshot.empty);
-      if (!querySnapshot.empty) {
-        setError('Username already taken.');
+  }, [gamificationData]);
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError('');
+      setLoading(true);
+
+      if (!currentUser?.uid) {
+        setError('User not authenticated');
+        setLoading(false);
+        return;
       }
-    } catch (err) {
-      console.error('Error checking username:', err);
-      setError('Error checking username. Please try again.');
-      setIsUnique(false); // Assume not unique on error to be safe
-    }
-    setIsLoading(false);
-  }, []);
 
-  useEffect(() => {
-    if (debouncedUsername) {
-      checkUsernameUniqueness(debouncedUsername);
-    }
-  }, [debouncedUsername, checkUsernameUniqueness]);
+      try {
+        // Update user document with the chosen username
+        await firestoreService.updateDocument('users', currentUser.uid, { username });
 
-  useEffect(() => {
-    if (!authLoading && currentUser && userProfile?.username) {
-      navigate('/'); // Already has a username, redirect
-    }
-  }, [currentUser, userProfile, authLoading, navigate]);
+        // Optionally, initialize gamification data for the user
+        const initialGamificationData: UserGamificationData = {
+          userId: currentUser.uid,
+          username,
+          xp: 0,
+          level: 1,
+          moodExplorerBadges: [],
+          genreCollectorBadges: [],
+          seasonalAchievements: [],
+        };
+        await firestoreService.setDocument('user_gamification', currentUser.uid, initialGamificationData);
 
-  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newUsername = e.target.value.toLowerCase();
-    setUsername(newUsername);
-    setIsValid(USERNAME_REGEX.test(newUsername));
-    if (!USERNAME_REGEX.test(newUsername)) {
-        setError('Username must be 3-15 lowercase letters, numbers, or underscores.');
-    } else {
-        setError(null); // Clear regex error if it becomes valid
-    }
-    // Reset uniqueness status until debounce check completes
-    setIsUnique(true); 
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isValid || !isUnique || isLoading || !currentUser) {
-      setError('Cannot submit. Please fix errors or wait for checks.');
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const userDocRef = doc(db, 'users', currentUser.uid);
-      const newUserProfile: UserProfile = {
-        ...(userProfile as UserProfile), // Spread existing profile data from AuthContext
-        uid: currentUser.uid,
-        email: currentUser.email,
-        displayName: userProfile?.displayName || currentUser.displayName, // Use existing or from auth
-        photoURL: userProfile?.photoURL || currentUser.photoURL, // Use existing or from auth
-        username: username,
-        createdAt: userProfile?.createdAt || serverTimestamp(), // Preserve if exists, else new
-      };
-
-      await setUserProfileData(newUserProfile); // This updates context and Firestore
-      navigate('/'); // Navigate to home or dashboard
-    } catch (err) {
-      console.error('Error saving username:', err);
-      setError('Failed to save username. Please try again.');
-      setIsLoading(false);
-    }
-  };
-
-  if (authLoading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  }
-
-  if (!currentUser) {
-    navigate('/login');
-    return null;
-  }
+        // Redirect or show success message
+      } catch (err) {
+        console.error('Error setting username:', err);
+        setError('Failed to set username. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [currentUser, username]
+  );
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col justify-center items-center p-4">
-      <div className="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-lg shadow-xl">
-        <h1 className="text-3xl font-bold text-center text-purple-400">Choose Your Username</h1>
-        <p className="text-center text-gray-400">
-          Welcome, {currentUser.displayName || 'User'}! Pick a unique username to get started.
-        </p>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-300">
-              Username
-            </label>
-            <div className="mt-1 relative rounded-md shadow-sm">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span className="text-gray-500 sm:text-sm">@</span>
-              </div>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                value={username}
-                onChange={handleUsernameChange}
-                required
-                className={`block w-full pl-7 pr-12 sm:text-sm rounded-md bg-gray-700 border-gray-600 focus:ring-purple-500 focus:border-purple-500
-                            ${!isValid && username.length > 0 ? 'border-red-500' : ''}
-                            ${!isUnique && isValid ? 'border-red-500' : ''}
-                            ${isUnique && isValid && username.length > 0 ? 'border-green-500' : ''}`}
-                placeholder="your_cool_name"
-                aria-describedby="username-validation"
-              />
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                {isLoading && <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-400"></div>}
-                {!isLoading && username.length > 0 && isValid && isUnique && <span className="text-green-500">✅</span>}
-                {!isLoading && username.length > 0 && (!isValid || !isUnique) && <span className="text-red-500">❌</span>}
-              </div>
-            </div>
-            {error && <p className="mt-2 text-sm text-red-400" id="username-validation">{error}</p>}
-            {!error && !isValid && username.length > 0 && <p className="mt-2 text-sm text-yellow-400">Must be 3-15 lowercase letters, numbers, or underscores.</p>}
-          </div>
-
-          <button
-            type="submit"
-            disabled={!isValid || !isUnique || isLoading || authLoading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading || authLoading ? 'Saving...' : 'Save Username'}
-          </button>
-        </form>
-      </div>
+    <div>
+      <h1>Choose a Username</h1>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Enter your username"
+          required
+        />
+        <button type="submit" disabled={loading}>
+          {loading ? 'Setting...' : 'Set Username'}
+        </button>
+        {error && <p className="error">{error}</p>}
+      </form>
     </div>
   );
 };

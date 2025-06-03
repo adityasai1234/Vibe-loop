@@ -29,7 +29,9 @@ export type Song = {
   intensity?: number;
 };
 
-export type User = {
+import { UserGamificationData, MoodLog as GamificationMoodLog } from './gamification';
+
+export interface User {
   id: string;
   name: string;
   username: string;
@@ -39,11 +41,22 @@ export type User = {
   favoriteSongs: string[];
   recentlyPlayed: string[];
   currentMood?: string;
-  moodHistory?: MoodLog[];
+  moodHistory?: MoodEntry[]; // This might be deprecated in favor of MoodLog
   gamification?: UserGamificationData;
-};
+}
 
-export type Playlist = {
+// It seems MoodEntry is similar to MoodLog. We should consolidate if possible.
+// For now, keeping both and aliasing MoodLog from gamification.ts to avoid naming conflict.
+// Consider replacing MoodEntry with GamificationMoodLog if they serve the same purpose.
+export { GamificationMoodLog };
+
+
+export interface MoodEntry {
+  mood: string;
+  timestamp: number;
+}
+
+export interface Playlist {
   id: string;
   title: string;
   coverArt: string;

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+  import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useSessionStore } from '../store/sessionStore';
 import { usePlayerStore } from '../store/playerStore';
-import { useAuth } from '../context/AuthContext'; // Corrected import
+import { useAuthContext } from '../context/AuthContext';
 import { useBadgeStore } from '../store/badgeStore';
 import { Song } from '../types';
-import { XP_REWARDS } from '../gamify/badges';
+import { XP_REWARDS } from '../gamify/badges'; 
 
 interface HostPanelProps {
   onSessionCreated?: (sessionId: string) => void;

@@ -182,17 +182,6 @@ users/{uid}/moodHistory: [{mood, timestamp}]
 - Desktop: Grid layout with side-by-side panels
 - Adaptive UI that changes based on screen size
 
-## Getting Started
-
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Set up Cobalt CMS environment variables in a `.env` file:
-   ```
-   COBALT_PROJECT_ID=your-project-id
-   ```
-4. Start the development server: `npm run dev`
-5. Open your browser to `http://localhost:5173`
-
 ## Tech Stack
 
 - React with TypeScript
