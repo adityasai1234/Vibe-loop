@@ -6,6 +6,14 @@ import React, {
   ReactNode,
   useEffect,
 } from 'react';
+import { 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signOut as firebaseSignOut,
+  onAuthStateChanged,
+  User as FirebaseUser
+} from 'firebase/auth';
+import { auth } from '../firebaseConfig';
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -60,22 +68,56 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  /* Simulated auth listener (replace with Firebase / Supabase, etc.) */
+  // Convert Firebase user to our User type
+  const convertFirebaseUser = (firebaseUser: FirebaseUser): User => ({
+    id: firebaseUser.uid,
+    uid: firebaseUser.uid,
+    name: firebaseUser.displayName || 'Anonymous User',
+    email: firebaseUser.email || undefined,
+    displayName: firebaseUser.displayName || undefined,
+    photoURL: firebaseUser.photoURL || undefined,
+  });
+
+  // Listen for auth state changes
   useEffect(() => {
-    // pretend we finish checking auth state after 1 s
-    const timer = setTimeout(() => setLoading(false), 1000);
-    return () => clearTimeout(timer);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(convertFirebaseUser(firebaseUser));
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const signInWithGoogle = async () => {
-    // TODO: replace with your real Google-auth flow
-    console.log('Google sign-in clicked');
+    try {
+      setLoading(true);
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = convertFirebaseUser(result.user);
+      setUser(user);
+    } catch (error) {
+      console.error('Error signing in with Google:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const signOutUser = async () => {
-    // TODO: replace with your real sign-out logic
-    setUser(null);
-    console.log('User signed out');
+    try {
+      setLoading(true);
+      await firebaseSignOut(auth);
+      setUser(null);
+    } catch (error) {
+      console.error('Error signing out:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -84,7 +126,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         currentUser: user,   // keep both keys for convenience
         setUser,
-        userProfile: undefined,
+        userProfile: user ? {
+          photoURL: user.photoURL,
+          displayName: user.displayName,
+          email: user.email,
+          username: user.username,
+        } : undefined,
         loading,
         signInWithGoogle,
         signOutUser,

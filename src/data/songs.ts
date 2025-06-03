@@ -166,6 +166,19 @@ export const songs: Song[] = [
     likes: 5200,
     mood: ['Energetic', 'Upbeat'],
     tags: ['pop', 'retro', 'synthwave']
+  },
+  {
+    id: 'all-the-stars',
+    title: 'All The Stars',
+    artist: 'SZA & Kendrick Lamar',
+    albumArt: '/assets/images/all-the-stars.png',
+    audioSrc: '/music/Kendrick Lamar, SZA - All The Stars - KendrickLamarVEVO.mp3',
+    duration: 232, // 3:52 in seconds
+    genre: 'Hip Hop',
+    releaseDate: '2018',
+    likes: 4800,
+    mood: ['Energetic', 'Uplifting'],
+    tags: ['soundtrack', 'black-panther', 'collaboration']
   }
   
 ];
