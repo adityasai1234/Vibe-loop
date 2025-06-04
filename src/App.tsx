@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AudioProvider } from './context/AudioContext';
 import { GamificationProvider } from './context/GamificationContext';
 import { ToastProvider } from './components/ui/ToastQueue';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useDominantColor } from './hooks/useDominantColor';
 import ThemeGradient from './components/ThemeGradient';
 
@@ -38,7 +38,7 @@ import RequireAuthImport from './components/RequireAuth'; // Added for protected
 
 // Store and Context imports
 import { useThemeStore } from './store/themeStore';
-import { AuthProvider, useAuthContext } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast'; // Added for notifications
 
 // Main App component that requires authentication
@@ -47,8 +47,7 @@ const AppContent: React.FC = () => {
   const [currentMood, setCurrentMood] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const auth = getAuth();
-  const navigate = useNavigate();
-  const { signOutUser: logout, currentUser } = useAuthContext();
+  const { logout, currentUser } = useAuth(); // Added currentUser for checks
   
   useDominantColor();
 
@@ -154,7 +153,7 @@ const AppContent: React.FC = () => {
 
 function AppProviders({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider>
+    <AuthProvider> {/* AuthProvider should be at the top */}
       <AudioProvider>
         <ToastProvider>
           <GamificationProvider>
@@ -211,9 +210,10 @@ function App() {
   
   return (
     <AppProviders>
-      <Router>
-        <AppContent />
-      </Router>
+        <Router>
+          {/* AppContent will now handle its internal routing based on auth state from useAuth */}
+          <AppContent /> 
+        </Router>
     </AppProviders>
   );
 }

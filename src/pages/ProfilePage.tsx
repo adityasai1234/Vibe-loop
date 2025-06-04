@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useAuthContext, UserProfile } from '../context/AuthContext';
+import { useAuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db } from '../firebaseConfig'; // Ensure db is exported from firebaseConfig
@@ -28,11 +28,11 @@ const themeColorOptions = [
   { value: 'pink', label: 'Hot Pink', color: '#ec4899' },
 ];
 
-const ProfilePage: React.FC = () => {
-  const { currentUser, userProfile, setUserProfileData, loading: authLoading } = useAuthContext();
+export const ProfilePage: React.FC = () => {
+  const { user, setUser } = useAuthContext();
   const navigate = useNavigate();
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(userProfile?.photoURL || null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(user.photoURL || null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -51,21 +51,21 @@ const ProfilePage: React.FC = () => {
   });
 
   useEffect(() => {
-    if (!authLoading && !currentUser) {
+    if (!user) {
       navigate('/login');
     }
-  }, [currentUser, authLoading, navigate]);
+  }, [user, navigate]);
 
   useEffect(() => {
-    if (userProfile) {
+    if (user) {
       reset({
-        displayName: userProfile.displayName || '',
-        bio: userProfile.bio || '',
-        themeColor: (userProfile.themeColor as ProfileFormData['themeColor']) || 'slate',
+        displayName: user.displayName || '',
+        bio: user.bio || '',
+        themeColor: (user.themeColor as ProfileFormData['themeColor']) || 'slate',
       });
-      setAvatarPreview(userProfile.photoURL || null);
+      setAvatarPreview(user.photoURL || null);
     }
-  }, [userProfile, reset]);
+  }, [user, reset]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -85,13 +85,13 @@ const ProfilePage: React.FC = () => {
   };
 
   const uploadAvatar = async (): Promise<string | null> => {
-    if (!avatarFile || !currentUser) return null;
+    if (!avatarFile || !user) return null;
 
     setIsUploading(true);
     setUploadProgress(0);
     const storage = getStorage();
     // Standardize to jpg, or handle multiple extensions in storage rules and here
-    const storageRef = ref(storage, `avatars/${currentUser.uid}.jpg`); 
+    const storageRef = ref(storage, `avatars/${user.uid}.jpg`); 
     const uploadTask = uploadBytesResumable(storageRef, avatarFile);
 
     return new Promise((resolve, reject) => {
@@ -125,9 +125,9 @@ const ProfilePage: React.FC = () => {
   };
 
   const onSubmit: SubmitHandler<ProfileFormData> = async (data) => {
-    if (!currentUser) return;
+    if (!user) return;
 
-    let newPhotoURL = userProfile?.photoURL || null;
+    let newPhotoURL = user.photoURL || null;
     if (avatarFile) {
       const uploadedUrl = await uploadAvatar();
       if (uploadedUrl) {
@@ -143,7 +143,7 @@ const ProfilePage: React.FC = () => {
     };
 
     try {
-      await setUserProfileData(updatedProfile);
+      await setUser(updatedProfile);
       toast.success('Profile updated successfully!');
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -151,7 +151,7 @@ const ProfilePage: React.FC = () => {
     }
   };
   
-  if (authLoading || !currentUser || !userProfile) {
+  if (!user) {
     return <div className="flex justify-center items-center h-screen">Loading profile...</div>;
   }
 
@@ -164,7 +164,7 @@ const ProfilePage: React.FC = () => {
           {/* Avatar Section */}
           <div className="flex flex-col items-center space-y-4">
             <img 
-              src={avatarPreview || `https://ui-avatars.com/api/?name=${userProfile.displayName || userProfile.email}&background=random&size=128`}
+              src={avatarPreview || `https://ui-avatars.com/api/?name=${user.displayName || user.email}&background=random&size=128`}
               alt="Avatar preview" 
               className="w-32 h-32 rounded-full object-cover border-4 border-purple-500"
             />
@@ -197,7 +197,7 @@ const ProfilePage: React.FC = () => {
             <input
               id="username"
               type="text"
-              value={userProfile.username || 'Not set'}
+              value={user.username || 'Not set'}
               readOnly
               className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm sm:text-sm text-gray-400 cursor-not-allowed"
             />
@@ -247,7 +247,7 @@ const ProfilePage: React.FC = () => {
 
           <button
             type="submit"
-            disabled={isSubmitting || isUploading || authLoading}
+            disabled={isSubmitting || isUploading}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting || isUploading ? 'Saving...' : 'Save Changes'}

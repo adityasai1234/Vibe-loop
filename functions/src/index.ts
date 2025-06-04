@@ -1,24 +1,19 @@
 /**
- * Main entry point for all Firebase Cloud Functions for Vibe-Loop Gamification.
+ * Import function triggers from their respective submodules:
+ *
+ * import {onCall} from "firebase-functions/v2/https";
+ * import {onDocumentWritten} from "firebase-functions/v2/firestore";
+ *
+ * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
-// Initialize Firebase Admin SDK
-import * as admin from 'firebase-admin';
-if (admin.apps.length === 0) {
-  admin.initializeApp();
-}
+import {onRequest} from "firebase-functions/v2/https";
+import * as logger from "firebase-functions/logger";
 
-// Export gamification trigger functions
-export { initializeUserGamification } from './gamificationTriggers';
-export { processMoodLog } from './moodProcessingTrigger';
-export { processSongPlay } from './songPlayProcessingTrigger';
-export { processSeasonalAchievements } from './seasonalAchievementTrigger';
-export { logAnalyticsEvent } from './logAnalytics';
+// Start writing functions
+// https://firebase.google.com/docs/functions/typescript
 
-// Placeholder for other function groups if any (e.g., existing dailyCard, discoveryMix)
-// If you have existing functions in other files, you would export them here as well
-// For example:
-// export * from './dailyCard'; // Assuming dailyCard.ts exports its functions
-// export * from './discoveryMix'; // Assuming discoveryMix.ts exports its functions
-
-console.log('Vibe-Loop Cloud Functions for Gamification and Analytics initialized.');
+// export const helloWorld = onRequest((request, response) => {
+//   logger.info("Hello logs!", {structuredData: true});
+//   response.send("Hello from Firebase!");
+// });

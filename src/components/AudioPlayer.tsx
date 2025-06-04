@@ -1,3 +1,4 @@
+import { useAuthContext } from '../context/AuthContext';
 import React from 'react';
 import { Play, Pause } from 'lucide-react';
 import { useThemeStore } from '../store/themeStore';

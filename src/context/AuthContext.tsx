@@ -1,205 +1,162 @@
-// src/context/AuthContext.tsx
-import {
+import React, {
   createContext,
   useContext,
   useState,
   useEffect,
-  useCallback,
   ReactNode,
 } from 'react';
+import { User } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
 import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-} from 'firebase/auth';
-import {
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  serverTimestamp,
-} from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+  signInWithGoogle,
+  loginWithEmailPassword,
+  registerWithEmailPassword,
+  sendPasswordReset,
+  logoutUser,
+} from '../services/authService';
 
 /* ------------------------------------------------------------------ */
-/* Types                                                               */
+/* Types and Context Setup                                            */
 /* ------------------------------------------------------------------ */
-interface User {
-  uid: string;
-  email: string | null;
-  displayName: string | null;
-  photoURL: string | null;
-}
-
-export interface UserProfile {
-  username: string;
-  bio?: string;
-  avatarUrl?: string;
-  preferences?: {
-    theme?: 'light' | 'dark';
-    notifications?: boolean;
-  };
-  displayName?: string;
-  email?: string;
-  photoURL?: string;
-  themeColor?: string;
-  createdAt?: Date;
-  hasCompletedOnboarding?: boolean;
-}
 
 interface AuthContextType {
   currentUser: User | null;
-  userProfile: UserProfile | null;
-  loading: boolean;
-  error: Error | null;
-  signInWithGoogle: () => Promise<void>;
-  signOutUser: () => Promise<void>;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  loginWithEmail: (email: string, password: string) => Promise<void>;
   registerWithEmail: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
-  setUserProfileData: (data: Partial<UserProfile>) => Promise<void>;
+  logout: () => Promise<void>;
   clearError: () => void;
 }
 
-/* ------------------------------------------------------------------ */
-/* Context (NOTE: `null`, not `undefined`)                             */
-/* ------------------------------------------------------------------ */
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
 
 /* ------------------------------------------------------------------ */
-/* Provider                                                            */
+/* Provider Component                                                 */
 /* ------------------------------------------------------------------ */
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const auth = getAuth();
 
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  /* --------------------  auth state listener  -------------------- */
+  /* ------------------------- Auth State Listener ------------------ */
   useEffect(() => {
-    const stop = onAuthStateChanged(auth, async fbUser => {
-      try {
-        if (fbUser) {
-          const user: User = {
-            uid: fbUser.uid,
-            email: fbUser.email,
-            displayName: fbUser.displayName,
-            photoURL: fbUser.photoURL,
-          };
-          setCurrentUser(user);
-
-          const snap = await getDoc(doc(db, 'users', fbUser.uid));
-          if (snap.exists()) {
-            setUserProfile(snap.data() as UserProfile);
-          } else {
-            const blank: UserProfile = {
-              username: '',
-              email: fbUser.email ?? undefined,
-              displayName: fbUser.displayName ?? undefined,
-              photoURL: fbUser.photoURL ?? undefined,
-              createdAt: new Date(),
-              hasCompletedOnboarding: false,
-            };
-            await setDoc(doc(db, 'users', fbUser.uid), blank);
-            setUserProfile(blank);
-          }
-        } else {
-          setCurrentUser(null);
-          setUserProfile(null);
-        }
-      } catch (err) {
-        setError(err as Error);
-      } finally {
-        setLoading(false);
-      }
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+      setIsAuthenticated(!!user);
+      setIsLoading(false);
     });
 
-    return stop; // cleanup
-  }, [auth]);
+    return unsubscribe; // clean-up on unmount
+  }, []);
 
-  /* --------------------  actions  -------------------- */
-  const signInWithGoogle = async () => {
-    try {
-      setLoading(true);
-      const provider = new GoogleAuthProvider();
-      const { user } = await signInWithPopup(auth, provider);
-
-      const snap = await getDoc(doc(db, 'users', user.uid));
-      if (!snap.exists()) {
-        const blank: UserProfile = {
-          username: '',
-          email: user.email ?? undefined,
-          displayName: user.displayName ?? undefined,
-          photoURL: user.photoURL ?? undefined,
-          createdAt: new Date(),
-          hasCompletedOnboarding: false,
-        };
-        await setDoc(doc(db, 'users', user.uid), blank);
-      }
-    } catch (err) {
-      setError(err as Error);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const signOutUser = useCallback(async () => {
-    try {
-      setLoading(true);
-      await firebaseSignOut(auth);
-    } catch (err) {
-      setError(err as Error);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, [auth]);
-
-  const registerWithEmail = async () => {/* stub */};
-  const resetPassword     = async () => {/* stub */};
-
-  const setUserProfileData = async (data: Partial<UserProfile>) => {
-    if (!currentUser) throw new Error('No user logged in');
-    try {
-      setLoading(true);
-      const ref = doc(db, 'users', currentUser.uid);
-      await updateDoc(ref, { ...data, updatedAt: serverTimestamp() });
-      setUserProfile(prev => (prev ? { ...prev, ...data } : prev));
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  /* ------------------------------ Helpers ------------------------- */
   const clearError = () => setError(null);
 
+  const loginWithEmail = async (email: string, password: string) => {
+    try {
+      setIsLoading(true);
+      clearError();
+      await loginWithEmailPassword(email, password);
+    } catch (err: any) {
+      setError(err.message || 'Failed to login');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const registerWithEmail = async (email: string, password: string) => {
+    try {
+      setIsLoading(true);
+      clearError();
+      await registerWithEmailPassword(email, password);
+    } catch (err: any) {
+      setError(err.message || 'Failed to register');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginWithGoogle = async () => {
+    try {
+      setIsLoading(true);
+      clearError();
+      await signInWithGoogle();
+    } catch (err: any) {
+      setError(err.message || 'Failed to login with Google');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetPassword = async (email: string) => {
+    try {
+      setIsLoading(true);
+      clearError();
+      await sendPasswordReset(email);
+    } catch (err: any) {
+      setError(err.message || 'Failed to send password reset email');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      setIsLoading(true);
+      clearError();
+      await logoutUser();
+    } catch (err: any) {
+      setError(err.message || 'Failed to logout');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /* ----------------------------- Value ---------------------------- */
   const value: AuthContextType = {
     currentUser,
-    userProfile,
-    loading,
+    isAuthenticated,
+    isLoading,
     error,
-    signInWithGoogle,
-    signOutUser,
+    loginWithEmail,
     registerWithEmail,
+    loginWithGoogle,
     resetPassword,
-    setUserProfileData,
+    logout,
     clearError,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
+};
 
 /* ------------------------------------------------------------------ */
-/* Hook everyone else uses                                            */
+/* Hooks & Exports                                                    */
 /* ------------------------------------------------------------------ */
-export function useAuth(): AuthContextType {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within <AuthProvider>');
-  return ctx;
-}
 
-/* optional alias so old code keeps working */
-export const useAuthContext = useAuth;
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+/* Alias export so other files can import { useAuthContext } */
+export { useAuth as useAuthContext };
+
+export { auth };

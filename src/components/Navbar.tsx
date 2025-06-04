@@ -1,16 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuthContext } from '../context/AuthContext';
-import { User, Settings, Sun, Moon } from 'lucide-react';
-import { useThemeStore } from '../store/themeStore';
-import LogoutButton from './LogoutButton';
+import { useAuthContext as useAuth } from '../context/AuthContext';
+import { LogOut, User, Settings, Sun, Moon } from 'lucide-react';
+import { useThemeStore } from '../store/themeStore'; // Assuming you have a theme store
 
 export const Navbar: React.FC = () => {
-  const { currentUser, userProfile, loading: authLoading } = useAuthContext();
+  const { currentUser, userProfile, signOutUser, loading: authLoading } = useAuth();
   const { isDark, toggleTheme } = useThemeStore();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const handleSignOut = async () => {
+    if (!signOutUser) {
+      console.error('Sign out function is not available');
+      return;
+    }
+
+    try {
+      await signOutUser();
+      navigate('/login'); // Redirect to login after sign out
+    } catch (error) {
+      console.error('Sign out failed:', error);
+      // Handle sign-out error (e.g., show a toast)
+    }
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -65,46 +79,35 @@ export const Navbar: React.FC = () => {
                   {userProfile.displayName || userProfile.username}
                 </span>
               </button>
-
               {dropdownOpen && (
-                <div className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 ${
-                  isDark ? 'bg-gray-800' : 'bg-white'
-                } ring-1 ring-black ring-opacity-5`}>
-                  <Link
+                <div className={`absolute right-0 mt-2 w-48 ${isDark ? 'bg-gray-800' : 'bg-white'} rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-50`}>
+                  <Link 
                     to="/profile"
-                    className={`block px-4 py-2 text-sm ${
-                      isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'
-                    }`}
                     onClick={() => setDropdownOpen(false)}
+                    className={`block px-4 py-2 text-sm ${isDark ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'} flex items-center`}
                   >
-                    <User className="inline-block w-4 h-4 mr-2" />
-                    Profile
+                    <User size={16} className="mr-2" /> Profile
                   </Link>
-                  <Link
+                  <Link 
                     to="/settings"
-                    className={`block px-4 py-2 text-sm ${
-                      isDark ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'
-                    }`}
                     onClick={() => setDropdownOpen(false)}
+                    className={`block px-4 py-2 text-sm ${isDark ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'} flex items-center`}
                   >
-                    <Settings className="inline-block w-4 h-4 mr-2" />
-                    Settings
+                    <Settings size={16} className="mr-2" /> Settings
                   </Link>
-                  <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
-                  <div className="px-4 py-2">
-                    <LogoutButton variant="text" className="w-full justify-start" />
-                  </div>
+                  <button
+                    onClick={handleSignOut}
+                    className={`w-full text-left block px-4 py-2 text-sm ${isDark ? 'text-red-400 hover:bg-gray-700' : 'text-red-600 hover:bg-gray-100'} flex items-center`}
+                  >
+                    <LogOut size={16} className="mr-2" /> Sign Out
+                  </button>
                 </div>
               )}
             </div>
           ) : (
-            <Link
+            <Link 
               to="/login"
-              className={`px-4 py-2 rounded-md ${
-                isDark 
-                  ? 'bg-purple-600 hover:bg-purple-700 text-white' 
-                  : 'bg-purple-600 hover:bg-purple-700 text-white'
-              }`}
+              className={`px-4 py-2 rounded-md text-sm font-medium ${isDark ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'bg-purple-500 hover:bg-purple-600 text-white'}`}
             >
               Sign In
             </Link>

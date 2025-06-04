@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { firestoreService } from '../services/firestoreService'; // Assuming firestoreService is set up for this
 import { UserGamificationData, EarnedBadge, BadgeDefinition, MoodLog, SongPlayLog, calculateLevel } from '../types/gamification';
 import { useAuthContext } from './AuthContext';
-import { onSnapshot, doc } from 'firebase/firestore';
+import { onSnapshot, doc, collection, addDoc, updateDoc, getDoc, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../firebaseConfig'; // Assuming db export from firebaseConfig
 
 interface GamificationContextType {
@@ -13,6 +13,7 @@ interface GamificationContextType {
   logSongPlay: (songId: string, genre: string, mood?: string) => Promise<void>;
   markBadgeAsSeen: (badgeId: string, badgeType: 'moodExplorer' | 'genreCollector' | 'seasonal') => Promise<void>;
   getBadgeDetails: (badgeId: string) => Promise<BadgeDefinition | null>;
+  getMoodLog: () => Promise<MoodLog[]>;
 }
 
 const GamificationContext = createContext<GamificationContextType | undefined>(undefined);
@@ -63,8 +64,8 @@ export const GamificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         timestamp: Date.now(),
         source,
       };
-      // This will trigger the `processMoodLog` Cloud Function
-      await firestoreService.addDocument('user_mood_logs', moodLog);
+      // Add to user_mood_logs collection
+      await addDoc(collection(db, 'user_mood_logs'), moodLog);
     } catch (err) {
       console.error('Error logging mood:', err);
       setError(err as Error);
@@ -82,12 +83,24 @@ export const GamificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         mood,
         timestamp: Date.now(),
       };
-      // This will trigger the `processSongPlay` Cloud Function
-      await firestoreService.addDocument('user_song_plays', songPlayLog);
+      // Add to user_song_plays collection
+      await addDoc(collection(db, 'user_song_plays'), songPlayLog);
     } catch (err) {
       console.error('Error logging song play:', err);
       setError(err as Error);
       throw err;
+    }
+    if (useAuthContext().currentUser?.uid) {
+      // Optionally, you can also update the gamification data immediately
+      // This is not strictly necessary if the Cloud Function handles it
+      setGamificationData(prevData => {
+        if (!prevData) return null;
+        return {
+          ...prevData,
+          xp: prevData.xp + 10, // Example XP reward for song play
+          level: calculateLevel(prevData.xp + 10),
+        };
+      });
     }
   };
 
@@ -104,7 +117,7 @@ export const GamificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     if (!badgeCollectionToUpdate) return;
 
     const badgeIndex = badgeCollectionToUpdate.findIndex(b => b.badgeId === badgeId);
-    if (badgeIndex === -1 || badgeCollectionToUpdate[badgeIndex].seen) return; // Not found or already seen
+    if (badgeIndex === -1 || badgeCollectionToUpdate[badgeIndex].seen) return;
 
     const updatedBadges = [...badgeCollectionToUpdate];
     updatedBadges[badgeIndex] = { ...updatedBadges[badgeIndex], seen: true };
@@ -115,19 +128,19 @@ export const GamificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     else if (badgeType === 'seasonal') updatedData.seasonalAchievements = updatedBadges;
 
     try {
-      await firestoreService.updateDocument('user_gamification', currentUser.uid, updatedData);
+      await updateDoc(doc(db, 'user_gamification', currentUser.uid), updatedData);
     } catch (err) {
       console.error('Error marking badge as seen:', err);
       setError(err as Error);
-      // Optionally revert local state change if Firestore update fails
       throw err;
     }
   };
 
   const getBadgeDetails = async (badgeId: string): Promise<BadgeDefinition | null> => {
     try {
-      const badgeDef = await firestoreService.getDocument<BadgeDefinition>('badge_definitions', badgeId);
-      return badgeDef || null;
+      const badgeDoc = await getDoc(doc(db, 'badge_definitions', badgeId));
+      if (!badgeDoc.exists()) return null;
+      return badgeDoc.data() as BadgeDefinition;
     } catch (err) {
       console.error('Error fetching badge definition:', err);
       setError(err as Error);
@@ -135,8 +148,34 @@ export const GamificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     }
   };
 
+  const getMoodLog = async (): Promise<MoodLog[]> => {
+    if (!currentUser?.uid) throw new Error('User not authenticated');
+    try {
+      const moodLogsQuery = query(
+        collection(db, 'user_mood_logs'),
+        where('userId', '==', currentUser.uid),
+        orderBy('timestamp', 'desc')
+      );
+      const querySnapshot = await getDocs(moodLogsQuery);
+      return querySnapshot.docs.map(doc => doc.data() as MoodLog);
+    } catch (err) {
+      console.error('Error fetching mood logs:', err);
+      setError(err as Error);
+      return [];
+    }
+  };
+
   return (
-    <GamificationContext.Provider value={{ gamificationData, loading, error, logMood, logSongPlay, markBadgeAsSeen, getBadgeDetails }}>
+    <GamificationContext.Provider value={{ 
+      gamificationData, 
+      loading, 
+      error, 
+      logMood, 
+      logSongPlay, 
+      markBadgeAsSeen, 
+      getBadgeDetails,
+      getMoodLog 
+    }}>
       {children}
     </GamificationContext.Provider>
   );

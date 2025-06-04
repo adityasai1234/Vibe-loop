@@ -1,7 +1,7 @@
 
 export const connectorConfig = {
   connector: 'default',
-  service: 'vibeloop',
+  service: 'vibe-loop',
   location: 'us-central1'
 };
 
