@@ -2,6 +2,19 @@ import { Song } from '../types';
 
 export const songs: Song[] = [
   {
+    id: 'notion',
+    title: 'Notion',
+    artist: 'Dol-Drums',
+    albumArt: '/assets/images/Notion-album.png',
+    audioSrc: '/music/Notion.mp3',
+    duration: 196, // 3:16 in seconds
+    genre: 'Rock',
+    releaseDate: '2018',
+    likes: 5000,
+    mood: ['Energetic', 'Hype'],
+    tags: ['trap', 'rap', 'melodic']
+  },
+  {
     id: 'my-eyes',
     title: 'My Eyes',
     artist: 'Travis Scott',
