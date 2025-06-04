@@ -1,143 +1,162 @@
-// src/context/AuthContext.tsx
 import React, {
   createContext,
   useContext,
   useState,
-  ReactNode,
   useEffect,
+  ReactNode,
 } from 'react';
-import { 
-  GoogleAuthProvider, 
-  signInWithPopup, 
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-  User as FirebaseUser
-} from 'firebase/auth';
+import { User } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
+import {
+  signInWithGoogle,
+  loginWithEmailPassword,
+  registerWithEmailPassword,
+  sendPasswordReset,
+  logoutUser,
+} from '../services/authService';
 
 /* ------------------------------------------------------------------ */
-/* Types                                                               */
+/* Types and Context Setup                                            */
 /* ------------------------------------------------------------------ */
-interface User {
-  id: string;
-  name: string;
-  uid: string;
-  username?: string;
-  email?: string;
-  displayName?: string;
-  photoURL?: string;
-}
-
-interface UserProfile {
-  photoURL?: string;
-  displayName?: string;
-  email?: string;
-  username?: string;
-}
 
 interface AuthContextType {
-  user: User | null;
-  currentUser: User | null;          // alias for user
-  setUser: (u: User | null) => void;
-  userProfile?: UserProfile;
-  signOutUser: () => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
-  loading: boolean;
+  currentUser: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  loginWithEmail: (email: string, password: string) => Promise<void>;
+  registerWithEmail: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  logout: () => Promise<void>;
+  clearError: () => void;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+interface AuthProviderProps {
+  children: ReactNode;
 }
 
 /* ------------------------------------------------------------------ */
-/* Context setup                                                       */
+/* Provider Component                                                 */
 /* ------------------------------------------------------------------ */
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuthContext = (): AuthContextType => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error('useAuthContext must be used within an AuthProvider');
-  }
-  return ctx;
-};
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-/* Alias so older code that calls `useAuth()` keeps working */
-export const useAuth = useAuthContext;
-
-/* ------------------------------------------------------------------ */
-/* Provider                                                            */
-/* ------------------------------------------------------------------ */
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  // Convert Firebase user to our User type
-  const convertFirebaseUser = (firebaseUser: FirebaseUser): User => ({
-    id: firebaseUser.uid,
-    uid: firebaseUser.uid,
-    name: firebaseUser.displayName || 'Anonymous User',
-    email: firebaseUser.email || undefined,
-    displayName: firebaseUser.displayName || undefined,
-    photoURL: firebaseUser.photoURL || undefined,
-  });
-
-  // Listen for auth state changes
+  /* ------------------------- Auth State Listener ------------------ */
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        setUser(convertFirebaseUser(firebaseUser));
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+      setIsAuthenticated(!!user);
+      setIsLoading(false);
     });
 
-    return () => unsubscribe();
+    return unsubscribe; // clean-up on unmount
   }, []);
 
-  const signInWithGoogle = async () => {
+  /* ------------------------------ Helpers ------------------------- */
+  const clearError = () => setError(null);
+
+  const loginWithEmail = async (email: string, password: string) => {
     try {
-      setLoading(true);
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = convertFirebaseUser(result.user);
-      setUser(user);
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
-      throw error;
+      setIsLoading(true);
+      clearError();
+      await loginWithEmailPassword(email, password);
+    } catch (err: any) {
+      setError(err.message || 'Failed to login');
+      throw err;
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const signOutUser = async () => {
+  const registerWithEmail = async (email: string, password: string) => {
     try {
-      setLoading(true);
-      await firebaseSignOut(auth);
-      setUser(null);
-    } catch (error) {
-      console.error('Error signing out:', error);
-      throw error;
+      setIsLoading(true);
+      clearError();
+      await registerWithEmailPassword(email, password);
+    } catch (err: any) {
+      setError(err.message || 'Failed to register');
+      throw err;
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        currentUser: user,   // keep both keys for convenience
-        setUser,
-        userProfile: user ? {
-          photoURL: user.photoURL,
-          displayName: user.displayName,
-          email: user.email,
-          username: user.username,
-        } : undefined,
-        loading,
-        signInWithGoogle,
-        signOutUser,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  const loginWithGoogle = async () => {
+    try {
+      setIsLoading(true);
+      clearError();
+      await signInWithGoogle();
+    } catch (err: any) {
+      setError(err.message || 'Failed to login with Google');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetPassword = async (email: string) => {
+    try {
+      setIsLoading(true);
+      clearError();
+      await sendPasswordReset(email);
+    } catch (err: any) {
+      setError(err.message || 'Failed to send password reset email');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      setIsLoading(true);
+      clearError();
+      await logoutUser();
+    } catch (err: any) {
+      setError(err.message || 'Failed to logout');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /* ----------------------------- Value ---------------------------- */
+  const value: AuthContextType = {
+    currentUser,
+    isAuthenticated,
+    isLoading,
+    error,
+    loginWithEmail,
+    registerWithEmail,
+    loginWithGoogle,
+    resetPassword,
+    logout,
+    clearError,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+
+/* ------------------------------------------------------------------ */
+/* Hooks & Exports                                                    */
+/* ------------------------------------------------------------------ */
+
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+/* Alias export so other files can import { useAuthContext } */
+export { useAuth as useAuthContext };
+
+export { auth };
