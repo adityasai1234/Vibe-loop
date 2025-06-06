@@ -2,73 +2,90 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, User, Bell, Music, Home, Disc3, Sun, Moon } from 'lucide-react';
 import { useThemeStore } from '../store/themeStore';
+import { useAuth } from '../context/AuthContext';
 
 export const Navbar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { isDark, toggleTheme } = useThemeStore();
+  const { user, signOut } = useAuth();
+  
+  const handleSignOut = async () => {
+    await signOut();
+  };
   
   return (
-    <nav className={`fixed top-0 w-full backdrop-blur-lg border-b z-50 ${
-      isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-gray-200'
-    }`}>
-      <div className="flex items-center justify-between p-4">
-        <div className="flex items-center space-x-2">
-          <div className="text-primary-500 mr-1">
-            <Disc3 size={28} strokeWidth={2} />
+    <nav className={`fixed top-0 left-0 right-0 z-50 ${isDark ? 'bg-gray-900' : 'bg-white'} shadow-md`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex">
+            <Link to="/" className={`flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <span className="text-xl font-bold">Vibe Loop</span>
+            </Link>
           </div>
-          <Link to="/" className="text-xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">
-            VibeLoop
-          </Link>
-        </div>
-        
-        <div className="hidden md:flex items-center space-x-8">
-          <Link to="/" className={`hover:text-primary-400 transition-colors flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            <Home size={18} className="mr-1" />
-            <span>Home</span>
-          </Link>
-          <Link to="/discover" className={`hover:text-primary-400 transition-colors flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            <Music size={18} className="mr-1" />
-            <span>Discover</span>
-          </Link>
-          <Link to="/library" className={`hover:text-primary-400 transition-colors ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            Library
-          </Link>
-        </div>
-        
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={`rounded-full pl-10 pr-4 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 w-40 md:w-64 ${
-                isDark ? 'bg-white/10 text-white' : 'bg-gray-100 text-gray-900'
-              }`}
-            />
-            <Search size={18} className="absolute left-3 top-2.5 text-gray-400" />
-          </div>
-          
-          <button 
-            onClick={toggleTheme}
-            className={`p-2 rounded-full transition-colors ${
-              isDark ? 'text-white hover:bg-white/10' : 'text-gray-900 hover:bg-gray-100'
-            }`}
-          >
-            {isDark ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
 
-          <button className={`hover:text-primary-400 transition-colors p-2 ${
-            isDark ? 'text-white' : 'text-gray-900'
-          }`}>
-            <Bell size={20} />
-          </button>
-          
-          <Link to="/profile" className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-accent-500 flex items-center justify-center text-white">
-              <User size={16} />
-            </div>
-          </Link>
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={toggleTheme}
+              className={`p-2 rounded-md ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
+            >
+              {isDark ? (
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                  />
+                </svg>
+              ) : (
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                  />
+                </svg>
+              )}
+            </button>
+
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <span className={`${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                  {user.email}
+                </span>
+                <button
+                  onClick={handleSignOut}
+                  className={`px-4 py-2 rounded-md text-sm font-medium ${
+                    isDark
+                      ? 'bg-gray-800 text-white hover:bg-gray-700'
+                      : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                  }`}
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Link
+                  to="/login"
+                  className={`px-4 py-2 rounded-md text-sm font-medium ${
+                    isDark
+                      ? 'bg-gray-800 text-white hover:bg-gray-700'
+                      : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                  }`}
+                >
+                  Sign in
+                </Link>
+                <Link
+                  to="/signup"
+                  className="px-4 py-2 rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+                >
+                  Sign up
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </nav>
