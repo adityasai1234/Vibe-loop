@@ -1,17 +1,4 @@
-import { User, MoodEntry } from '../types';
-
-// Sample mood history entries
-const oliviaMoodHistory: MoodEntry[] = [
-  { mood: 'Happy', timestamp: Date.now() - 86400000 * 2 }, // 2 days ago
-  { mood: 'Chill', timestamp: Date.now() - 86400000 }, // 1 day ago
-  { mood: 'Sleepy', timestamp: Date.now() - 3600000 * 5 } // 5 hours ago
-];
-
-const ethanMoodHistory: MoodEntry[] = [
-  { mood: 'Party', timestamp: Date.now() - 86400000 * 3 }, // 3 days ago
-  { mood: 'Angry', timestamp: Date.now() - 86400000 * 1.5 }, // 1.5 days ago
-  { mood: 'Chill', timestamp: Date.now() - 3600000 * 2 } // 2 hours ago
-];
+import { User } from '../types';
 
 export const users: User[] = [
   {
@@ -22,9 +9,7 @@ export const users: User[] = [
     followers: 1542,
     following: 342,
     favoriteSongs: ['1', '4', '6'],
-    recentlyPlayed: ['4', '2', '7', '3'],
-    currentMood: 'Chill',
-    moodHistory: oliviaMoodHistory
+    recentlyPlayed: ['4', '2', '7', '3']
   },
   {
     id: '2',
@@ -34,8 +19,6 @@ export const users: User[] = [
     followers: 872,
     following: 215,
     favoriteSongs: ['2', '7', '5'],
-    recentlyPlayed: ['5', '1', '8'],
-    currentMood: 'Party',
-    moodHistory: ethanMoodHistory
+    recentlyPlayed: ['5', '1', '8']
   }
 ];
