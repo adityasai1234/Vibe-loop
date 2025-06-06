@@ -1,119 +1,76 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuthContext as useAuth } from '../context/AuthContext';
-import { LogOut, User, Settings, Sun, Moon } from 'lucide-react';
-import { useThemeStore } from '../store/themeStore'; // Assuming you have a theme store
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Search, User, Bell, Music, Home, Disc3, Sun, Moon } from 'lucide-react';
+import { useThemeStore } from '../store/themeStore';
 
 export const Navbar: React.FC = () => {
-  const { currentUser, userProfile, signOutUser, loading: authLoading } = useAuth();
+  const [searchQuery, setSearchQuery] = useState('');
   const { isDark, toggleTheme } = useThemeStore();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const navigate = useNavigate();
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const handleSignOut = async () => {
-    if (!signOutUser) {
-      console.error('Sign out function is not available');
-      return;
-    }
-
-    try {
-      await signOutUser();
-      navigate('/login'); // Redirect to login after sign out
-    } catch (error) {
-      console.error('Sign out failed:', error);
-      // Handle sign-out error (e.g., show a toast)
-    }
-  };
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  if (authLoading) {
-    return (
-      <header className="fixed top-0 left-0 right-0 z-50 bg-gray-800/80 backdrop-blur-md text-white shadow-lg">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="text-xl font-bold text-purple-400">VibeLoop</Link>
-          <div className="animate-pulse h-8 w-24 bg-gray-700 rounded"></div>
-        </div>
-      </header>
-    );
-  }
-
+  
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 shadow-lg ${isDark ? 'bg-gray-900/80 text-gray-200' : 'bg-white/80 text-gray-800'} backdrop-blur-md`}>
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className={`text-2xl font-bold ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>VibeLoop</Link>
+    <nav className={`fixed top-0 w-full backdrop-blur-lg border-b z-50 ${
+      isDark ? 'bg-black/80 border-white/10' : 'bg-white/80 border-gray-200'
+    }`}>
+      <div className="flex items-center justify-between p-4">
+        <div className="flex items-center space-x-2">
+          <div className="text-primary-500 mr-1">
+            <Disc3 size={28} strokeWidth={2} />
+          </div>
+          <Link to="/" className="text-xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">
+            VibeLoop
+          </Link>
+        </div>
+        
+        <div className="hidden md:flex items-center space-x-8">
+          <Link to="/" className={`hover:text-primary-400 transition-colors flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            <Home size={18} className="mr-1" />
+            <span>Home</span>
+          </Link>
+          <Link to="/discover" className={`hover:text-primary-400 transition-colors flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            <Music size={18} className="mr-1" />
+            <span>Discover</span>
+          </Link>
+          <Link to="/library" className={`hover:text-primary-400 transition-colors ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            Library
+          </Link>
+        </div>
         
         <div className="flex items-center space-x-4">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={`rounded-full pl-10 pr-4 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 w-40 md:w-64 ${
+                isDark ? 'bg-white/10 text-white' : 'bg-gray-100 text-gray-900'
+              }`}
+            />
+            <Search size={18} className="absolute left-3 top-2.5 text-gray-400" />
+          </div>
+          
           <button 
             onClick={toggleTheme}
-            className={`p-2 rounded-full ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-200'}`}
-            aria-label="Toggle theme"
+            className={`p-2 rounded-full transition-colors ${
+              isDark ? 'text-white hover:bg-white/10' : 'text-gray-900 hover:bg-gray-100'
+            }`}
           >
             {isDark ? <Sun size={20} /> : <Moon size={20} />}
           </button>
 
-          {currentUser && userProfile ? (
-            <div className="relative" ref={dropdownRef}>
-              <button 
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center space-x-2 p-1 rounded-full hover:bg-opacity-20 hover:bg-gray-500 transition-colors"
-              >
-                <img 
-                  src={userProfile.photoURL || `https://ui-avatars.com/api/?name=${userProfile.displayName || userProfile.email}&background=random&size=32`}
-                  alt={userProfile.displayName || 'User Avatar'}
-                  className="w-8 h-8 rounded-full object-cover border-2 border-purple-500"
-                />
-                <span className="hidden md:inline text-sm font-medium">
-                  {userProfile.displayName || userProfile.username}
-                </span>
-              </button>
-              {dropdownOpen && (
-                <div className={`absolute right-0 mt-2 w-48 ${isDark ? 'bg-gray-800' : 'bg-white'} rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-50`}>
-                  <Link 
-                    to="/profile"
-                    onClick={() => setDropdownOpen(false)}
-                    className={`block px-4 py-2 text-sm ${isDark ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'} flex items-center`}
-                  >
-                    <User size={16} className="mr-2" /> Profile
-                  </Link>
-                  <Link 
-                    to="/settings"
-                    onClick={() => setDropdownOpen(false)}
-                    className={`block px-4 py-2 text-sm ${isDark ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'} flex items-center`}
-                  >
-                    <Settings size={16} className="mr-2" /> Settings
-                  </Link>
-                  <button
-                    onClick={handleSignOut}
-                    className={`w-full text-left block px-4 py-2 text-sm ${isDark ? 'text-red-400 hover:bg-gray-700' : 'text-red-600 hover:bg-gray-100'} flex items-center`}
-                  >
-                    <LogOut size={16} className="mr-2" /> Sign Out
-                  </button>
-                </div>
-              )}
+          <button className={`hover:text-primary-400 transition-colors p-2 ${
+            isDark ? 'text-white' : 'text-gray-900'
+          }`}>
+            <Bell size={20} />
+          </button>
+          
+          <Link to="/profile" className="flex items-center">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-accent-500 flex items-center justify-center text-white">
+              <User size={16} />
             </div>
-          ) : (
-            <Link 
-              to="/login"
-              className={`px-4 py-2 rounded-md text-sm font-medium ${isDark ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'bg-purple-500 hover:bg-purple-600 text-white'}`}
-            >
-              Sign In
-            </Link>
-          )}
+          </Link>
         </div>
       </div>
-    </header>
+    </nav>
   );
 };

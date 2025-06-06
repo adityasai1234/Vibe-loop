@@ -2,8 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Home, Compass, Library, Bookmark, Heart, Clock, Plus, 
-  Mic, Radio, Headphones,
-  UndoDot
+  Mic, Radio, Headphones, Smile
 } from 'lucide-react';
 import { playlists } from '../data/playlists';
 import { useThemeStore } from '../store/themeStore';
@@ -40,6 +39,14 @@ export const Sidebar: React.FC = () => {
             }`}>
               <Library size={18} />
               <span>Your Library</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/mood" className={`flex items-center space-x-3 p-2 rounded-md transition-colors ${
+              isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'
+            }`}>
+              <Smile size={18} />
+              <span>Mood</span>
             </Link>
           </li>
         </ul>
