@@ -1,11 +1,6 @@
-import React from 'react';
 import { create } from 'zustand';
 import { songs } from '../data/songs';
 import { Song } from '../types';
-import { AudioEngine } from "@/audio/AudioEngine";
-import { EqPreset } from "@/audio/eqPresets";
-
-const engine = new AudioEngine();
 
 interface PlayerState {
   currentSong: Song | null;
@@ -13,10 +8,6 @@ interface PlayerState {
   volume: number;
   queue: Song[];
   playbackProgress: number;
-  playbackRate: number;
-  audioRef?: React.RefObject<HTMLAudioElement>;
-  crossfadeSec: number;
-  eqPreset: EqPreset;
   
   // Actions
   setCurrentSong: (song: Song) => void;
@@ -29,9 +20,6 @@ interface PlayerState {
   addToQueue: (song: Song) => void;
   removeFromQueue: (songId: string) => void;
   setPlaybackProgress: (progress: number) => void;
-  setPlaybackRate: (rate: number) => void;
-  setCrossfade: (sec: number) => void;
-  setEqPreset: (preset: EqPreset) => void;
 }
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
@@ -40,13 +28,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   volume: 0.7,
   queue: [],
   playbackProgress: 0,
-  playbackRate: 1,
-  crossfadeSec: 2,
-  eqPreset: "Flat",
   
   setCurrentSong: (song) => {
     set({ currentSong: song, isPlaying: true, playbackProgress: 0 });
-    engine.play(song.url);
   },
   
   togglePlayPause: () => {
@@ -103,30 +87,4 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
   
   setPlaybackProgress: (progress) => set({ playbackProgress: progress }),
-  
-  setPlaybackRate: (rate) => {
-    set({ playbackRate: rate });
-    // sync immediately to <audio> element if mounted
-    const audioRef = get().audioRef?.current;
-    if (audioRef) {
-      audioRef.playbackRate = rate;
-    }
-  },
-  
-  setCrossfade: (sec) => {
-    engine.crossfadeSec = sec;
-    set({ crossfadeSec: sec });
-  },
-  
-  setEqPreset: (preset) => {
-    engine.applyEqPreset(preset);
-    set({ eqPreset: preset });
-  },
 }));
-function shuffleArray(array: any[]) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}
-shuffleArray(songs);
