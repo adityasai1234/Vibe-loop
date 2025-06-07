@@ -13,64 +13,70 @@ import SignupPage from './pages/SignupPage';
 import { useThemeStore } from './store/themeStore';
 import { MusicPlayer } from './components/MusicPlayer';
 
-function App() {
+function AppContent() {
   const { isDark } = useThemeStore();
 
   return (
-    <AuthProvider>
-      <MusicPlayerProvider>
-        <Router>
-          <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-gray-900'}`}>
-            <Navbar />
-            <Sidebar />
-            
-            <main className="pt-16 pl-64"> {/* Adjust padding based on your navbar and sidebar heights */}
-              <Routes>
-                {/* Public routes */}
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/signup" element={<SignupPage />} />
+    <div className={`min-h-screen ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-gray-900'}`}>
+      <Navbar />
+      <Sidebar />
+      
+      <main className="pt-16 pl-64"> {/* Adjust padding based on your navbar and sidebar heights */}
+        <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
 
-                {/* Protected routes */}
-                <Route
-                  path="/"
-                  element={
-                    <RequireAuth>
-                      <HomePage />
-                    </RequireAuth>
-                  }
-                />
-                <Route
-                  path="/discover"
-                  element={
-                    <RequireAuth>
-                      <DiscoverPage />
-                    </RequireAuth>
-                  }
-                />
-                <Route
-                  path="/profile"
-                  element={
-                    <RequireAuth>
-                      <ProfilePage />
-                    </RequireAuth>
-                  }
-                />
-                <Route
-                  path="/mood"
-                  element={
-                    <RequireAuth>
-                      <MoodPage />
-                    </RequireAuth>
-                  }
-                />
-              </Routes>
-            </main>
-            
-            <MusicPlayer />
-          </div>
-        </Router>
-      </MusicPlayerProvider>
-    </AuthProvider>
+          {/* Protected routes */}
+          <Route
+            path="/"
+            element={
+              <RequireAuth>
+                <HomePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/discover"
+            element={
+              <RequireAuth>
+                <DiscoverPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <RequireAuth>
+                <ProfilePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/mood"
+            element={
+              <RequireAuth>
+                <MoodPage />
+              </RequireAuth>
+            }
+          />
+        </Routes>
+      </main>
+      
+      <MusicPlayer />
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <MusicPlayerProvider>
+          <AppContent />
+        </MusicPlayerProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 
