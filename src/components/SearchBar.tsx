@@ -175,3 +175,28 @@ export const SearchBar: React.FC = () => {
     </div>
   );
 };
+// CSS for heart beat animation
+const styles = `
+@keyframes heartBeat {
+  0%, 100% {
+    transform: scale(1);        
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+.animate-heartBeat {
+  animation: heartBeat 0.6s ease-in-out infinite;
+}
+`;
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement("style");
+  styleSheet.type = "text/css";
+  styleSheet.innerText = styles;
+  document.head.appendChild(styleSheet);
+  if (document.querySelector('.animate-heartBeat')) {
+    document.querySelector('.animate-heartBeat')?.classList.add('animate-heartBeat');
+}
+  }
+export default SearchBar;
