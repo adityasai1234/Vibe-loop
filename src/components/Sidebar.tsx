@@ -1,146 +1,127 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { 
-  Home, Compass, Library, Bookmark, Heart, Clock, Plus, 
-  Mic, Radio, Headphones, Smile
-} from 'lucide-react';
-import { playlists } from '../data/playlists';
+import { Link, useLocation } from 'react-router-dom';
+import { Home, Compass, Heart, User, Music, Plus } from 'lucide-react';
 import { useThemeStore } from '../store/themeStore';
+import { useWindowSize } from '../hooks/useWindowSize';
 
-export const Sidebar: React.FC = () => {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+  const location = useLocation();
   const { isDark } = useThemeStore();
-  
-  return (
-    <aside className={`hidden md:flex fixed left-0 top-16 bottom-20 w-60 backdrop-blur-lg border-r flex-col z-40 ${
-      isDark ? 'bg-black/80 border-white/10 text-white' : 'bg-white/80 border-gray-200 text-gray-900'
+  const { isDesktop } = useWindowSize();
+
+  const isActive = (path: string) => location.pathname === path;
+
+  const navItems = [
+    { path: '/', icon: Home, label: 'Home' },
+    { path: '/discover', icon: Compass, label: 'Discover' },
+    { path: '/mood', icon: Heart, label: 'Mood' },
+    { path: '/profile', icon: User, label: 'Profile' },
+  ];
+
+  const playlistItems = [
+    { id: '1', name: 'Liked Songs', icon: Heart },
+    { id: '2', name: 'My Playlist #1', icon: Music },
+    { id: '3', name: 'My Playlist #2', icon: Music },
+  ];
+
+  const sidebarContent = (
+    <div className={`h-full flex flex-col ${
+      isDark ? 'bg-gray-900' : 'bg-white'
     }`}>
-      <div className="p-4">
-        <h2 className={`font-semibold mb-3 ${isDark ? 'text-white/80' : 'text-gray-900/80'}`}>MENU</h2>
-        <ul className="space-y-1">
-          <li>
-            <Link to="/" className={`flex items-center space-x-3 p-2 rounded-md transition-colors ${
-              isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'
-            }`}>
-              <Home size={18} />
-              <span>Home</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/discover" className={`flex items-center space-x-3 p-2 rounded-md transition-colors ${
-              isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'
-            }`}>
-              <Compass size={18} />
-              <span>Discover</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/library" className={`flex items-center space-x-3 p-2 rounded-md transition-colors ${
-              isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'
-            }`}>
-              <Library size={18} />
-              <span>Your Library</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/mood" className={`flex items-center space-x-3 p-2 rounded-md transition-colors ${
-              isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'
-            }`}>
-              <Smile size={18} />
-              <span>Mood</span>
-            </Link>
-          </li>
-        </ul>
-      </div>
-      
-      <div className={`p-4 border-t ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
-        <h2 className={`font-semibold mb-3 ${isDark ? 'text-white/80' : 'text-gray-900/80'}`}>YOUR COLLECTION</h2>
-        <ul className="space-y-1">
-          <li>
-            <Link to="/liked" className={`flex items-center space-x-3 p-2 rounded-md transition-colors ${
-              isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'
-            }`}>
-              <Heart size={18} />
-              <span>Liked Songs</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/favorites" className={`flex items-center space-x-3 p-2 rounded-md transition-colors ${
-              isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'
-            }`}>
-              <Bookmark size={18} />
-              <span>Favorites</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/recent" className={`flex items-center space-x-3 p-2 rounded-md transition-colors ${
-              isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'
-            }`}>
-              <Clock size={18} />
-              <span>Recently Played</span>
-            </Link>
-          </li>
-        </ul>
-      </div>
-      
-      <div className={`p-4 border-t ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className={`font-semibold ${isDark ? 'text-white/80' : 'text-gray-900/80'}`}>YOUR PLAYLISTS</h2>
-          <button className={`p-1 rounded-md transition-colors ${
-            isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'
+      {/* Navigation */}
+      <nav className="flex-1 px-2 py-4 space-y-1">
+        {navItems.map(({ path, icon: Icon, label }) => (
+          <Link
+            key={path}
+            to={path}
+            className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+              isActive(path)
+                ? isDark
+                  ? 'bg-gray-800 text-white'
+                  : 'bg-gray-100 text-gray-900'
+                : isDark
+                ? 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+            }`}
+          >
+            <Icon className="mr-3 h-5 w-5" />
+            {label}
+          </Link>
+        ))}
+      </nav>
+
+      {/* Playlists */}
+      <div className="px-2 py-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className={`text-xs font-semibold uppercase tracking-wider ${
+            isDark ? 'text-gray-400' : 'text-gray-500'
           }`}>
-            <Plus size={18} />
+            Playlists
+          </h2>
+          <button
+            className={`p-1 rounded-full ${
+              isDark
+                ? 'text-gray-400 hover:text-white hover:bg-gray-800'
+                : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
+            }`}
+          >
+            <Plus size={16} />
           </button>
         </div>
-        <ul className="space-y-1">
-          {playlists.map(playlist => (
-            <li key={playlist.id}>
-              <Link 
-                to={`/playlist/${playlist.id}`} 
-                className={`flex items-center space-x-3 p-2 rounded-md transition-colors ${
-                  isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'
-                }`}
-              >
-                <img 
-                  src={playlist.coverArt} 
-                  alt={playlist.title} 
-                  className="w-6 h-6 rounded object-cover"
-                />
-                <span className="truncate">{playlist.title}</span>
-              </Link>
-            </li>
+        <div className="space-y-1">
+          {playlistItems.map(({ id, name, icon: Icon }) => (
+            <button
+              key={id}
+              className={`w-full flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                isDark
+                  ? 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              }`}
+            >
+              <Icon className="mr-3 h-5 w-5" />
+              {name}
+            </button>
           ))}
-        </ul>
-      </div>
-      
-      <div className={`mt-auto p-4 border-t ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
-        <h2 className={`font-semibold mb-3 ${isDark ? 'text-white/80' : 'text-gray-900/80'}`}>CATEGORIES</h2>
-        <div className="grid grid-cols-2 gap-2">
-          <button className={`flex items-center justify-center space-x-2 p-2 rounded-md transition-colors ${
-            isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-100 hover:bg-gray-200'
-          }`}>
-            <Headphones size={16} />
-            <span className="text-sm">Pop</span>
-          </button>
-          <button className={`flex items-center justify-center space-x-2 p-2 rounded-md transition-colors ${
-            isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-100 hover:bg-gray-200'
-          }`}>
-            <Radio size={16} />
-            <span className="text-sm">Rock</span>
-          </button>
-          <button className={`flex items-center justify-center space-x-2 p-2 rounded-md transition-colors ${
-            isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-100 hover:bg-gray-200'
-          }`}>
-            <Mic size={16} />
-            <span className="text-sm">Hip Hop</span>
-          </button>
-          <button className={`flex items-center justify-center space-x-2 p-2 rounded-md transition-colors ${
-            isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-100 hover:bg-gray-200'
-          }`}>
-            <Headphones size={16} />
-            <span className="text-sm">Indie</span>
-          </button>
         </div>
       </div>
-    </aside>
+    </div>
+  );
+
+  if (isDesktop) {
+    return (
+      <aside className="hidden lg:flex lg:flex-shrink-0">
+        <div className="flex flex-col w-64 fixed top-16 bottom-0 overflow-y-auto">
+          {sidebarContent}
+        </div>
+      </aside>
+    );
+  }
+
+  return (
+    <>
+      {/* Backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 transition-opacity lg:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out lg:hidden ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="h-full pt-16">
+          {sidebarContent}
+        </div>
+      </div>
+    </>
   );
 };
