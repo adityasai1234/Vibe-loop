@@ -4,11 +4,17 @@ import { useMusicPlayer } from '../context/MusicPlayerContext';
 import { useThemeStore } from '../store/themeStore';
 import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Heart, Shuffle } from 'lucide-react';
 import { useSongsStore } from '../store/songsStore';
+import { useWindowSize } from '../hooks/useWindowSize';
 
 export const MusicPlayer: React.FC = () => {
   const { currentSong, isPlaying, play, pause, duration, currentTime, setVolume, seek, playNext, playPrevious, volume } = useMusicPlayer();
   const { isDark } = useThemeStore();
   const { likedSongs, toggleLike, songs } = useSongsStore();
+  const { width } = useWindowSize();
+
+  const isMobile = width !== undefined && width < 640;
+  const isTablet = width !== undefined && width >= 640 && width < 1024;
+  const isDesktop = width !== undefined && width >= 1024;
 
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
@@ -41,14 +47,21 @@ export const MusicPlayer: React.FC = () => {
     return null; // Don't render player if no song is loaded
   }
 
+  // Hide this player on mobile, as BottomNav handles it
+  if (isMobile) {
+    return null;
+  }
+
   const isLiked = currentSong ? likedSongs.includes(currentSong.id) : false;
 
   return (
-    <div className={`fixed bottom-0 left-0 right-0 z-50 ${
-      isDark ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-900'
-    } p-4 shadow-lg flex items-center justify-between`}>
+    <div className={`fixed bottom-0 left-0 right-0 z-50 p-4 shadow-lg 
+      ${isDark ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-900'}
+      ${isTablet ? 'h-20 flex items-center justify-between' : 'flex items-center justify-between'} 
+      ${isDesktop ? '' : ''} 
+    `}>
       {/* Song Info */}
-      <div className="flex items-center gap-4 w-1/4">
+      <div className={`flex items-center gap-4 ${isTablet ? 'w-1/3' : 'w-1/4'}`}>
         <img
           src={currentSong.coverUrl}
           alt={currentSong.title}
@@ -61,7 +74,7 @@ export const MusicPlayer: React.FC = () => {
       </div>
 
       {/* Player Controls */}
-      <div className="flex flex-col items-center justify-center gap-2 w-1/2">
+      <div className={`flex flex-col items-center justify-center gap-2 ${isTablet ? 'w-1/3' : 'w-1/2'}`}>
         <div className="flex items-center gap-4">
           {/* Shuffle */}
           <button
@@ -109,8 +122,8 @@ export const MusicPlayer: React.FC = () => {
             <Heart size={20} fill={isLiked ? 'currentColor' : 'none'} />
           </button>
         </div>
-        {/* Progress Bar */}
-        <div className="flex items-center gap-2 w-full">
+        {/* Progress Bar - Hidden on tablet for compactness */}
+        <div className={`flex items-center gap-2 w-full ${isTablet ? 'hidden' : 'flex'}`}>
           <span className="text-xs text-gray-500">{formatTime(currentTime)}</span>
           <input
             type="range"
@@ -129,8 +142,8 @@ export const MusicPlayer: React.FC = () => {
         </div>
       </div>
 
-      {/* Volume Control */}
-      <div className="flex items-center gap-2 w-1/4 justify-end">
+      {/* Volume Control - Hidden on tablet for compactness */}
+      <div className={`flex items-center gap-2 ${isTablet ? 'hidden' : 'w-1/4 justify-end'}`}>
         <button
           onClick={() => setVolume(volume > 0 ? 0 : 0.5)} // Toggle mute/unmute or set to default volume
           className={`p-2 rounded-full ${
