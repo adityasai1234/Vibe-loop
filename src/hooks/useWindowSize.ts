@@ -1,28 +1,43 @@
 import { useState, useEffect } from 'react';
 
 interface WindowSize {
-  width: number | undefined;
-  height: number | undefined;
+  width: number;
+  height: number;
+  isMobile: boolean;
+  isTablet: boolean;
+  isDesktop: boolean;
 }
 
 export function useWindowSize(): WindowSize {
   const [windowSize, setWindowSize] = useState<WindowSize>({
-    width: undefined,
-    height: undefined,
+    width: window.innerWidth,
+    height: window.innerHeight,
+    isMobile: window.innerWidth < 640,
+    isTablet: window.innerWidth >= 640 && window.innerWidth < 1024,
+    isDesktop: window.innerWidth >= 1024,
   });
 
   useEffect(() => {
+    let timeoutId: number;
+
     function handleResize() {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
+      clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(() => {
+        setWindowSize({
+          width: window.innerWidth,
+          height: window.innerHeight,
+          isMobile: window.innerWidth < 640,
+          isTablet: window.innerWidth >= 640 && window.innerWidth < 1024,
+          isDesktop: window.innerWidth >= 1024,
+        });
+      }, 100);
     }
-    
+
     window.addEventListener('resize', handleResize);
-    handleResize(); // Set initial size
-    
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   return windowSize;
