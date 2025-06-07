@@ -1,80 +1,75 @@
 import React from 'react';
-import { SongCard } from '../components/SongCard';
-import { PlaylistCard } from '../components/PlaylistCard';
-import { songs } from '../data/songs';
-import { playlists } from '../data/playlists';
-import { users } from '../data/users';
+import { Link } from 'react-router-dom';
+import { useSongsStore } from '../store/songsStore';
 import { useThemeStore } from '../store/themeStore';
+import { Play, Clock } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
   const { isDark } = useThemeStore();
-  const currentUser = users[0];
-  
-  const recentlyPlayed = currentUser.recentlyPlayed.map(
-    id => songs.find(song => song.id === id)
-  ).filter(Boolean);
-  
-  const favoriteSongs = currentUser.favoriteSongs.map(
-    id => songs.find(song => song.id === id)
-  ).filter(Boolean);
-  
-  const trendingSongs = [...songs].sort((a, b) => b.likes - a.likes).slice(0, 5);
-  
+  const { songs, playlists, recentlyPlayed } = useSongsStore();
+
+  const getSongById = (id: string) => songs.find(song => song.id === id);
+
   return (
-    <div className={`pt-16 md:pl-60 pb-20 min-h-screen ${
-      isDark 
-        ? 'bg-gradient-to-b from-black via-gray-900 to-black text-white' 
-        : 'bg-gradient-to-b from-gray-50 via-white to-gray-50 text-gray-900'
-    }`}>
-      <div className="px-6 py-8">
-        <section className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold">Recently Played</h2>
-            <button className="text-sm text-primary-400 hover:text-primary-300">View All</button>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {recentlyPlayed.map(song => song && (
-              <SongCard key={song.id} song={song} />
-            ))}
-          </div>
-        </section>
-        
-        <section className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold">Your Playlists</h2>
-            <button className="text-sm text-primary-400 hover:text-primary-300">View All</button>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {playlists.map(playlist => (
-              <PlaylistCard key={playlist.id} playlist={playlist} />
-            ))}
-          </div>
-        </section>
-        
-        <section className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold">Trending Now</h2>
-            <button className="text-sm text-primary-400 hover:text-primary-300">View All</button>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {trendingSongs.map(song => (
-              <SongCard key={song.id} song={song} />
-            ))}
-          </div>
-        </section>
-        
-        <section className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold">Your Favorites</h2>
-            <button className="text-sm text-primary-400 hover:text-primary-300">View All</button>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {favoriteSongs.map(song => song && (
-              <SongCard key={song.id} song={song} />
-            ))}
-          </div>
-        </section>
-      </div>
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-8">Welcome Back</h1>
+
+      {/* Recently Played */}
+      <section className="mb-12">
+        <div className="flex items-center gap-2 mb-4">
+          <Clock size={24} />
+          <h2 className="text-2xl font-semibold">Recently Played</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {recentlyPlayed.slice(0, 8).map((songId) => {
+            const song = getSongById(songId);
+            if (!song) return null;
+            return (
+              <div
+                key={song.id}
+                className={`p-4 rounded-lg ${
+                  isDark ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50'
+                } shadow-md transition-colors`}
+              >
+                <img
+                  src={song.coverUrl}
+                  alt={song.title}
+                  className="w-full aspect-square object-cover rounded-md mb-3"
+                />
+                <h3 className="font-semibold truncate">{song.title}</h3>
+                <p className="text-sm text-gray-500 truncate">{song.artist}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Playlists */}
+      <section>
+        <div className="flex items-center gap-2 mb-4">
+          <Play size={24} />
+          <h2 className="text-2xl font-semibold">Your Playlists</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {playlists.map((playlist) => (
+            <Link
+              key={playlist.id}
+              to={`/playlist/${playlist.id}`}
+              className={`p-4 rounded-lg ${
+                isDark ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50'
+              } shadow-md transition-colors`}
+            >
+              <img
+                src={playlist.coverUrl}
+                alt={playlist.name}
+                className="w-full aspect-square object-cover rounded-md mb-3"
+              />
+              <h3 className="font-semibold truncate">{playlist.name}</h3>
+              <p className="text-sm text-gray-500">{playlist.songs.length} songs</p>
+            </Link>
+          ))}
+        </div>
+      </section>
     </div>
   );
 };
