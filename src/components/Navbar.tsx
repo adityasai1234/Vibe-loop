@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useThemeStore } from '../store/themeStore';
 import { useAuth } from '../context/AuthContext';
@@ -6,6 +6,7 @@ import { Moon, Sun, LogOut } from 'lucide-react';
 import { Logo } from './Logo';
 
 export const Navbar: React.FC = () => {
+  const [searchQuery, setSearchQuery] = useState('');
   const { isDark, toggleTheme } = useThemeStore();
   const { user, signOut } = useAuth();
 
