@@ -51,8 +51,8 @@ export const DiscoverPage: React.FC = () => {
             <select
               value={selectedGenre}
               onChange={(e) => setSelectedGenre(e.target.value)}
-              className={`appearance-none bg-transparent border rounded-lg px-4 py-2 pr-8 ${
-                isDark ? 'border-gray-700 text-white' : 'border-gray-300 text-gray-900'
+              className={`appearance-none bg-transparent border-0 rounded-lg px-4 py-2 pr-8 focus:ring-0 ${
+                isDark ? 'text-white' : 'text-gray-900'
               }`}
             >
               <option value="">All Genres</option>
@@ -68,8 +68,8 @@ export const DiscoverPage: React.FC = () => {
             <select
               value={selectedMood}
               onChange={(e) => setSelectedMood(e.target.value)}
-              className={`appearance-none bg-transparent border rounded-lg px-4 py-2 pr-8 ${
-                isDark ? 'border-gray-700 text-white' : 'border-gray-300 text-gray-900'
+              className={`appearance-none bg-transparent border-0 rounded-lg px-4 py-2 pr-8 focus:ring-0 ${
+                isDark ? 'text-white' : 'text-gray-900'
               }`}
             >
               <option value="">All Moods</option>
@@ -99,17 +99,17 @@ export const DiscoverPage: React.FC = () => {
               key={song.id}
               className={`group relative rounded-lg overflow-hidden ${
                 isDark ? 'bg-gray-800' : 'bg-white'
-              } shadow-lg transition-transform hover:scale-105`}
+              } shadow-md transition-transform hover:scale-102 hover:shadow-lg`}
             >
               <div className="aspect-square relative">
                 <img
                   src={song.coverUrl}
                   alt={song.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-t-lg"
                 />
                 <button
                   onClick={() => handlePlay(song)}
-                  className={`absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity ${
+                  className={`absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
                     isDark ? 'text-white' : 'text-white'
                   }`}
                 >
@@ -121,21 +121,15 @@ export const DiscoverPage: React.FC = () => {
                 </button>
               </div>
               <div className="p-4">
-                <h3 className="font-semibold truncate">{song.title}</h3>
-                <p className={`text-sm truncate ${
-                  isDark ? 'text-gray-400' : 'text-gray-600'
-                }`}>
+                <h3 className="font-semibold truncate text-base">{song.title}</h3>
+                <p className={`text-sm truncate ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                   {song.artist}
                 </p>
                 <div className="mt-2 flex items-center justify-between text-xs">
-                  <span className={`${
-                    isDark ? 'text-gray-400' : 'text-gray-500'
-                  }`}>
+                  <span className={`${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                     {song.genre}
                   </span>
-                  <span className={`${
-                    isDark ? 'text-gray-400' : 'text-gray-500'
-                  }`}>
+                  <span className={`${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                     {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
                   </span>
                 </div>
