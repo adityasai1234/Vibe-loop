@@ -24,9 +24,9 @@ export function LikedSongsProvider({ children }: { children: React.ReactNode }) 
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  // Fetch liked songs when user changes
+  // Fetch liked songs when user changes or component mounts
   useEffect(() => {
-    if (user) {
+    if (user?.id) { // Ensure user and user.id are available
       fetchLikedSongs();
     } else {
       setLikedSongs([]);
@@ -35,12 +35,16 @@ export function LikedSongsProvider({ children }: { children: React.ReactNode }) 
   }, [user]);
 
   const fetchLikedSongs = async () => {
+    if (!user?.id) { // Explicit check for user.id before fetching
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from('liked_songs')
         .select('*')
-        .eq('user_id', user?.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
@@ -55,7 +59,7 @@ export function LikedSongsProvider({ children }: { children: React.ReactNode }) 
 
       setLikedSongs(songs);
     } catch (error) {
-      console.error('Error fetching liked songs:', error);
+      console.error('Error fetching liked songs:', error instanceof Error ? error.message : error);
     } finally {
       setLoading(false);
     }
@@ -66,7 +70,7 @@ export function LikedSongsProvider({ children }: { children: React.ReactNode }) 
   };
 
   const toggleLike = async (song: Song) => {
-    if (!user) return;
+    if (!user?.id) return; // Explicit check for user.id before toggling
 
     try {
       const isCurrentlyLiked = isLiked(song.id);
@@ -100,7 +104,7 @@ export function LikedSongsProvider({ children }: { children: React.ReactNode }) 
         setLikedSongs(prev => [...prev, song]);
       }
     } catch (error) {
-      console.error('Error toggling like:', error);
+      console.error('Error toggling like:', error instanceof Error ? error.message : error);
     }
   };
 
