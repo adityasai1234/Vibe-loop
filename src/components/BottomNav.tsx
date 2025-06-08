@@ -1,3 +1,6 @@
+
+
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Disc3, Heart, User, Search, Settings, Play } from 'lucide-react'; // Import icons for mobile nav
@@ -64,5 +67,6 @@ export const BottomNav: React.FC = () => {
         />
       )}
     </div>
+
   );
 }; 
