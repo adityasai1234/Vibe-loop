@@ -60,7 +60,7 @@ export function LikedSongsProvider({ children }: { children: React.ReactNode }) 
 
       setLikedSongs(songs);
     } catch (error) {
-      console.error('Error fetching liked songs:', error instanceof Error ? error.message : error);
+      console.error('Error fetching liked songs:', JSON.stringify(error, null, 2));
     } finally {
       setLoading(false);
     }

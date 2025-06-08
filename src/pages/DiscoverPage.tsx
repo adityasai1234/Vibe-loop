@@ -7,13 +7,13 @@ import { Play, Pause, Filter, Search } from 'lucide-react';
 
 export const DiscoverPage: React.FC = () => {
   const { isDark } = useThemeStore();
-  const { currentSong, isPlaying, playSong, pauseSong } = useMusicPlayer();
+  const { currentSong, isPlaying, play, pause } = useMusicPlayer();
   const { searchQuery, searchResults } = useSearch();
   const [selectedGenre, setSelectedGenre] = useState<string>('');
   const [selectedMood, setSelectedMood] = useState<string>('');
 
   const genres = useMemo(() => Array.from(new Set(songs.map(song => song.genre))), []);
-  const moods = useMemo(() => Array.from(new Set(songs.map(song => song.mood))), []);
+  const moods = useMemo(() => Array.from(new Set(songs.flatMap(song => song.mood))), []);
 
   const filteredSongs = useMemo(() => {
     let results = searchQuery ? searchResults : songs;
@@ -22,7 +22,7 @@ export const DiscoverPage: React.FC = () => {
       results = results.filter(song => song.genre === selectedGenre);
     }
     if (selectedMood) {
-      results = results.filter(song => song.mood === selectedMood);
+      results = results.filter(song => song.mood.includes(selectedMood));
     }
     
     return results;
@@ -31,12 +31,10 @@ export const DiscoverPage: React.FC = () => {
   const handlePlay = (song: typeof songs[0]) => {
     if (currentSong?.id === song.id) {
       if (isPlaying) {
-        pauseSong();
-      } else {
-        playSong(song);
+        pause();
       }
     } else {
-      playSong(song);
+      play(song);
     }
   };
 
@@ -142,11 +140,13 @@ export const DiscoverPage: React.FC = () => {
                   </span>
                 </div>
                 <div className="mt-2">
-                  <span className={`inline-block px-2 py-1 rounded-full text-xs ${
-                    isDark ? 'bg-secondary-800 text-secondary-300' : 'bg-secondary-100 text-secondary-600'
-                  }`}>
-                    {song.mood}
-                  </span>
+                  {song.mood.map(m => (
+                    <span key={m} className={`inline-block px-2 py-1 rounded-full text-xs mr-2 ${
+                      isDark ? 'bg-secondary-800 text-secondary-300' : 'bg-secondary-100 text-secondary-600'
+                    }`}>
+                      {m}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>

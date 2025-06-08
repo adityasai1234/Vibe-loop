@@ -3,12 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import { useThemeStore } from '../store/themeStore';
 import { useMusicPlayer } from '../context/MusicPlayerContext';
 import { songs } from '../data/songs';
-import { Play, Pause } from 'lucide-react';
+import { Play, Pause, PlusCircle } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
   const { user } = useAuth();
   const { isDark } = useThemeStore();
-  const { currentSong, isPlaying, play, pause } = useMusicPlayer();
+  const { currentSong, isPlaying, play, pause, addToQueue } = useMusicPlayer();
 
   const handlePlay = (song: typeof songs[0]) => {
     if (currentSong?.id === song.id) {
@@ -20,6 +20,10 @@ export const HomePage: React.FC = () => {
     } else {
       play(song);
     }
+  };
+
+  const handleAddToQueue = (song: typeof songs[0]) => {
+    addToQueue(song);
   };
 
   return (
@@ -76,6 +80,15 @@ export const HomePage: React.FC = () => {
                 <span className={`text-secondary-400' : 'text-secondary-500'}`}>
                   {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
                 </span>
+                <button
+                  onClick={() => handleAddToQueue(song)}
+                  className={`p-1 rounded-full transition-colors duration-200 ${
+                    isDark ? 'hover:bg-secondary-800' : 'hover:bg-secondary-100'
+                  }`}
+                  title="Add to Queue"
+                >
+                  <PlusCircle size={20} className={isDark ? 'text-secondary-400' : 'text-secondary-500'} />
+                </button>
               </div>
             </div>
           </div>
