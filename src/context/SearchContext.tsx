@@ -18,7 +18,7 @@ export const SearchProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       song.title.toLowerCase().includes(query) ||
       song.artist.toLowerCase().includes(query) ||
       song.genre.toLowerCase().includes(query) ||
-      song.mood.toLowerCase().includes(query)
+      song.mood.some(m => m.toLowerCase().includes(query))
     );
   });
 

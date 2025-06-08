@@ -25,21 +25,22 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, isMobile }) => {
       isDark ? 'bg-secondary-950 text-secondary-100' : 'bg-white text-secondary-800'
     }`}>
       <div className="max-w-7xl mx-auto h-16 flex items-center justify-between">
-        {/* Left section: Hamburger menu for mobile, always present on desktop */}
-        {isMobile && (
-          <button
-            onClick={onMenuClick}
-            className={`p-2 rounded-md transition-colors duration-200 ${
-              isDark ? 'hover:bg-secondary-800' : 'hover:bg-secondary-100'
-            }`}
-            aria-label="Open navigation menu"
-          >
-            <Menu size={20} />
-          </button>
-        )}
-        <Link to="/">
-          <Logo />
-        </Link>
+        <div className="flex items-center space-x-2">
+          {isMobile && (
+            <button
+              onClick={onMenuClick}
+              className={`p-2 rounded-md transition-colors duration-200 ${
+                isDark ? 'hover:bg-secondary-800' : 'hover:bg-secondary-100'
+              }`}
+              aria-label="Open navigation menu"
+            >
+              <Menu size={20} />
+            </button>
+          )}
+          <Link to="/">
+            <Logo />
+          </Link>
+        </div>
 
         {/* Center section - Search (only visible on non-mobile devices) */}
         {!isMobile && (
@@ -95,6 +96,21 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, isMobile }) => {
                 Sign in
               </Link>
             )}
+          </div>
+        )}
+
+        {/* Search icon for mobile (will open MobileMenu) */}
+        {isMobile && (
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={onMenuClick} // Opens the MobileMenu
+              className={`p-2 rounded-md transition-colors duration-200 ${
+                isDark ? 'hover:bg-secondary-800' : 'hover:bg-secondary-100'
+              }`}
+              aria-label="Open search menu"
+            >
+              <Search size={20} />
+            </button>
           </div>
         )}
       </div>
