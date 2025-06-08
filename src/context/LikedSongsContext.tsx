@@ -8,6 +8,8 @@ interface Song {
   artist: string;
   coverUrl: string;
   audioUrl: string;
+  url: string;
+  duration: number;
 }
 
 interface LikedSongsContextType {
@@ -55,6 +57,8 @@ export function LikedSongsProvider({ children }: { children: React.ReactNode }) 
         artist: item.artist,
         coverUrl: item.cover_url,
         audioUrl: item.audio_url,
+        url: item.url,
+        duration: item.duration,
       }));
 
       setLikedSongs(songs);
@@ -97,6 +101,8 @@ export function LikedSongsProvider({ children }: { children: React.ReactNode }) 
             artist: song.artist,
             cover_url: song.coverUrl,
             audio_url: song.audioUrl,
+            url: song.url,
+            duration: song.duration,
           });
 
         if (error) throw error;

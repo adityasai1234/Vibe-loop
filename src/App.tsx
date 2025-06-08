@@ -32,22 +32,8 @@ const AppContent = () => {
   const { isTablet, isDesktop } = useWindowSize();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Wavy SVG patterns as data URIs
-  const darkWaveBg = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,40 C150,80 350,0 500,40 C650,80 850,0 1000,40 L1000,0 L0,0 Z' fill='%231f2937'/%3E%3Cpath d='M1000,40 C1150,80 1350,0 1500,40 L1500,0 L1000,0 Z' fill='%231f2937'/%3E%3C/svg%3E")`;
-  const lightWaveBg = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,40 C150,80 350,0 500,40 C650,80 850,0 1000,40 L1000,0 L0,0 Z' fill='%23e5e7eb'/%3E%3Cpath d='M1000,40 C1150,80 1350,0 1500,40 L1500,0 L1000,0 Z' fill='%23e5e7eb'/%3E%3C/svg%3E")`;
-
   return (
-    <div
-      className="min-h-screen relative"
-      style={{
-        backgroundColor: isDark ? '#111827' : '#f9fafb',
-        backgroundImage: isDark ? darkWaveBg : lightWaveBg,
-        backgroundRepeat: 'repeat-x',
-        backgroundSize: '1200px 120px',
-        backgroundPosition: 'bottom',
-        backgroundAttachment: 'fixed',
-      }}
-    >
+    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <Navbar onMenuClick={() => setIsSidebarOpen(true)} />
       
       <div className="flex h-[calc(100vh-4rem)]">
@@ -55,7 +41,7 @@ const AppContent = () => {
         
         <main className={`flex-1 overflow-y-auto transition-all duration-300 ${
           isDesktop ? 'ml-64' : ''
-        } ${isDark ? 'bg-gray-900 bg-opacity-80' : 'bg-white bg-opacity-80'} backdrop-blur-sm`}>
+        }`}>
           <div className="container mx-auto px-4 py-8">
             <Routes>
               <Route path="/login" element={<LoginPage />} />

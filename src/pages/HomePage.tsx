@@ -23,9 +23,13 @@ export const HomePage: React.FC = () => {
   };
 
   return (
-    <div className={`p-8 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-      <h1 className="text-3xl font-bold mb-6">Welcome to Vibe Loop</h1>
-      <p className="text-lg mb-8">
+    <div className={`p-8 transition-colors duration-300 ${
+      isDark ? 'text-secondary-100' : 'text-secondary-900'
+    }`}>
+      <h1 className="text-3xl font-bold mb-4">Welcome to Vibe Loop</h1>
+      <p className={`text-lg mb-8 ${
+        isDark ? 'text-secondary-300' : 'text-secondary-700'
+      }`}>
         Hello, {user?.email}! Start exploring music that matches your mood.
       </p>
 
@@ -33,15 +37,15 @@ export const HomePage: React.FC = () => {
         {songs.map((song) => (
           <div
             key={song.id}
-            className={`group relative rounded-lg overflow-hidden ${
-              isDark ? 'bg-gray-800' : 'bg-white'
-            } shadow-md transition-transform hover:scale-102 hover:shadow-lg`}
+            className={`group relative rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:scale-105 ${
+              isDark ? 'bg-secondary-900' : 'bg-white'
+            }`}
           >
             <div className="aspect-square relative">
               <img
                 src={song.coverUrl}
                 alt={song.title}
-                className="w-full h-full object-cover rounded-t-lg"
+                className="w-full h-full object-cover"
               />
               <button
                 onClick={() => handlePlay(song)}
@@ -57,15 +61,19 @@ export const HomePage: React.FC = () => {
               </button>
             </div>
             <div className="p-4">
-              <h3 className="font-semibold truncate text-base">{song.title}</h3>
-              <p className={`text-sm truncate ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              <h3 className="font-semibold truncate text-lg">{song.title}</h3>
+              <p className={`text-sm truncate ${
+                isDark ? 'text-secondary-400' : 'text-secondary-600'
+              }`}>
                 {song.artist}
               </p>
-              <div className="mt-2 flex items-center justify-between text-xs">
-                <span className={`${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+              <div className="mt-3 flex items-center justify-between text-xs">
+                <span className={`px-2 py-0.5 rounded-full ${
+                  isDark ? 'bg-secondary-800 text-secondary-300' : 'bg-secondary-100 text-secondary-600'
+                }`}>
                   {song.genre}
                 </span>
-                <span className={`${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                <span className={`text-secondary-400' : 'text-secondary-500'}`}>
                   {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
                 </span>
               </div>

@@ -24,18 +24,18 @@ export const SearchBar: React.FC = () => {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search songs, artists, or playlists..."
-          className={`w-full px-4 py-2 pl-10 rounded-full text-sm font-medium ${
-            isDark 
-              ? 'bg-gray-800 text-white placeholder-gray-400 focus:ring-gray-700' 
-              : 'bg-gray-100 text-gray-900 placeholder-gray-500 focus:ring-gray-200'
-          } focus:outline-none focus:ring-2 transition-all duration-200`}
+          className={`w-full px-4 py-2 pl-10 rounded-lg text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2
+            ${isDark 
+              ? 'bg-secondary-800 text-secondary-100 placeholder-secondary-400 focus:ring-primary-600 focus:bg-secondary-700' 
+              : 'bg-secondary-100 text-secondary-900 placeholder-secondary-500 focus:ring-primary-500 focus:bg-secondary-200'
+          }`}
         />
         <Search 
-          className={`absolute left-3 top-2.5 h-4 w-4 ${
-            isDark ? 'text-gray-400' : 'text-gray-500'
+          className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${
+            isDark ? 'text-secondary-400' : 'text-secondary-500'
           }`} 
         />
       </div>
     </form>
   );
-}; 
+};
