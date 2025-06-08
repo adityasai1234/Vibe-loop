@@ -8,17 +8,17 @@ import { Play, Pause } from 'lucide-react';
 export const HomePage: React.FC = () => {
   const { user } = useAuth();
   const { isDark } = useThemeStore();
-  const { currentSong, isPlaying, playSong, pauseSong } = useMusicPlayer();
+  const { currentSong, isPlaying, play, pause } = useMusicPlayer();
 
   const handlePlay = (song: typeof songs[0]) => {
     if (currentSong?.id === song.id) {
       if (isPlaying) {
-        pauseSong();
+        pause();
       } else {
-        playSong(song);
+        play(song);
       }
     } else {
-      playSong(song);
+      play(song);
     }
   };
 

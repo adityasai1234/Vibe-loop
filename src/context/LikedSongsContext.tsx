@@ -1,16 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { supabase } from '../lib/supabaseClient';
+import { Song as StoredSong } from '../store/songsStore'; // Import Song from songsStore
 
-interface Song {
-  id: string;
-  title: string;
-  artist: string;
-  coverUrl: string;
-  audioUrl: string;
-  url: string;
-  duration: number;
-}
+// Define the Song interface for the context, matching the stored song type
+interface Song extends StoredSong {}
 
 interface LikedSongsContextType {
   likedSongs: Song[];
@@ -51,14 +45,17 @@ export function LikedSongsProvider({ children }: { children: React.ReactNode }) 
       if (error) throw error;
 
       // Transform the data to match our Song interface
-      const songs = data.map(item => ({
+      const songs: Song[] = data.map(item => ({
         id: item.song_id,
         title: item.title,
         artist: item.artist,
         coverUrl: item.cover_url,
-        audioUrl: item.audio_url,
         url: item.url,
         duration: item.duration,
+        album: item.album,
+        genre: item.genre,
+        mood: item.mood || [],
+        releaseDate: item.release_date,
       }));
 
       setLikedSongs(songs);
@@ -100,9 +97,12 @@ export function LikedSongsProvider({ children }: { children: React.ReactNode }) 
             title: song.title,
             artist: song.artist,
             cover_url: song.coverUrl,
-            audio_url: song.audioUrl,
             url: song.url,
             duration: song.duration,
+            album: song.album,
+            genre: song.genre,
+            mood: song.mood,
+            release_date: song.releaseDate,
           });
 
         if (error) throw error;

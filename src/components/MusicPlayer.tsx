@@ -3,6 +3,7 @@ import { useMusicPlayer } from '../context/MusicPlayerContext';
 import { useThemeStore } from '../store/themeStore';
 import { useLikedSongs } from '../context/LikedSongsContext';
 import { Play, Pause, SkipBack, SkipForward, Heart } from 'lucide-react';
+import { Song } from '../store/songsStore';
 
 export const MusicPlayer: React.FC = () => {
   const { currentSong, isPlaying, play, pause, duration, currentTime, setVolume, seek, playNext, playPrevious, volume } = useMusicPlayer();
@@ -14,12 +15,17 @@ export const MusicPlayer: React.FC = () => {
   const handleLike = async () => {
     if (!currentSong) return;
     
-    const songToLike = {
+    const songToLike: Song = {
       id: currentSong.id,
       title: currentSong.title,
       artist: currentSong.artist,
       coverUrl: currentSong.coverUrl,
-      audioUrl: currentSong.url,
+      url: currentSong.url,
+      album: currentSong.album,
+      duration: currentSong.duration,
+      genre: currentSong.genre,
+      mood: currentSong.mood,
+      releaseDate: currentSong.releaseDate,
     };
     
     await toggleLike(songToLike);
@@ -34,7 +40,7 @@ export const MusicPlayer: React.FC = () => {
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const time = parseFloat(e.target.value);
-    seekTo(time);
+    seek(time);
   };
 
   return (
@@ -67,7 +73,7 @@ export const MusicPlayer: React.FC = () => {
         <div className="flex flex-col items-center flex-1 w-full sm:w-auto px-0 sm:px-4">
           <div className="flex items-center space-x-4 mb-3">
             <button
-              onClick={() => { /* Implement skip back logic */ }}
+              onClick={playPrevious}
               className={`p-2 rounded-full transition-colors duration-200 ${
                 isDark ? 'hover:bg-secondary-800' : 'hover:bg-secondary-100'
               }`}
@@ -76,7 +82,7 @@ export const MusicPlayer: React.FC = () => {
             </button>
 
             <button
-              onClick={() => isPlaying ? pauseSong() : resumeSong()}
+              onClick={() => isPlaying ? pause() : play(currentSong)}
               className={`p-3 rounded-full shadow-md transition-colors duration-200 ${
                 isDark ? 'bg-primary-600 text-white hover:bg-primary-700' : 'bg-primary-500 text-white hover:bg-primary-600'
               }`}
@@ -89,7 +95,7 @@ export const MusicPlayer: React.FC = () => {
             </button>
 
             <button
-              onClick={() => { /* Implement skip forward logic */ }}
+              onClick={playNext}
               className={`p-2 rounded-full transition-colors duration-200 ${
                 isDark ? 'hover:bg-secondary-800' : 'hover:bg-secondary-100'
               }`}
