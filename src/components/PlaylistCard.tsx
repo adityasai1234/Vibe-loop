@@ -24,6 +24,10 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist }) => {
       setCurrentSong(firstSong);
     }
   };
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleLike(playlist.id);
+  };
 
   return (
     <div className="flex flex-col w-48 p-3 group rounded-lg transition-all hover:bg-gray-100/5">
@@ -43,6 +47,7 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist }) => {
           </button>
         </div>
       </div>
+      <button onClick={handleLike}>Like</button>
       <div className="flex flex-col mt-2">
         <div className="flex items-center justify-between">
           <p className="font-medium truncate">{playlist.title}</p>

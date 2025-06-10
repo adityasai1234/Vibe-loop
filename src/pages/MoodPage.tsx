@@ -37,14 +37,14 @@ export const MoodPage: React.FC = () => {
     : [];
   
   return (
-    <div className={`pt-16 md:pl-60 pb-20 min-h-screen ${
+    <div className={`p-8 transition-colors duration-300 ${
       isDark 
-        ? 'bg-gradient-to-b from-black via-gray-900 to-black text-white' 
-        : 'bg-gradient-to-b from-gray-50 via-white to-gray-50 text-gray-900'
+        ? 'text-secondary-100' 
+        : 'text-secondary-900'
     }`}>
       <div className="px-6 py-8">
-        <h1 className="text-3xl font-bold mb-2">How are you feeling today?</h1>
-        <p className={`mb-8 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+        <h1 className="text-3xl font-bold mb-4">How are you feeling today?</h1>
+        <p className={`mb-8 ${isDark ? 'text-secondary-300' : 'text-secondary-700'}`}>
           Select a mood to get personalized music recommendations
         </p>
         
@@ -53,12 +53,12 @@ export const MoodPage: React.FC = () => {
             <button
               key={mood.emoji}
               onClick={() => handleMoodSelect(mood.emoji)}
-              className={`p-4 rounded-lg flex flex-col items-center justify-center transition-all ${
+              className={`p-4 rounded-lg flex flex-col items-center justify-center transition-all duration-200 ${
                 selectedMood === mood.emoji
-                  ? 'bg-primary-500 text-white scale-105'
+                  ? `bg-primary-600 text-white shadow-md transform scale-105`
                   : isDark
-                    ? 'bg-white/10 hover:bg-white/20'
-                    : 'bg-white hover:bg-gray-100 shadow-sm'
+                    ? 'bg-secondary-900 hover:bg-secondary-800'
+                    : 'bg-white hover:bg-secondary-100 shadow-sm'
               }`}
             >
               <span className="text-4xl mb-2">{mood.emoji}</span>
@@ -71,7 +71,7 @@ export const MoodPage: React.FC = () => {
           <>
             <div className="mb-8">
               <h2 className="text-2xl font-bold mb-4">Recommended Songs</h2>
-              <div className="grid grid-cols-1 gap-2">
+              <div className="grid grid-cols-1 gap-4">
                 {recommendedSongs.map(song => song && (
                   <SongCard key={song.id} song={song} size="small" />
                 ))}
@@ -79,17 +79,19 @@ export const MoodPage: React.FC = () => {
             </div>
             
             <div className="mb-8">
-              <label className="block text-sm font-medium mb-2">
+              <label className={`block text-sm font-medium mb-2 ${
+                isDark ? 'text-secondary-200' : 'text-secondary-700'
+              }`}>
                 How are you feeling? (Optional)
               </label>
               <textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className={`w-full p-3 rounded-lg ${
+                className={`w-full p-3 rounded-lg border focus:ring-2 focus:outline-none transition-colors duration-200 ${
                   isDark
-                    ? 'bg-white/10 text-white placeholder-gray-400'
-                    : 'bg-white text-gray-900 placeholder-gray-500'
-                } focus:ring-2 focus:ring-primary-500 focus:outline-none`}
+                    ? 'bg-secondary-800 border-secondary-700 text-secondary-100 placeholder-secondary-400 focus:ring-primary-600'
+                    : 'bg-white border-secondary-300 text-secondary-900 placeholder-secondary-500 focus:ring-primary-500'
+                }`}
                 placeholder="Share your thoughts..."
                 rows={3}
               />
@@ -97,7 +99,7 @@ export const MoodPage: React.FC = () => {
             
             <button
               onClick={handleSaveMood}
-              className="bg-primary-500 text-white px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors"
+              className={`bg-primary-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-primary-600 transition-colors duration-200`}
             >
               Save to Mood Journal
             </button>
@@ -116,33 +118,39 @@ export const MoodPage: React.FC = () => {
               return (
                 <div
                   key={entry.id}
-                  className={`p-4 rounded-lg ${
-                    isDark ? 'bg-white/10' : 'bg-white shadow-sm'
+                  className={`p-4 rounded-lg shadow-sm transition-colors duration-200 ${
+                    isDark ? 'bg-secondary-900' : 'bg-white'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center space-x-2">
-                      <Calendar size={16} className="text-primary-400" />
-                      <span className="text-sm">
+                      <Calendar size={18} className="text-primary-500" />
+                      <span className={`text-sm ${
+                        isDark ? 'text-secondary-200' : 'text-secondary-700'
+                      }`}>
                         {entryDate.toLocaleDateString()}
                       </span>
-                      <Clock size={16} className="text-primary-400 ml-2" />
-                      <span className="text-sm">
+                      <Clock size={18} className="text-primary-500 ml-4" />
+                      <span className={`text-sm ${
+                        isDark ? 'text-secondary-200' : 'text-secondary-700'
+                      }`}>
                         {entryDate.toLocaleTimeString()}
                       </span>
                     </div>
-                    <span className="text-2xl">{entry.mood}</span>
+                    <span className="text-3xl">{entry.mood}</span>
                   </div>
                   
                   {entry.note && (
                     <p className={`text-sm mb-3 ${
-                      isDark ? 'text-gray-300' : 'text-gray-600'
+                      isDark ? 'text-secondary-300' : 'text-secondary-600'
                     }`}>
                       {entry.note}
                     </p>
                   )}
                   
-                  <div className="text-sm text-primary-400">
+                  <div className={`text-sm ${
+                    isDark ? 'text-primary-400' : 'text-primary-600'
+                  }`}>
                     {entrySongs.map(song => song?.title).join(', ')}
                   </div>
                 </div>

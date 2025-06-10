@@ -1,108 +1,143 @@
 import React from 'react';
-import { useMusicPlayer } from '../context/MusicPlayerContext';
+import { Link, useLocation } from 'react-router-dom';
+import { Home, Compass, Heart, User, Music, Plus, X } from 'lucide-react';
 import { useThemeStore } from '../store/themeStore';
-import { useLikedSongs } from '../context/LikedSongsContext';
-import { Play, Pause, SkipBack, SkipForward, Heart } from 'lucide-react';
+import { useWindowSize } from '../hooks/useWindowSize';
 
-export const MusicPlayer: React.FC = () => {
-  const { currentSong, isPlaying, playSong, pauseSong, resumeSong } = useMusicPlayer();
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+  const location = useLocation();
   const { isDark } = useThemeStore();
-  const { isLiked, toggleLike } = useLikedSongs();
+  const { isDesktop } = useWindowSize();
 
-  if (!currentSong) return null;
+  const isActive = (path: string) => location.pathname === path;
 
-  const handleLike = async () => {
-    if (!currentSong) return;
-    
-    const songToLike = {
-      id: currentSong.id,
-      title: currentSong.title,
-      artist: currentSong.artist,
-      coverUrl: currentSong.coverUrl,
-      audioUrl: currentSong.url,
-    };
-    
-    await toggleLike(songToLike);
-  };
+  const navItems = [
+    { path: '/', icon: Home, label: 'Home' },
+    { path: '/discover', icon: Compass, label: 'Discover' },
+    { path: '/liked', icon: Heart, label: 'Liked Songs' },
+    { path: '/mood', icon: Heart, label: 'Mood' },
+    { path: '/profile', icon: User, label: 'Profile' },
+    { path: '/queue', icon: Music, label: 'Queue' },
+  ];
 
-  return (
-    <div className={`fixed bottom-0 left-0 right-0 p-2 sm:p-4 ${
-      isDark ? 'bg-gray-900 border-t border-gray-800' : 'bg-white border-t border-gray-200'
+  const playlistItems = [
+    { id: '1', name: 'My Playlist #1', icon: Music },
+    { id: '2', name: 'My Playlist #2', icon: Music },
+  ];
+
+  const sidebarContent = (
+    <div className={`h-full flex flex-col transition-colors duration-300 ${
+      isDark ? 'bg-secondary-950 text-secondary-100' : 'bg-white text-secondary-800'
     }`}>
-      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4">
-        {/* Song Info - Stack vertically on mobile, horizontal on desktop */}
-        <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
-          <img
-            src={currentSong.coverUrl}
-            alt={currentSong.title}
-            className="w-10 h-10 sm:w-12 sm:h-12 rounded-md"
-          />
-          <div className="min-w-0 flex-1 sm:flex-none">
-            <h3 className={`font-medium truncate text-sm sm:text-base ${
-              isDark ? 'text-white' : 'text-gray-900'
-            }`}>
-              {currentSong.title}
-            </h3>
-            <p className={`text-xs sm:text-sm truncate ${
-              isDark ? 'text-gray-400' : 'text-gray-500'
-            }`}>
-              {currentSong.artist}
-            </p>
-          </div>
-        </div>
-
-        {/* Controls - Center on mobile, right-aligned on desktop */}
-        <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto justify-center sm:justify-end">
-          <button
-            onClick={() => {}}
-            className={`p-1.5 sm:p-2 rounded-full ${
-              isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'
-            }`}
-          >
-            <SkipBack size={18} className="sm:w-5 sm:h-5" />
-          </button>
-
-          <button
-            onClick={() => isPlaying ? pauseSong() : resumeSong()}
-            className={`p-2 sm:p-3 rounded-full ${
-              isDark ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-100 hover:bg-gray-200'
-            }`}
-          >
-            {isPlaying ? (
-              <Pause size={20} className="sm:w-6 sm:h-6" />
-            ) : (
-              <Play size={20} className="sm:w-6 sm:h-6" />
-            )}
-          </button>
-
-          <button
-            onClick={() => {}}
-            className={`p-1.5 sm:p-2 rounded-full ${
-              isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'
-            }`}
-          >
-            <SkipForward size={18} className="sm:w-5 sm:h-5" />
-          </button>
-
-          <button
-            onClick={handleLike}
-            className={`p-1.5 sm:p-2 rounded-full transition-colors ${
-              isLiked(currentSong.id)
+      {/* Navigation */}
+      <nav className="flex-1 px-4 py-6 space-y-1">
+        {navItems.map(({ path, icon: Icon, label }) => (
+          <Link
+            key={path}
+            to={path}
+            onClick={onClose}
+            className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+              isActive(path)
                 ? isDark
-                  ? 'text-red-500 hover:text-red-400'
-                  : 'text-red-600 hover:text-red-500'
+                  ? 'bg-primary-700 text-white'
+                  : 'bg-primary-500 text-white'
                 : isDark
-                ? 'text-gray-400 hover:text-white'
-                : 'text-gray-500 hover:text-gray-900'
+                ? 'hover:bg-secondary-800'
+                : 'hover:bg-secondary-100'
             }`}
           >
-            <Heart
-              size={18}
-              className={`sm:w-5 sm:h-5 ${isLiked(currentSong.id) ? 'fill-current' : ''}`}
-            />
+            <Icon className="mr-3 h-5 w-5" />
+            {label}
+          </Link>
+        ))}
+      </nav>
+
+      {/* Playlists */}
+      <div className={`px-4 py-4 border-t border-dashed ${
+        isDark ? 'border-secondary-800' : 'border-secondary-200'
+      }`}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className={`text-xs font-semibold uppercase tracking-wider ${
+            isDark ? 'text-secondary-400' : 'text-secondary-500'
+          }`}>
+            Playlists
+          </h2>
+          <button
+            className={`p-1 rounded-full transition-colors duration-200 ${
+              isDark
+                ? 'hover:bg-secondary-800'
+                : 'hover:bg-secondary-100'
+            }`}
+          >
+            <Plus size={16} />
           </button>
+        </div>
+        <div className="space-y-1">
+          {playlistItems.map(({ id, name, icon: Icon }) => (
+            <button
+              key={id}
+              className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                isDark
+                  ? 'hover:bg-secondary-800'
+                  : 'hover:bg-secondary-100'
+              }`}
+            >
+              <Icon className="mr-3 h-5 w-5" />
+              {name}
+            </button>
+          ))}
         </div>
       </div>
     </div>
+  );
+
+  if (isDesktop) {
+    return (
+      <aside className="hidden lg:flex lg:flex-shrink-0">
+        <div className="flex flex-col w-64 fixed top-16 bottom-0 overflow-y-auto">
+          {sidebarContent}
+        </div>
+      </aside>
+    );
+  }
+
+  return (
+    <>
+      {/* Backdrop for overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity lg:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Overlay Sidebar */}
+      <div
+        className={`fixed inset-x-0 top-0 bottom-0 z-50 transform transition-transform duration-300 ease-in-out lg:hidden ${
+          isOpen ? 'translate-y-0' : '-translate-y-full'
+        }`}
+      >
+        <div className="h-full pt-16 flex flex-col">
+          <div className={`px-4 py-4 flex items-center justify-end ${
+            isDark ? 'bg-secondary-950' : 'bg-white'
+          }`}>
+            <button
+              onClick={onClose}
+              className={`p-2 rounded-full transition-colors duration-200 ${
+                isDark ? 'hover:bg-secondary-800' : 'hover:bg-secondary-100'
+              }`}
+            >
+              <X size={24} />
+            </button>
+          </div>
+          {sidebarContent}
+        </div>
+      </div>
+    </>
   );
 };

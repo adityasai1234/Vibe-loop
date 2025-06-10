@@ -1,14 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { supabase } from '../lib/supabaseClient';
+import { Song as StoredSong } from '../store/songsStore'; // Import Song from songsStore
 
-interface Song {
-  id: string;
-  title: string;
-  artist: string;
-  coverUrl: string;
-  audioUrl: string;
-}
+// Define the Song interface for the context, matching the stored song type
+interface Song extends StoredSong {}
 
 interface LikedSongsContextType {
   likedSongs: Song[];
@@ -24,9 +20,9 @@ export function LikedSongsProvider({ children }: { children: React.ReactNode }) 
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  // Fetch liked songs when user changes
+  // Fetch liked songs when user changes or component mounts
   useEffect(() => {
-    if (user) {
+    if (user?.id) { // Ensure user and user.id are available
       fetchLikedSongs();
     } else {
       setLikedSongs([]);
@@ -35,27 +31,36 @@ export function LikedSongsProvider({ children }: { children: React.ReactNode }) 
   }, [user]);
 
   const fetchLikedSongs = async () => {
+    if (!user?.id) { // Explicit check for user.id before fetching
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from('liked_songs')
         .select('*')
-        .eq('user_id', user?.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
       // Transform the data to match our Song interface
-      const songs = data.map(item => ({
+      const songs: Song[] = data.map(item => ({
         id: item.song_id,
         title: item.title,
         artist: item.artist,
         coverUrl: item.cover_url,
-        audioUrl: item.audio_url,
+        url: item.url,
+        duration: item.duration,
+        album: item.album,
+        genre: item.genre,
+        mood: item.mood || [],
+        releaseDate: item.release_date,
       }));
 
       setLikedSongs(songs);
     } catch (error) {
-      console.error('Error fetching liked songs:', error);
+      console.error('Error fetching liked songs:', JSON.stringify(error, null, 2));
     } finally {
       setLoading(false);
     }
@@ -66,7 +71,7 @@ export function LikedSongsProvider({ children }: { children: React.ReactNode }) 
   };
 
   const toggleLike = async (song: Song) => {
-    if (!user) return;
+    if (!user?.id) return; // Explicit check for user.id before toggling
 
     try {
       const isCurrentlyLiked = isLiked(song.id);
@@ -92,7 +97,12 @@ export function LikedSongsProvider({ children }: { children: React.ReactNode }) 
             title: song.title,
             artist: song.artist,
             cover_url: song.coverUrl,
-            audio_url: song.audioUrl,
+            url: song.url,
+            duration: song.duration,
+            album: song.album,
+            genre: song.genre,
+            mood: song.mood,
+            release_date: song.releaseDate,
           });
 
         if (error) throw error;
@@ -100,7 +110,7 @@ export function LikedSongsProvider({ children }: { children: React.ReactNode }) 
         setLikedSongs(prev => [...prev, song]);
       }
     } catch (error) {
-      console.error('Error toggling like:', error);
+      console.error('Error toggling like:', error instanceof Error ? error.message : error);
     }
   };
 
