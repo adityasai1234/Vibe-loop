@@ -1,6 +1,7 @@
 import React from 'react';
-import { Music } from 'lucide-react';
+import { Dice1, Music } from 'lucide-react';
 import { useThemeStore } from '../store/themeStore';
+import { unstable_HistoryRouter } from 'react-router-dom';
 
 export const Logo: React.FC = () => {
   const { isDark } = useThemeStore();
@@ -24,5 +25,4 @@ export const Logo: React.FC = () => {
     </div>
   );
 };
-
-
+unstable_HistoryRouter
