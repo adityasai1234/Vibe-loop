@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Compass, Heart, User, Search, Sun, Moon, LogOut, X, Music } from 'lucide-react';
+import { Home, Compass, Heart, User, Search, Sun, Moon, LogOut, X, Music, Upload } from 'lucide-react';
 import { useThemeStore } from '../store/themeStore';
 import { useAuth } from '../context/AuthContext';
 import { SearchBar } from './SearchBar';
@@ -21,6 +21,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
     { path: '/discover', icon: Compass, label: 'Discover' },
     { path: '/liked', icon: Heart, label: 'Liked Songs' },
     { path: '/mood', icon: Heart, label: 'Mood' },
+    { path: '/upload', icon: Upload, label: 'Upload' },
     { path: '/profile', icon: User, label: 'Profile' },
     { path: '/queue', icon: Music, label: 'Queue' },
   ];

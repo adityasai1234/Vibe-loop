@@ -31,6 +31,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   const [duration, setDuration] = useState(0);
   const [queue, setQueueState] = useState<Song[]>([]);
   const [currentQueueIndex, setCurrentQueueIndex] = useState(-1);
+  const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const { songs } = useSongsStore(); // Access songs from the store
@@ -129,29 +130,90 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
     if (!audioRef.current) {
       audioRef.current = new Audio();
       audioRef.current.volume = volume;
+      
+      // Add error handling for audio loading
+      audioRef.current.onerror = (e) => {
+        console.error('Audio loading error:', e);
+        const error = e.target as HTMLAudioElement;
+        let errorMessage = 'Error loading audio';
+        
+        switch (error.error?.code) {
+          case MediaError.MEDIA_ERR_ABORTED:
+            errorMessage = 'Audio playback was aborted';
+            break;
+          case MediaError.MEDIA_ERR_NETWORK:
+            errorMessage = 'Network error while loading audio';
+            break;
+          case MediaError.MEDIA_ERR_DECODE:
+            errorMessage = 'Audio decoding error';
+            break;
+          case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+            errorMessage = 'Audio format not supported';
+            break;
+        }
+        
+        console.error(errorMessage);
+        setCurrentSong(null);
+        setIsPlaying(false);
+      };
+
+      // Add CORS error handling
+      audioRef.current.onstalled = () => {
+        console.warn('Audio playback stalled - possible CORS or network issue');
+      };
+
+      // Add other event listeners
       audioRef.current.ontimeupdate = () => {
         setCurrentTime(audioRef.current?.currentTime || 0);
       };
+      
       audioRef.current.ondurationchange = () => {
         setDuration(audioRef.current?.duration || 0);
       };
+      
       audioRef.current.onended = () => {
-        playNext(); // playNext is now stably defined via useCallback
+        playNext();
       };
-    }
-  }, [playNext, volume]); // Dependencies include playNext and volume
 
-  // Update current song and control playback
+      // Add preload handling
+      audioRef.current.preload = 'metadata';
+    }
+  }, [playNext, volume]);
+
+  // Update current song and control playback with improved error handling
   useEffect(() => {
     if (currentSong && audioRef.current) {
-      if (audioRef.current.src !== currentSong.url) {
-        audioRef.current.src = currentSong.url;
-      }
-      if (isPlaying) {
-        audioRef.current.play().catch(e => console.error("Error playing audio:", e));
-      } else {
-        audioRef.current.pause();
-      }
+      const loadAndPlay = async () => {
+        try {
+          // Reset error state
+          setError(null);
+          
+          // Set new source
+          if (audioRef.current.src !== currentSong.url) {
+            audioRef.current.src = currentSong.url;
+            
+            // Load metadata first
+            await audioRef.current.load();
+            
+            // Check if the audio is actually playable
+            if (audioRef.current.readyState >= 2) { // HAVE_CURRENT_DATA
+              if (isPlaying) {
+                await audioRef.current.play();
+              }
+            } else {
+              throw new Error('Audio not ready for playback');
+            }
+          } else if (isPlaying) {
+            await audioRef.current.play();
+          }
+        } catch (err) {
+          console.error('Error during audio playback:', err);
+          setError(err instanceof Error ? err.message : 'Failed to play audio');
+          setIsPlaying(false);
+        }
+      };
+
+      loadAndPlay();
     } else if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.src = '';

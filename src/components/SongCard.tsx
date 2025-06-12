@@ -1,7 +1,7 @@
 import React from 'react';
-import { Play, Heart, MoreHorizontal, Pause } from 'lucide-react';
-import { Song } from '../types';
-import { usePlayerStore } from '../store/playerStore';
+import { Play, Heart, MoreHorizontal, Pause, Square } from 'lucide-react';
+import { useMusicPlayer } from '../context/MusicPlayerContext';
+import type { Song } from '../store/songsStore';
 
 interface SongCardProps {
   song: Song;
@@ -9,23 +9,39 @@ interface SongCardProps {
 }
 
 export const SongCard: React.FC<SongCardProps> = ({ song, size = 'medium' }) => {
-  const { currentSong, isPlaying, setCurrentSong, togglePlayPause } = usePlayerStore();
+  const { currentSong, isPlaying, play, pause } = useMusicPlayer();
+  const [lastClickTime, setLastClickTime] = React.useState<number>(0);
   
   const isActive = currentSong?.id === song.id;
   
   const handlePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
+    const now = Date.now();
     
     if (isActive) {
-      togglePlayPause();
+      if (isPlaying && now - lastClickTime < 300) {
+        pause();
+        setLastClickTime(0);
+      } else {
+        pause();
+        setLastClickTime(now);
+      }
     } else {
-      setCurrentSong(song);
+      play(song);
+      setLastClickTime(now);
+    }
+  };
+
+  const handleStop = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isActive && isPlaying) {
+      pause();
     }
   };
   
   const formatDuration = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+    const secs = Math.floor(seconds % 60);
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
   
@@ -46,7 +62,7 @@ export const SongCard: React.FC<SongCardProps> = ({ song, size = 'medium' }) => 
     return (
       <div className={`${containerClasses[size]} rounded-md transition-all hover:bg-gray-100/10`}>
         <img 
-          src={song.albumArt} 
+          src={song.coverUrl} 
           alt={`${song.title} by ${song.artist}`} 
           className={imageClasses[size]}
         />
@@ -54,12 +70,24 @@ export const SongCard: React.FC<SongCardProps> = ({ song, size = 'medium' }) => 
           <p className="text-sm font-medium truncate">{song.title}</p>
           <p className="text-xs text-gray-400 truncate">{song.artist}</p>
         </div>
-        <button 
-          onClick={handlePlay}
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-primary-500 hover:bg-primary-600 text-white transition-all"
-        >
-          {isActive && isPlaying ? <Pause size={16} /> : <Play size={16} />}
-        </button>
+        <div className="flex items-center space-x-2">
+          {isActive && isPlaying && (
+            <button 
+              onClick={handleStop}
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-red-500 hover:bg-red-600 text-white transition-all"
+              title="Stop"
+            >
+              <Square size={16} />
+            </button>
+          )}
+          <button 
+            onClick={handlePlay}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-primary-500 hover:bg-primary-600 text-white transition-all"
+            title={isActive && isPlaying ? "Double click to stop" : "Play"}
+          >
+            {isActive && isPlaying ? <Pause size={16} /> : <Play size={16} />}
+          </button>
+        </div>
       </div>
     );
   }
@@ -68,18 +96,30 @@ export const SongCard: React.FC<SongCardProps> = ({ song, size = 'medium' }) => 
     <div className={`${containerClasses[size]} rounded-lg transition-all hover:bg-gray-100/5`}>
       <div className="relative">
         <img 
-          src={song.albumArt} 
+          src={song.coverUrl} 
           alt={`${song.title} by ${song.artist}`} 
           className={`${imageClasses[size]} transition-all group-hover:shadow-lg group-hover:shadow-primary-500/20`}
         />
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
           <div className="absolute inset-0 bg-black/40 rounded-md"></div>
-          <button 
-            onClick={handlePlay}
-            className="relative z-10 w-12 h-12 flex items-center justify-center rounded-full bg-primary-500 hover:bg-primary-600 text-white transition-all transform hover:scale-105"
-          >
-            {isActive && isPlaying ? <Pause size={20} /> : <Play size={20} />}
-          </button>
+          <div className="relative z-10 flex items-center space-x-2">
+            {isActive && isPlaying && (
+              <button 
+                onClick={handleStop}
+                className="w-12 h-12 flex items-center justify-center rounded-full bg-red-500 hover:bg-red-600 text-white transition-all transform hover:scale-105"
+                title="Stop"
+              >
+                <Square size={24} />
+              </button>
+            )}
+            <button 
+              onClick={handlePlay}
+              className="w-12 h-12 flex items-center justify-center rounded-full bg-primary-500 hover:bg-primary-600 text-white transition-all transform hover:scale-105"
+              title={isActive && isPlaying ? "Double click to stop" : "Play"}
+            >
+              {isActive && isPlaying ? <Pause size={24} /> : <Play size={24} />}
+            </button>
+          </div>
         </div>
       </div>
       <div className="flex flex-col mt-2">
