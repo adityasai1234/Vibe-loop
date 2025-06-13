@@ -13,12 +13,54 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-// Create Supabase client
+// Create Supabase client with enhanced error handling
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    storageKey: 'vibe-loop-auth-token',
+    storage: {
+      getItem: (key) => {
+        try {
+          const value = localStorage.getItem(key);
+          return value ? JSON.parse(value) : null;
+        } catch (error) {
+          console.error('Error reading from localStorage:', error);
+          return null;
+        }
+      },
+      setItem: (key, value) => {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch (error) {
+          console.error('Error writing to localStorage:', error);
+        }
+      },
+      removeItem: (key) => {
+        try {
+          localStorage.removeItem(key);
+        } catch (error) {
+          console.error('Error removing from localStorage:', error);
+        }
+      }
+    }
+  },
+  global: {
+    headers: {
+      'x-application-name': 'vibe-loop'
+    }
+  }
+});
+
+// Add auth state change listener for debugging
+supabase.auth.onAuthStateChange((event, session) => {
+  console.log('Auth state changed:', event, session ? 'Session exists' : 'No session');
+  if (event === 'TOKEN_REFRESHED') {
+    console.log('Token refreshed successfully');
+  }
+  if (event === 'SIGNED_OUT') {
+    console.log('User signed out');
   }
 });
 
@@ -35,6 +77,21 @@ export const getPublicUrl = (filePath: string): string => {
     .from(STORAGE_BUCKET)
     .getPublicUrl(filePath);
   return data.publicUrl;
+};
+
+// Helper function to check auth status
+export const checkAuthStatus = async () => {
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error) {
+      console.error('Error checking auth status:', error);
+      return null;
+    }
+    return session;
+  } catch (error) {
+    console.error('Unexpected error checking auth status:', error);
+    return null;
+  }
 };
 
 // Note: Storage bucket should be created via Supabase dashboard or migrations
