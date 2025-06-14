@@ -3,6 +3,7 @@ import { useMusicPlayer } from '../context/MusicPlayerContext';
 import { useThemeStore } from '../store/themeStore';
 import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Heart, Shuffle, X } from 'lucide-react';
 import { useSongsStore } from '../store/songsStore';
+import { PlayerControls } from './PlayerControls';
 
 interface MusicPlayerMobileModalProps {
   isOpen: boolean;
@@ -141,30 +142,33 @@ export const MusicPlayerMobileModal: React.FC<MusicPlayerMobileModalProps> = ({ 
           </button>
         </div>
 
-        {/* Volume Control */}
-        <div className="flex items-center justify-center gap-4 px-8">
-          <button
-            onClick={() => setVolume(volume > 0 ? 0 : 0.5)}
-            className={`p-2 rounded-full ${
-              isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
-            }`}
-          >
-            {volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
-          </button>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={volume}
-            onChange={handleVolumeChange}
-            className={`w-32 h-2 rounded-lg appearance-none cursor-pointer 
-              ${isDark ? 'bg-gray-600' : 'bg-gray-300'}
-            `}
-            style={{
-              background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(volume / 1) * 100}%, ${isDark ? '#4b5563' : '#d1d5db'} ${(volume / 1) * 100}%, ${isDark ? '#4b5563' : '#d1d5db'} 100%)`,
-            }}
-          />
+        {/* Volume Control and Player Settings */}
+        <div className="flex items-center justify-between px-8">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setVolume(volume > 0 ? 0 : 0.5)}
+              className={`p-2 rounded-full ${
+                isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
+              }`}
+            >
+              {volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
+            </button>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={volume}
+              onChange={handleVolumeChange}
+              className={`w-32 h-2 rounded-lg appearance-none cursor-pointer 
+                ${isDark ? 'bg-gray-600' : 'bg-gray-300'}
+              `}
+              style={{
+                background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(volume / 1) * 100}%, ${isDark ? '#4b5563' : '#d1d5db'} ${(volume / 1) * 100}%, ${isDark ? '#4b5563' : '#d1d5db'} 100%)`,
+              }}
+            />
+          </div>
+          <PlayerControls />
         </div>
       </div>
     </div>

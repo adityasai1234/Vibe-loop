@@ -4,6 +4,7 @@ import { useThemeStore } from '../store/themeStore';
 import { useLikedSongs } from '../context/LikedSongsContext';
 import { Play, Pause, SkipBack, SkipForward, Heart, Loader2 } from 'lucide-react';
 import { Song } from '../store/songsStore';
+import { PlayerControls } from './PlayerControls';
 
 export const MusicPlayer: React.FC = () => {
   const { currentSong, isPlaying, play, pause, duration, currentTime, setVolume, seek, playNext, playPrevious, volume } = useMusicPlayer();
@@ -462,8 +463,9 @@ export const MusicPlayer: React.FC = () => {
           </div>
         </div>
 
-        {/* Right section (Like button) */}
-        <div className="flex items-center w-full sm:w-auto justify-center sm:justify-end">
+        {/* Right section (Like button and Player Controls) */}
+        <div className="flex items-center w-full sm:w-auto justify-center sm:justify-end space-x-2">
+          <PlayerControls />
           <button
             onClick={handleLike}
             className={`p-2 rounded-full transition-colors duration-200 ${
