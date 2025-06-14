@@ -41,10 +41,10 @@ export const useFileUpload = ({
     }
 
     try {
-      // 1. Validate file size
+      //file size
       validateFileSize(file);
 
-      // 2. Check authentication
+      //auth check
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) throw sessionError;
       if (!session) throw new Error('No active session');
@@ -59,7 +59,7 @@ export const useFileUpload = ({
       setError(null);
       setProgress(0);
 
-      // 3. Generate safe filename
+      //filename generate
       const timestamp = Date.now();
       const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
       const filePath = `${timestamp}_${safeFileName}`; // No bucket prefix needed
@@ -72,7 +72,6 @@ export const useFileUpload = ({
         fileName: file.name,
       });
 
-      // 4. Upload to storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from(bucket)
         .upload(filePath, file, {
@@ -90,8 +89,7 @@ export const useFileUpload = ({
       }
 
       console.log('Upload successful:', uploadData);
-
-      // 5. Store metadata via RPC
+//rpc
       const { error: rpcError } = await supabase.rpc('add_media_file', {
         _bucket: bucket,
         _path: uploadData.path,
@@ -102,8 +100,6 @@ export const useFileUpload = ({
         console.error('RPC error:', rpcError);
         throw rpcError;
       }
-
-      // 6. Get public URL
       const publicUrl = getPublicUrl(filePath);
       console.log('Public URL:', publicUrl);
       

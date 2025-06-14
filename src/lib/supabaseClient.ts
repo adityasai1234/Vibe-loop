@@ -4,6 +4,7 @@ import type { Database } from '../types/supabase';
 // Constants
 export const STORAGE_BUCKET = 'media';
 export const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
+export const SIGNED_URL_EXPIRY = 60; // 60 seconds
 
 // Validate environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -77,6 +78,25 @@ export const getPublicUrl = (filePath: string): string => {
     .from(STORAGE_BUCKET)
     .getPublicUrl(filePath);
   return data.publicUrl;
+};
+
+// Helper function to create signed URL
+export const createSignedUrl = async (filePath: string): Promise<string | null> => {
+  try {
+    const { data, error } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .createSignedUrl(filePath, SIGNED_URL_EXPIRY);
+
+    if (error) {
+      console.error('Error creating signed URL:', error);
+      return null;
+    }
+
+    return data.signedUrl;
+  } catch (error) {
+    console.error('Unexpected error creating signed URL:', error);
+    return null;
+  }
 };
 
 // Helper function to check auth status

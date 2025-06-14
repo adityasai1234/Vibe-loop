@@ -1,6 +1,13 @@
 import React, { createContext, useContext, useState, useRef, useEffect, ReactNode, useCallback } from 'react';
 import { Song, useSongsStore } from '../store/songsStore';
 
+// Constants
+const DEFAULT_CROSSFADE_DURATION = 3; // 3 seconds
+const SLEEP_TIMER_PRESETS = [15, 30, 45, 60, 90]; // minutes
+
+// Type for the setupCrossfade function
+type SetupCrossfadeFunction = (nextSong: Song) => Promise<void>;
+
 interface MusicPlayerContextType {
   currentSong: Song | null;
   isPlaying: boolean;
@@ -19,11 +26,30 @@ interface MusicPlayerContextType {
   removeFromQueue: (songId: string) => void;
   clearQueue: () => void;
   setQueue: (newQueue: Song[]) => void;
+
+  // Sleep Timer properties
+  sleepTimer: {
+    isActive: boolean;
+    remainingTime: number;
+    duration: number;
+    start: (minutes: number) => void;
+    cancel: () => void;
+    presets: number[];
+  };
+
+  // Crossfade properties
+  crossfade: {
+    isEnabled: boolean;
+    duration: number;
+    toggle: () => void;
+    setDuration: (seconds: number) => void;
+  };
 }
 
 const MusicPlayerContext = createContext<MusicPlayerContextType | undefined>(undefined);
 
 export function MusicPlayerProvider({ children }: { children: ReactNode }) {
+  // State declarations
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setInternalVolume] = useState(0.5);
@@ -32,23 +58,183 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   const [queue, setQueueState] = useState<Song[]>([]);
   const [currentQueueIndex, setCurrentQueueIndex] = useState(-1);
   const [error, setError] = useState<string | null>(null);
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Sleep Timer state
+  const [sleepTimerActive, setSleepTimerActive] = useState(false);
+  const [sleepTimerDuration, setSleepTimerDuration] = useState(0);
+  const [sleepTimerRemaining, setSleepTimerRemaining] = useState(0);
+  const sleepTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Crossfade state
+  const [crossfadeEnabled, setCrossfadeEnabled] = useState(false);
+  const [crossfadeDuration, setCrossfadeDuration] = useState(DEFAULT_CROSSFADE_DURATION);
+  const [nextAudioContext, setNextAudioContext] = useState<AudioContext | null>(null);
+  const [nextGainNode, setNextGainNode] = useState<GainNode | null>(null);
+  const [currentGainNode, setCurrentGainNode] = useState<GainNode | null>(null);
+  const crossfadeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Declare setupCrossfade type before its usage
+  const setupCrossfadeRef = useRef<SetupCrossfadeFunction | null>(null);
 
   const { songs } = useSongsStore(); // Access songs from the store
 
-  // Define playback functions using useCallback to ensure stability
-  const play = useCallback((song: Song) => {
-    setCurrentSong(song);
-    setIsPlaying(true);
-    if (!queue.some(s => s.id === song.id)) {
-      setQueueState([song]);
-      setCurrentQueueIndex(0);
-    } else {
-      const index = queue.findIndex(s => s.id === song.id);
-      setCurrentQueueIndex(index);
+  // Sleep Timer functions
+  const startSleepTimer = useCallback((minutes: number) => {
+    // Cancel any existing timer
+    if (sleepTimerRef.current) {
+      clearInterval(sleepTimerRef.current);
     }
-  }, [queue]);
 
+    const durationInSeconds = minutes * 60;
+    setSleepTimerDuration(durationInSeconds);
+    setSleepTimerRemaining(durationInSeconds);
+    setSleepTimerActive(true);
+
+    // Update remaining time every second
+    sleepTimerRef.current = setInterval(() => {
+      setSleepTimerRemaining(prev => {
+        if (prev <= 1) {
+          // Timer finished
+          if (sleepTimerRef.current) {
+            clearInterval(sleepTimerRef.current);
+          }
+          setSleepTimerActive(false);
+          pause();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  const cancelSleepTimer = useCallback(() => {
+    if (sleepTimerRef.current) {
+      clearInterval(sleepTimerRef.current);
+    }
+    setSleepTimerActive(false);
+    setSleepTimerRemaining(0);
+    setSleepTimerDuration(0);
+  }, []);
+
+  // Setup crossfade with proper type annotation
+  const setupCrossfade = useCallback<SetupCrossfadeFunction>(async (nextSong: Song) => {
+    const currentAudio = audioRef.current;
+    if (!crossfadeEnabled || !currentAudio) return;
+
+    try {
+      // Create new audio context for next song
+      const newContext = new AudioContext();
+      const newGainNode = newContext.createGain();
+      newGainNode.gain.value = 0; // Start silent
+
+      // Create audio source
+      const response = await fetch(nextSong.url);
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await newContext.decodeAudioData(arrayBuffer);
+      const source = newContext.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(newGainNode);
+      newGainNode.connect(newContext.destination);
+
+      // Store references
+      setNextAudioContext(newContext);
+      setNextGainNode(newGainNode);
+
+      // Start crossfade
+      const currentGain = currentAudio.volume ?? 1;
+      const fadeOutDuration = crossfadeDuration * 1000;
+      const startTime = newContext.currentTime;
+
+      // Fade out current audio
+      if (currentGainNode) {
+        currentGainNode.gain.setValueAtTime(currentGain, startTime);
+        currentGainNode.gain.linearRampToValueAtTime(0, startTime + fadeOutDuration / 1000);
+      }
+
+      // Fade in next audio
+      newGainNode.gain.setValueAtTime(0, startTime);
+      newGainNode.gain.linearRampToValueAtTime(currentGain, startTime + fadeOutDuration / 1000);
+
+      // Start next audio
+      source.start(startTime);
+
+      // Clean up after crossfade
+      crossfadeTimeoutRef.current = setTimeout(() => {
+        if (nextAudioContext) {
+          nextAudioContext.close();
+        }
+        setNextAudioContext(null);
+        setNextGainNode(null);
+      }, fadeOutDuration);
+    } catch (error) {
+      console.error('Crossfade error:', error);
+      // Fallback to normal playback
+      if (setupCrossfadeRef.current) {
+        setupCrossfadeRef.current(nextSong);
+      }
+    }
+  }, [crossfadeEnabled, crossfadeDuration]);
+
+  // Store setupCrossfade in ref to avoid circular dependency
+  useEffect(() => {
+    setupCrossfadeRef.current = setupCrossfade;
+  }, [setupCrossfade]);
+
+  // Define play function with proper type annotation
+  const play = useCallback((song: Song): void => {
+    if (crossfadeEnabled && currentSong && setupCrossfadeRef.current) {
+      setupCrossfadeRef.current(song);
+    } else {
+      setCurrentSong(song);
+      setIsPlaying(true);
+      if (!queue.some(s => s.id === song.id)) {
+        setQueueState([song]);
+        setCurrentQueueIndex(0);
+      } else {
+        const index = queue.findIndex(s => s.id === song.id);
+        setCurrentQueueIndex(index);
+      }
+    }
+  }, [crossfadeEnabled, currentSong, queue]);
+
+  // Update setupCrossfade dependencies to include play
+  useEffect(() => {
+    setupCrossfade.dependencies = [crossfadeEnabled, crossfadeDuration, play];
+  }, [crossfadeEnabled, crossfadeDuration, play]);
+
+  const toggleCrossfade = useCallback(() => {
+    setCrossfadeEnabled(prev => !prev);
+  }, []);
+
+  const updateCrossfadeDuration = useCallback((seconds: number) => {
+    setCrossfadeDuration(Math.max(0, Math.min(10, seconds)));
+  }, []);
+
+  // Cleanup function for crossfade
+  useEffect(() => {
+    return () => {
+      if (crossfadeTimeoutRef.current) {
+        clearTimeout(crossfadeTimeoutRef.current);
+      }
+      if (nextAudioContext) {
+        nextAudioContext.close();
+      }
+    };
+  }, [nextAudioContext]);
+
+  // Cleanup function for sleep timer
+  useEffect(() => {
+    return () => {
+      if (sleepTimerRef.current) {
+        clearInterval(sleepTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Define playback functions using useCallback to ensure stability
   const pause = useCallback(() => {
     setIsPlaying(false);
   }, []);
@@ -227,6 +413,45 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
     }
   }, [volume]);
 
+  // Handle audio element events with proper type checking
+  useEffect(() => {
+    const audioElement = document.querySelector('audio');
+    if (audioElement) {
+      audioRef.current = audioElement;
+      
+      const handleTimeUpdate = () => {
+        const currentAudio = audioRef.current;
+        if (currentAudio && currentAudio.currentTime !== currentTime) {
+          seek(currentAudio.currentTime);
+        }
+        if (isBuffering) {
+          setIsBuffering(false);
+        }
+      };
+
+      const handleError = (e: Event) => {
+        if (e instanceof ErrorEvent) {
+          console.error('Audio error:', e.error);
+        } else {
+          console.error('Audio error:', e);
+        }
+        setError('Error playing audio. Please try again.');
+        setIsLoading(false);
+        setIsBuffering(false);
+      };
+
+      // Add all event listeners
+      audioElement.addEventListener('timeupdate', handleTimeUpdate);
+      audioElement.addEventListener('error', handleError);
+
+      // Cleanup function
+      return () => {
+        audioElement.removeEventListener('timeupdate', handleTimeUpdate);
+        audioElement.removeEventListener('error', handleError);
+      };
+    }
+  }, [currentTime, seek, isPlaying, isBuffering]);
+
   return (
     <MusicPlayerContext.Provider
       value={{
@@ -247,6 +472,24 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
         removeFromQueue,
         clearQueue,
         setQueue: setFullQueue, // Renamed to setQueue in context for clarity
+
+        // Sleep Timer values
+        sleepTimer: {
+          isActive: sleepTimerActive,
+          remainingTime: sleepTimerRemaining,
+          duration: sleepTimerDuration,
+          start: startSleepTimer,
+          cancel: cancelSleepTimer,
+          presets: SLEEP_TIMER_PRESETS
+        },
+
+        // Crossfade values
+        crossfade: {
+          isEnabled: crossfadeEnabled,
+          duration: crossfadeDuration,
+          toggle: toggleCrossfade,
+          setDuration: updateCrossfadeDuration
+        }
       }}
     >
       {children}
