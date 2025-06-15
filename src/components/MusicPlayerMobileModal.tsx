@@ -174,3 +174,5 @@ export const MusicPlayerMobileModal: React.FC<MusicPlayerMobileModalProps> = ({ 
     </div>
   );
 };
+
+export default MusicPlayerMobileModal;

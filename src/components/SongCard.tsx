@@ -80,13 +80,13 @@ export const SongCard: React.FC<SongCardProps> = ({ song, size = 'medium' }) => 
               <Square size={16} />
             </button>
           )}
-          <button 
-            onClick={handlePlay}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-primary-500 hover:bg-primary-600 text-white transition-all"
+        <button 
+          onClick={handlePlay}
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-primary-500 hover:bg-primary-600 text-white transition-all"
             title={isActive && isPlaying ? "Double click to stop" : "Play"}
-          >
-            {isActive && isPlaying ? <Pause size={16} /> : <Play size={16} />}
-          </button>
+        >
+          {isActive && isPlaying ? <Pause size={16} /> : <Play size={16} />}
+        </button>
         </div>
       </div>
     );
@@ -112,13 +112,13 @@ export const SongCard: React.FC<SongCardProps> = ({ song, size = 'medium' }) => 
                 <Square size={24} />
               </button>
             )}
-            <button 
-              onClick={handlePlay}
+          <button 
+            onClick={handlePlay}
               className="w-12 h-12 flex items-center justify-center rounded-full bg-primary-500 hover:bg-primary-600 text-white transition-all transform hover:scale-105"
               title={isActive && isPlaying ? "Double click to stop" : "Play"}
-            >
+          >
               {isActive && isPlaying ? <Pause size={24} /> : <Play size={24} />}
-            </button>
+          </button>
           </div>
         </div>
       </div>

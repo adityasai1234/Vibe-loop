@@ -15,6 +15,9 @@ export const SearchBar: React.FC = () => {
       navigate('/discover');
     }
   };
+  if (!searchQuery) {
+    return null;
+  }
 
   return (
     <form onSubmit={handleSearch} className="w-full">
@@ -39,3 +42,4 @@ export const SearchBar: React.FC = () => {
     </form>
   );
 };
+// usage in HomePage 

@@ -1,134 +1,74 @@
-import { useState, useCallback } from 'react';
-import { supabase, getPublicUrl, validateFileSize } from '../lib/supabaseClient';
-import type { StorageError } from '@supabase/storage-js';
+import { useState, ChangeEvent } from 'react';
+import { supabase } from '../lib/supabaseClient';
 
-interface UseFileUploadOptions {
-  bucket?: string;
-  onSuccess?: (url: string, filePath: string) => void;
-  onError?: (error: Error) => void;
-}
+const BUCKET = 'media';               // storage bucket
+const ALLOWED = ['audio/mpeg', 'audio/mp3', 'video/mp4'];
+const MAX_MB  = 100;                  // 100 MB
 
-interface UploadProgress {
-  loaded: number;
-  total: number;
-}
+type UploadState =
+  | { phase: 'idle' }
+  | { phase: 'uploading'; pct: number }
+  | { phase: 'done'; url: string }
+  | { phase: 'error'; msg: string };
 
-interface UseFileUploadReturn {
-  file: File | null;
-  setFile: (file: File | null) => void;
-  upload: () => Promise<void>;
-  progress: number;
-  url: string | null;
-  error: Error | null;
-  uploading: boolean;
-}
+export function useFileUpload() {
+  const [state, setState] = useState<UploadState>({ phase: 'idle' });
 
-export const useFileUpload = ({
-  bucket = 'media',
-  onSuccess,
-  onError,
-}: UseFileUploadOptions = {}): UseFileUploadReturn => {
-  const [file, setFile] = useState<File | null>(null);
-  const [progress, setProgress] = useState(0);
-  const [url, setUrl] = useState<string | null>(null);
-  const [error, setError] = useState<Error | null>(null);
-  const [uploading, setUploading] = useState(false);
+  async function onChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const upload = useCallback(async () => {
-    if (!file) {
-      setError(new Error('No file selected'));
-      return;
+    /* 0️⃣ basic client-side validation */
+    if (!ALLOWED.includes(file.type)) {
+      return setState({ phase: 'error', msg: 'Only MP3 or MP4 files allowed.' });
+    }
+    if (file.size > MAX_MB * 1_000_000) {
+      return setState({ phase: 'error', msg: `Max ${MAX_MB} MB.` });
     }
 
-    try {
-      //file size
-      validateFileSize(file);
+    const filePath = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
 
-      //auth check
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) throw sessionError;
-      if (!session) throw new Error('No active session');
+    /* 1️⃣ upload bytes to Storage */
+    setState({ phase: 'uploading', pct: 0 });
+    const { data: up, error: upErr } = await supabase
+      .storage
+      .from(BUCKET)
+      .upload(filePath, file, {
+        contentType: file.type,
+        onUploadProgress: (ev: ProgressEvent) => {
+          const pct = Math.round((ev.loaded / (ev.total || 1)) * 100);
+          setState({ phase: 'uploading', pct });
+        }
+      } as any); // Temporarily cast to any to bypass type issues with onUploadProgress
 
-      console.log('Auth check:', {
-        hasSession: !!session,
-        tokenExpiry: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null,
-        isExpired: session.expires_at ? new Date(session.expires_at * 1000) < new Date() : false,
-      });
-
-      setUploading(true);
-      setError(null);
-      setProgress(0);
-
-      //filename generate
-      const timestamp = Date.now();
-      const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      const filePath = `${timestamp}_${safeFileName}`; // No bucket prefix needed
-
-      console.log('Upload attempt:', {
-        bucket,
-        filePath,
-        fileSize: file.size,
-        fileType: file.type,
-        fileName: file.name,
-      });
-
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from(bucket)
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false,
-        });
-
-      if (uploadError) {
-        console.error('Upload error:', {
-          message: uploadError.message,
-          name: uploadError.name,
-          error: uploadError,
-        });
-        throw uploadError;
-      }
-
-      console.log('Upload successful:', uploadData);
-//rpc
-      const { error: rpcError } = await supabase.rpc('add_media_file', {
-        _bucket: bucket,
-        _path: uploadData.path,
-        _file_name: file.name
-      });
-
-      if (rpcError) {
-        console.error('RPC error:', rpcError);
-        throw rpcError;
-      }
-      const publicUrl = getPublicUrl(filePath);
-      console.log('Public URL:', publicUrl);
-      
-      setUrl(publicUrl);
-      onSuccess?.(publicUrl, filePath);
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Upload failed');
-      console.error('Upload failed:', {
-        error,
-        file: file ? {
-          name: file.name,
-          size: file.size,
-          type: file.type,
-        } : null,
-      });
-      setError(error);
-      onError?.(error);
-    } finally {
-      setUploading(false);
+    if (upErr) {
+      return setState({ phase: 'error', msg: upErr.message });
     }
-  }, [file, bucket, onSuccess, onError]);
 
-  return {
-    file,
-    setFile,
-    upload,
-    progress,
-    url,
-    error,
-    uploading,
-  };
-}; 
+    /* 2️⃣ insert metadata row (owner_id nullable for anon) */
+    const { error: insertErr } = await supabase
+      .from('media_files')
+      .insert({
+        owner_id: (await supabase.auth.getSession()).data?.session?.user?.id ?? null,
+        bucket:    BUCKET,
+        path:      filePath,
+        file_name: file.name,
+        size_bytes: file.size,
+        inserted_at: new Date().toISOString()
+      });
+
+    if (insertErr) {
+      return setState({ phase: 'error', msg: insertErr.message });
+    }
+
+    /* 3️⃣ get public URL for playback */
+    const { data: pub } = supabase
+      .storage
+      .from(BUCKET)
+      .getPublicUrl(filePath);
+
+    setState({ phase: 'done', url: pub.publicUrl });
+  }
+
+  return { state, onChange };
+} 

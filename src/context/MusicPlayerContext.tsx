@@ -188,15 +188,15 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
     if (crossfadeEnabled && currentSong && setupCrossfadeRef.current) {
       setupCrossfadeRef.current(song);
     } else {
-      setCurrentSong(song);
-      setIsPlaying(true);
-      if (!queue.some(s => s.id === song.id)) {
-        setQueueState([song]);
-        setCurrentQueueIndex(0);
-      } else {
-        const index = queue.findIndex(s => s.id === song.id);
-        setCurrentQueueIndex(index);
-      }
+    setCurrentSong(song);
+    setIsPlaying(true);
+    if (!queue.some(s => s.id === song.id)) {
+      setQueueState([song]);
+      setCurrentQueueIndex(0);
+    } else {
+      const index = queue.findIndex(s => s.id === song.id);
+      setCurrentQueueIndex(index);
+    }
     }
   }, [crossfadeEnabled, currentSong, queue]);
 
@@ -375,18 +375,18 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
           setError(null);
           
           // Set new source
-          if (audioRef.current.src !== currentSong.url) {
-            audioRef.current.src = currentSong.url;
+      if (audioRef.current.src !== currentSong.url) {
+        audioRef.current.src = currentSong.url;
             
             // Load metadata first
             await audioRef.current.load();
             
             // Check if the audio is actually playable
             if (audioRef.current.readyState >= 2) { // HAVE_CURRENT_DATA
-              if (isPlaying) {
+      if (isPlaying) {
                 await audioRef.current.play();
               }
-            } else {
+      } else {
               throw new Error('Audio not ready for playback');
             }
           } else if (isPlaying) {
@@ -396,7 +396,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
           console.error('Error during audio playback:', err);
           setError(err instanceof Error ? err.message : 'Failed to play audio');
           setIsPlaying(false);
-        }
+      }
       };
 
       loadAndPlay();

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { Playlist } from '../types';
 
 export interface Song {
   id: string;
@@ -16,12 +17,7 @@ export interface Song {
 
 interface SongsState {
   songs: Song[];
-  playlists: {
-    id: string;
-    name: string;
-    coverUrl: string;
-    songs: string[];
-  }[];
+  playlists: Playlist[];
   recentlyPlayed: string[];
   likedSongs: string[];
   addToPlaylist: (playlistId: string, songId: string) => void;
@@ -93,18 +89,22 @@ const sampleSongs: Song[] = [
   },
 ];
 
-const samplePlaylists = [
+const samplePlaylists: Playlist[] = [
   {
     id: '1',
-    name: 'Rock Classics',
-    coverUrl: 'https://i.scdn.co/image/ab67616d0000b273e8b066f70c206551210d902b',
+    title: 'Rock Classics',
+    coverArt: 'https://i.scdn.co/image/ab67616d0000b273e8b066f70c206551210d902b',
     songs: ['1', '3'],
+    createdBy: '1',
+    likes: 0
   },
   {
     id: '2',
-    name: 'Pop Hits',
-    coverUrl: 'https://i.scdn.co/image/ab67616d0000b2732e8ed79e177ff6011076f5f5',
+    title: 'Pop Hits',
+    coverArt: 'https://i.scdn.co/image/ab67616d0000b2732e8ed79e177ff6011076f5f5',
     songs: ['2', '4', '5'],
+    createdBy: '1',
+    likes: 0
   },
 ];
 

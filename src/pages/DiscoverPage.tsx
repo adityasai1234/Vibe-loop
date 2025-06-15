@@ -15,7 +15,7 @@ export const DiscoverPage: React.FC = () => {
           <Logo />
           <h1 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
             Discover Media
-          </h1>
+        </h1>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             Explore music and videos from the community
           </p>
@@ -27,7 +27,7 @@ export const DiscoverPage: React.FC = () => {
           onError={handleError}
           className="mt-8"
         />
-      </div>
+        </div>
     </div>
   );
 };

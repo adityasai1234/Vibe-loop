@@ -1,7 +1,6 @@
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { Upload, X, Music, Video, AlertCircle } from 'lucide-react';
 import { useFileUpload } from '../hooks/useFileUpload';
-import { MAX_FILE_SIZE } from '../lib/supabaseClient';
 
 // Helper function to format file size for display
 const formatFileSize = (bytes: number): string => {
@@ -14,60 +13,35 @@ const formatFileSize = (bytes: number): string => {
 
 interface FileUploadProps {
   onUploadComplete?: (url: string, filePath: string) => void;
-  acceptedFileTypes?: string[];
-  maxFileSize?: number;
   className?: string;
 }
 
 export const FileUpload: React.FC<FileUploadProps> = ({
   onUploadComplete,
-  acceptedFileTypes = ['audio/mpeg', 'audio/mp3', 'video/mp4'],
-  maxFileSize = MAX_FILE_SIZE,
   className = '',
 }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [validationError, setValidationError] = useState<string | null>(null);
-  const {
-    file,
-    setFile,
-    upload,
-    progress,
-    url,
-    error,
-    uploading,
-  } = useFileUpload({
-    onSuccess: async (publicUrl, filePath) => {
-      if (!file) return;
-      onUploadComplete?.(publicUrl, filePath);
-    },
-  });
+  const [localFile, setLocalFile] = useState<File | null>(null); // To store file for display
+  const { state, onChange: handleFileUploadChange } = useFileUpload();
 
-  const validateAndSetFile = useCallback((newFile: File | null) => {
-    setValidationError(null);
-    
-    if (!newFile) {
-      setFile(null);
-      return;
+  // Handle the onUploadComplete prop when the hook's state is 'done'
+  useEffect(() => {
+    if (state.phase === 'done' && onUploadComplete) {
+      // Note: The new useFileUpload hook does not return filePath directly.
+      // We are passing localFile?.name as a placeholder. Review if actual filePath is needed.
+      onUploadComplete(state.url, localFile?.name || '');
     }
+  }, [state, onUploadComplete, localFile]);
 
-    // Validate file type
-    const isValidType = acceptedFileTypes.includes(newFile.type);
-    
-    if (!isValidType) {
-      setValidationError(`File type not supported. Please upload ${acceptedFileTypes
-        .map(type => type.split('/')[1].toUpperCase())
-        .join(' or ')} files.`);
-      return;
+  const handleSelectAndUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLocalFile(file); // Store file for display
+      handleFileUploadChange(e); // Pass the event directly to the hook
+    } else {
+      setLocalFile(null); // Clear file if selection is cancelled
     }
-
-    // Validate file size
-    if (newFile.size > maxFileSize) {
-      setValidationError(`File size exceeds ${formatFileSize(maxFileSize)} limit.`);
-      return;
-    }
-
-    setFile(newFile);
-  }, [setFile, acceptedFileTypes, maxFileSize]);
+  }, [handleFileUploadChange]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -84,25 +58,29 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     setIsDragging(false);
     const droppedFile = e.dataTransfer.files[0];
     if (droppedFile) {
-      validateAndSetFile(droppedFile);
+      // Create a synthetic ChangeEvent to pass to the hook's onChange
+      const syntheticEvent = {
+        target: { files: [droppedFile] },
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
+      setLocalFile(droppedFile); // Store file for display
+      handleFileUploadChange(syntheticEvent);
+    } else {
+      setLocalFile(null);
     }
-  }, [validateAndSetFile]);
-
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      validateAndSetFile(selectedFile);
-    }
-  }, [validateAndSetFile]);
+  }, [handleFileUploadChange]);
 
   const handleRemoveFile = useCallback(() => {
-    setFile(null);
-    setValidationError(null);
-  }, [setFile]);
+    setLocalFile(null);
+    // The useFileUpload hook does not provide a reset function for its internal state.
+    // If a complete reset of the upload process is needed, the hook would require a reset method.
+  }, []);
 
-  const isAudio = file?.type.startsWith('audio/');
-  const isVideo = file?.type.startsWith('video/');
-  const errorMessage = validationError || error?.message;
+  const isAudio = localFile?.type?.startsWith('audio/');
+  const isVideo = localFile?.type?.startsWith('video/');
+  const displayErrorMessage = state.phase === 'error' ? state.msg : null;
+
+  const ALL_ALLOWED_TYPES = ['audio/mpeg', 'audio/mp3', 'video/mp4']; // From useFileUpload
+  const MAX_FILE_SIZE_MB = 100; // From useFileUpload
 
   return (
     <div className={`w-full max-w-xl mx-auto ${className}`}>
@@ -110,7 +88,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         className={`
           relative border-2 border-dashed rounded-lg p-6
           ${isDragging ? 'border-accent-500 bg-accent-50 dark:bg-accent-900/20' : 'border-gray-300 dark:border-gray-700'}
-          ${errorMessage ? 'border-red-500 dark:border-red-400' : ''}
+          ${displayErrorMessage ? 'border-red-500 dark:border-red-400' : ''}
           transition-colors duration-200
         `}
         onDragOver={handleDragOver}
@@ -119,14 +97,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       >
         <input
           type="file"
-          accept={acceptedFileTypes.join(',')}
-          onChange={handleFileSelect}
+          accept={ALL_ALLOWED_TYPES.join(',')}
+          onChange={handleSelectAndUpload}
           className="hidden"
           id="file-upload"
-          disabled={uploading}
+          disabled={state.phase === 'uploading'}
         />
         
-        {!file ? (
+        {state.phase === 'idle' && !localFile ? (
           <label
             htmlFor="file-upload"
             className="flex flex-col items-center justify-center cursor-pointer"
@@ -137,91 +115,83 @@ export const FileUpload: React.FC<FileUploadProps> = ({
               <span className="text-accent-500 font-medium">browse</span>
             </p>
             <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-              Supported formats: {acceptedFileTypes.map(type => type.split('/')[1].toUpperCase()).join(', ')} (max {formatFileSize(maxFileSize)})
+              Supported formats: {ALL_ALLOWED_TYPES.map(type => type.split('/')[1].toUpperCase()).join(', ')} (max {MAX_FILE_SIZE_MB} MB)
             </p>
           </label>
         ) : (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                {isAudio ? (
-                  <Music className="w-8 h-8 text-accent-500" />
-                ) : (
-                  <Video className="w-8 h-8 text-accent-500" />
-                )}
-                <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {file.name}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {formatFileSize(file.size)}
-                  </p>
+            {localFile && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  {isAudio ? (
+                    <Music className="w-8 h-8 text-accent-500" />
+                  ) : (
+                    <Video className="w-8 h-8 text-accent-500" />
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      {localFile.name}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {formatFileSize(localFile.size)}
+                    </p>
+                  </div>
                 </div>
+                {state.phase !== 'uploading' && (
+                  <button
+                    onClick={handleRemoveFile}
+                    className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
+                    aria-label="Remove file"
+                  >
+                    <X className="w-5 h-5 text-gray-500" />
+                  </button>
+                )}
               </div>
-              {!uploading && (
-                <button
-                  onClick={handleRemoveFile}
-                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
-                  aria-label="Remove file"
-                >
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
-              )}
-            </div>
+            )}
 
-            {uploading && (
+            {state.phase === 'uploading' && (
               <div className="space-y-2">
                 <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-accent-500 transition-all duration-300"
-                    style={{ width: `${progress}%` }}
+                    style={{ width: `${state.pct}%` }}
                   />
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                  Uploading... {Math.round(progress)}%
+                  Uploading... {Math.round(state.pct)}%
                 </p>
               </div>
             )}
 
-            {!uploading && !url && (
-              <button
-                onClick={upload}
-                disabled={!!validationError}
-                className={`
-                  w-full py-2 px-4 rounded-lg font-medium
-                  transition-colors duration-200
-                  ${validationError
-                    ? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed'
-                    : 'bg-accent-500 hover:bg-accent-600 text-white'
-                  }
-                `}
-              >
-                Upload File
-              </button>
-            )}
-
-            {url && (
+            {state.phase === 'done' && (
               <div className="text-center">
                 <p className="text-sm text-green-600 dark:text-green-400 mb-2">
                   Upload complete!
                 </p>
                 {isAudio ? (
                   <audio controls className="w-full">
-                    <source src={url} type={file.type} />
+                    <source src={state.url} type={localFile?.type} />
                     Your browser does not support the audio element.
                   </audio>
                 ) : (
                   <video controls className="w-full rounded-lg">
-                    <source src={url} type={file.type} />
+                    <source src={state.url} type={localFile?.type} />
                     Your browser does not support the video element.
                   </video>
                 )}
+                <button
+                  onClick={handleRemoveFile}
+                  className="mt-4 py-2 px-4 rounded-lg font-medium bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200"
+                >
+                  Upload Another File
+                </button>
               </div>
             )}
 
-            {errorMessage && (
-              <p className="text-sm text-red-500 dark:text-red-400 text-center">
-                {errorMessage}
+            {displayErrorMessage && (
+              <p className="text-sm text-red-500 dark:text-red-400 text-center flex items-center justify-center">
+                <AlertCircle size={16} className="mr-1" />
+                {displayErrorMessage}
               </p>
             )}
           </div>

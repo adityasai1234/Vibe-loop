@@ -259,9 +259,9 @@ export const MusicPlayer: React.FC = () => {
         {/* Song Info */}
         <div className="flex items-center space-x-3 w-full sm:w-auto">
           <div className="relative">
-            <img
-              src={currentSong.coverUrl}
-              alt={currentSong.title}
+          <img
+            src={currentSong.coverUrl}
+            alt={currentSong.title}
               className={`w-12 h-12 rounded-md shadow-md transition-opacity duration-200 ${
                 isBuffering ? 'opacity-50' : 'opacity-100'
               }`}
@@ -415,12 +415,12 @@ export const MusicPlayer: React.FC = () => {
               )}
               
               {/* Seek input (hidden but accessible) */}
-              <input
-                type="range"
-                min="0"
-                max={duration}
-                value={currentTime}
-                onChange={handleSeek}
+            <input
+              type="range"
+              min="0"
+              max={duration}
+              value={currentTime}
+              onChange={handleSeek}
                 disabled={isLoading}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 style={{ 
