@@ -1,15 +1,29 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useSongsStore, Song } from '../store/songsStore';
+import { usePlaylistStore } from '../store/playlistStore';
 import { useThemeStore } from '../store/themeStore';
-import { Play, Pause, Heart, Clock } from 'lucide-react';
+import { Play, Pause, Heart, Clock, MoreVertical, Share2, Edit2, Trash2, Share } from 'lucide-react';
 import { useMusicPlayer } from '../context/MusicPlayerContext';
+import { PlaylistModal } from '../components/PlaylistModal';
+import { SharePlaylistModal } from '../components/SharePlaylistModal';
+import { DroppablePlaylist } from '../components/DroppablePlaylist';
+import { Playlist } from '../types';
 
 export const PlaylistPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { playlists, songs, likedSongs, toggleLike, addToRecentlyPlayed } = useSongsStore();
+  const { deletePlaylist } = usePlaylistStore();
   const { isDark } = useThemeStore();
   const { currentSong, isPlaying, play, pause } = useMusicPlayer();
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
 
   const playlist = playlists.find((p) => p.id === id);
 
@@ -17,6 +31,20 @@ export const PlaylistPage: React.FC = () => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  };
+
+  const handleMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMenuPosition({ x: rect.left, y: rect.bottom });
+    setIsMenuOpen(true);
+  };
+
+  const handleDeletePlaylist = () => {
+    if (window.confirm('Are you sure you want to delete this playlist?')) {
+      deletePlaylist(id!);
+      navigate('/');
+    }
   };
 
   if (!playlist) {
@@ -42,78 +70,134 @@ export const PlaylistPage: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen p-8 pt-20 ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-gray-900'}`}>
-      <div className="max-w-7xl mx-auto">
-        {/* Playlist Header */}
-        <div className={`flex flex-col md:flex-row items-center md:items-end gap-6 mb-8 p-6 rounded-lg ${
-          isDark ? 'bg-gray-800' : 'bg-white'
-        } shadow-lg`}>
-          <img
-            src={playlist.coverUrl}
-            alt={playlist.name}
-            className="w-32 h-32 md:w-48 md:h-48 rounded-lg shadow-md object-cover"
-          />
-          <div className="text-center md:text-left">
-            <p className="text-sm text-gray-500 font-semibold mb-1">Playlist</p>
-            <h1 className="text-4xl md:text-6xl font-bold mb-2">{playlist.name}</h1>
-            <p className="text-lg text-gray-500">{playlistSongs.length} songs</p>
-          </div>
-        </div>
+    <DndProvider backend={HTML5Backend}>
+      <div className={`min-h-screen p-8 pt-20 ${isDark ? 'bg-black text-white' : 'bg-gray-50 text-gray-900'}`}>
+        <div className="max-w-7xl mx-auto">
+          {/* Playlist Header */}
+          <div className={`flex flex-col md:flex-row items-center md:items-end gap-6 mb-8 p-6 rounded-lg ${
+            isDark ? 'bg-gray-800' : 'bg-white'
+          } shadow-lg relative`}>
+            <img
+              src={playlist.coverArt}
+              alt={playlist.title}
+              className="w-32 h-32 md:w-48 md:h-48 rounded-lg shadow-md object-cover"
+            />
+            <div className="text-center md:text-left flex-1">
+              <p className="text-sm text-gray-500 font-semibold mb-1">Playlist</p>
+              <h1 className="text-4xl md:text-6xl font-bold mb-2">{playlist.title}</h1>
+              <p className="text-lg text-gray-500">{playlistSongs.length} songs</p>
+            </div>
 
-        {/* Song List */}
-        <div className={`overflow-x-auto rounded-lg shadow-md ${
-          isDark ? 'bg-gray-800' : 'bg-white'
-        }`}>
-          <table className="min-w-full divide-y divide-gray-700">
-            <thead className={`${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}>
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Album</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell"><Clock size={16} /></th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-700">
-              {playlistSongs.map((song, index) => (
-                <tr
-                  key={song.id}
-                  className={`hover:${isDark ? 'bg-gray-700' : 'bg-gray-50'} transition-colors duration-200 cursor-pointer ${
-                    currentSong?.id === song.id ? (isDark ? 'bg-blue-900 bg-opacity-20' : 'bg-blue-100 bg-opacity-50') : ''
+            {/* Playlist Actions */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setIsShareModalOpen(true)}
+                className={`p-2 rounded-full ${
+                  isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
+                }`}
+                title="Share playlist"
+              >
+                <Share2 size={20} />
+              </button>
+              <div className="relative">
+                <button
+                  onClick={handleMenuClick}
+                  className={`p-2 rounded-full ${
+                    isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
                   }`}
-                  onClick={() => handleSongPlay(song)}
+                  title="More options"
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">{index + 1}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <img src={song.coverUrl} alt={song.title} className="w-10 h-10 rounded-md object-cover mr-4" />
-                      <div className="flex flex-col">
-                        <div className="text-sm font-medium text-white">{song.title}</div>
-                        <div className="text-sm text-gray-500">{song.artist}</div>
+                  <MoreVertical size={20} />
+                </button>
+
+                {isMenuOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setIsMenuOpen(false)}
+                    />
+                    <div
+                      className={`absolute z-50 mt-2 w-48 rounded-md shadow-lg ${
+                        isDark ? 'bg-gray-800' : 'bg-white'
+                      } ring-1 ring-black ring-opacity-5`}
+                      style={{
+                        top: menuPosition.y,
+                        left: menuPosition.x,
+                        transform: 'translateX(-100%)',
+                      }}
+                    >
+                      <div className="py-1">
+                        <button
+                          onClick={() => {
+                            setIsEditModalOpen(true);
+                            setIsMenuOpen(false);
+                          }}
+                          className={`flex items-center w-full px-4 py-2 text-sm ${
+                            isDark
+                              ? 'text-gray-300 hover:bg-gray-700'
+                              : 'text-gray-700 hover:bg-gray-100'
+                          }`}
+                        >
+                          <Edit2 size={16} className="mr-3" />
+                          Edit Playlist
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsShareModalOpen(true);
+                            setIsMenuOpen(false);
+                          }}
+                          className={`flex items-center w-full px-4 py-2 text-sm ${
+                            isDark
+                              ? 'text-gray-300 hover:bg-gray-700'
+                              : 'text-gray-700 hover:bg-gray-100'
+                          }`}
+                        >
+                          <Share size={16} className="mr-3" />
+                          Share
+                        </button>
+                        <button
+                          onClick={() => {
+                            handleDeletePlaylist();
+                            setIsMenuOpen(false);
+                          }}
+                          className={`flex items-center w-full px-4 py-2 text-sm text-red-500 hover:bg-red-50`}
+                        >
+                          <Trash2 size={16} className="mr-3" />
+                          Delete Playlist
+                        </button>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">{song.album}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">{formatDuration(song.duration)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation(); // Prevent row click from triggering twice
-                        toggleLike(song.id);
-                      }}
-                      className={`p-2 rounded-full ${
-                        isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
-                      } ${likedSongs.includes(song.id) ? 'text-red-500' : ''}`}
-                    >
-                      <Heart size={20} fill={likedSongs.includes(song.id) ? 'currentColor' : 'none'} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Song List */}
+          <DroppablePlaylist
+            playlistId={playlist.id}
+            songs={playlistSongs}
+            currentSongId={currentSong?.id || null}
+            isPlaying={isPlaying}
+            likedSongs={likedSongs}
+            onSongPlay={handleSongPlay}
+            onSongLike={toggleLike}
+            formatDuration={formatDuration}
+          />
         </div>
+
+        {/* Modals */}
+        <PlaylistModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          playlist={playlist}
+        />
+        <SharePlaylistModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          playlist={playlist}
+        />
       </div>
-    </div>
+    </DndProvider>
   );
 }; 

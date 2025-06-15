@@ -55,7 +55,7 @@ const router = createBrowserRouter(
 
 export function App() {
   return (
-    <AuthProvider>
+      <AuthProvider>
       <ThemeProvider>
         <SearchProvider>
           <LikedSongsProvider>
@@ -65,7 +65,7 @@ export function App() {
           </LikedSongsProvider>
         </SearchProvider>
       </ThemeProvider>
-    </AuthProvider>
+      </AuthProvider>
   );
 }
 
