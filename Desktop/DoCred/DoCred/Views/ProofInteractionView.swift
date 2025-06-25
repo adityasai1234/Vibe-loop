@@ -121,4 +121,3 @@ struct ProofInteractionView: View {
         }
     }
 } 
-if(User)\₹

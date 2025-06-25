@@ -1,8 +1,7 @@
 import SwiftUI
 
 struct ProfileView: View {
-    // Mock user and completed tasks
-    let user = User(id: "demoUser1", name: "Alex Johnson", email: "alex@example.com", credibilityScore: 120, teamId: nil, badges: ["Starter", "Reliable"], role: .member)
+        let user = User(id: "demoUser1", name: "Alex Johnson", email: "alex@example.com", credibilityScore: 120, teamId: nil, badges: ["Starter", "Reliable"], role: .member)
     let completedTasks: [Task] = [
         Task(id: "task1", title: "Take out trash", description: "Take out the trash before 8pm", status: .approved, proof: [], createdAt: Date().addingTimeInterval(-86400 * 2), updatedAt: nil, assignedTo: "demoUser1", reviewedBy: nil, score: 10, teamId: nil),
         Task(id: "task2", title: "Wash dishes", description: "Wash all dishes after dinner", status: .approved, proof: [], createdAt: Date().addingTimeInterval(-86400 * 1), updatedAt: nil, assignedTo: "demoUser1", reviewedBy: nil, score: 8, teamId: nil)
