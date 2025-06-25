@@ -12,9 +12,8 @@ struct LeaderboardView: View {
             }
             .pickerStyle(.segmented)
             .padding()
-            // List of leaderboard entries goes here
             Spacer()
         }
         .navigationTitle("Leaderboard")
     }
-} 
+}

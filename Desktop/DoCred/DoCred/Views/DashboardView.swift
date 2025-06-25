@@ -24,10 +24,11 @@ struct DashboardView: View {
                     .background(Color.accentColor)
                     .foregroundColor(.white)
                     .cornerRadius(8)
+                    .cornerRadius(8)
             }
         }
         .padding()
         .navigationTitle("Dashboard")
         .navigationBarTitleDisplayMode(.large)
     }
-} 
+}

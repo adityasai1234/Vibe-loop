@@ -52,4 +52,4 @@ struct FairnessVotingView: View {
         }
         .padding()
     }
-} 
+}

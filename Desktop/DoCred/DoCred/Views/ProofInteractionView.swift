@@ -120,4 +120,4 @@ struct ProofInteractionView: View {
             return String(userId.prefix(2)).uppercased()
         }
     }
-} 
+}

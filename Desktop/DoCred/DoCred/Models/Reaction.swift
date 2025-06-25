@@ -5,4 +5,4 @@ struct Reaction: Identifiable, Codable {
     var userId: String
     var proofId: String
     var emoji: String // e.g., "👍"
-} 
+}

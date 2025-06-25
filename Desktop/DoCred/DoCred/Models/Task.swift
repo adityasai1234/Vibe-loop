@@ -16,4 +16,4 @@ struct Task: Identifiable, Codable {
 
 enum TaskStatus: String, Codable {
     case pending, reviewed, approved
-} 
+}

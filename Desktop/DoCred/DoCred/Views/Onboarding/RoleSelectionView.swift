@@ -17,4 +17,4 @@ struct RoleSelectionView: View {
         }
         .padding()
     }
-} 
+}

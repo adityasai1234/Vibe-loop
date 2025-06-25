@@ -17,6 +17,7 @@ struct BottomNavBarView: View {
             Spacer()
         }
         .font(.title2)
+        .font(.title2)
         .padding(.vertical, 8)
         .background(Color(.systemGray6))
     }
@@ -27,4 +28,4 @@ struct BottomNavBarView: View {
         }
         .accessibilityLabel(Text(icon))
     }
-} 
+}

@@ -18,4 +18,4 @@ struct CredScoreProgressBar: View {
         }
         .padding(.vertical, 4)
     }
-} 
+}

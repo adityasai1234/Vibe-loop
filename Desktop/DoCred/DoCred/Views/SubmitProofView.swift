@@ -14,4 +14,4 @@ struct SubmitProofView: View {
         }
         .navigationTitle("Submit Proof")
     }
-} 
+}
