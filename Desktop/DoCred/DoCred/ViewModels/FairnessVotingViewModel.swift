@@ -6,7 +6,7 @@ class FairnessVotingViewModel: ObservableObject {
     @Published var isVotingActive: Bool = false
     @Published var votingEndsAt: Date?
     let choreId: String
-    let userIds: [String] // all users in group
+    let userIds: [String]
 
     init(choreId: String, userIds: [String]) {
         self.choreId = choreId
@@ -15,8 +15,8 @@ class FairnessVotingViewModel: ObservableObject {
 
     func startVoting(reason: String?) {
         isVotingActive = true
-        votingEndsAt = Date().addingTimeInterval(3600) // 1 hour
-        // Optionally store reason for audit
+        votingEndsAt = Date().addingTimeInterval(3600)
+
     }
 
     func castVote(userId: String, vote: Bool, reason: String? = nil) {
@@ -29,6 +29,7 @@ class FairnessVotingViewModel: ObservableObject {
     var totalVotes: Int { votes.count }
     var majorityReached: Bool { totalVotes > userIds.count / 2 }
     var votingResult: String? {
+    }
         guard majorityReached else { return nil }
         return reassignVotes > keepVotes ? "reassign" : "keep"
     }

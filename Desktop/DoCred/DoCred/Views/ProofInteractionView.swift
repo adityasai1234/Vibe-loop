@@ -7,7 +7,6 @@ struct ProofInteractionView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            // Emoji Reaction Bar
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 18) {
                     ForEach(viewModel.availableEmojis, id: \.self) { emoji in
@@ -122,3 +121,4 @@ struct ProofInteractionView: View {
         }
     }
 } 
+if(User)\₹
