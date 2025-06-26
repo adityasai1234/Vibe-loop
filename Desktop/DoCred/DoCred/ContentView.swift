@@ -9,50 +9,135 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
+    @State private var selectedTab = 0
+    @EnvironmentObject private var themeManager: ThemeManager
+    @State private var showingSubmitSheet = false
+    @State private var showingThemeToggle = false
+    
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+        ZStack {
+            // Main tab view
+            TabView(selection: $selectedTab) {
+                NavigationView {
+                    DashboardView()
+                }
+                .tabItem {
+                    Image(systemName: "house.fill")
+                    Text("Home")
+                }
+                .tag(0)
+                
+                NavigationView {
+                    FullCalendarView()
+                }
+                .tabItem {
+                    Image(systemName: "calendar")
+                    Text("Calendar")
+                }
+                .tag(1)
+                
+                NavigationView {
+                    LeaderboardView()
+                }
+                .tabItem {
+                    Image(systemName: "trophy.fill")
+                    Text("Leaderboard")
+                }
+                .tag(2)
+                
+                // Submit tab - just a placeholder
+                Color.clear
+                    .tabItem {
+                        Image(systemName: "plus.circle.fill")
+                        Text("Submit")
                     }
+                    .tag(3)
+                
+                NavigationView {
+                    HistoryView()
                 }
-                .onDelete(perform: deleteItems)
+                .tabItem {
+                    Image(systemName: "clock.fill")
+                    Text("History")
+                }
+                .tag(4)
+                
+                NavigationView {
+                    ProfileView()
+                }
+                .tabItem {
+                    Image(systemName: "person.fill")
+                    Text("Profile")
+                }
+                .tag(5)
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+            .accentColor(themeManager.customAccentColor)
+            .onChange(of: selectedTab) { newValue in
+                if newValue == 3 {
+                    // Reset to home tab and show submit sheet
+                    selectedTab = 0
+                    showingSubmitSheet = true
                 }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+            }
+            
+            // Floating Action Button (FAB)
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        HapticManager.shared.heavyImpact()
+                        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                            showingSubmitSheet = true
+                        }
+                    }) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 60, height: 60)
+                            .background(
+                                Circle()
+                                    .fill(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [
+                                                themeManager.customAccentColor,
+                                                themeManager.customAccentColor.opacity(0.8)
+                                            ]),
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .shadow(
+                                        color: themeManager.customAccentColor.opacity(0.4),
+                                        radius: 12,
+                                        x: 0,
+                                        y: 6
+                                    )
+                            )
                     }
+                    .padding(.bottom, 32)
+                    .padding(.trailing, 24)
                 }
             }
-        } detail: {
-            Text("Select an item")
         }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+        .sheet(isPresented: $showingSubmitSheet) {
+            NavigationView {
+                SubmitProofView(task: Task(
+                    id: "demoTask",
+                    title: "Demo Task",
+                    description: "This is a demo task for proof submission.",
+                    status: .pending,
+                    proof: [],
+                    createdAt: Date(),
+                    updatedAt: nil,
+                    assignedTo: "demoUserId",
+                    reviewedBy: nil,
+                    score: 5,
+                    teamId: nil
+                ))
             }
         }
+        .preferredColorScheme(themeManager.isDarkMode ? .dark : .light)
     }
 }
 

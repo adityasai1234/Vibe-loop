@@ -42,4 +42,4 @@ class ProofInteractionViewModel: ObservableObject {
     var filteredComments: [Comment] {
         comments.filter { $0.proofId == proofId }
     }
-} 
+}

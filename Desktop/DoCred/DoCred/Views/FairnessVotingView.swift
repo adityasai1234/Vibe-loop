@@ -28,14 +28,14 @@ struct FairnessVotingView: View {
                 Text("Voting: Is this task fair?")
                     .font(.headline)
                 HStack {
-                    Button(action: { userVote = false; viewModel.castVote(userId: "currentUserId", vote: false) }) {
+                    Button(action: { userVote = false; viewModel.castVote(vote: false) }) {
                         Text("✅ Keep as is (\(viewModel.keepVotes))")
                     }
-                    .disabled(userVote != nil)
-                    Button(action: { userVote = true; viewModel.castVote(userId: "currentUserId", vote: true) }) {
+                    .disabled(viewModel.hasVoted)
+                    Button(action: { userVote = true; viewModel.castVote(vote: true) }) {
                         Text("🔄 Reassign (\(viewModel.reassignVotes))")
                     }
-                    .disabled(userVote != nil)
+                    .disabled(viewModel.hasVoted)
                 }
                 Text("\(viewModel.totalVotes) of \(viewModel.userIds.count) have voted")
                 if let endsAt = viewModel.votingEndsAt {

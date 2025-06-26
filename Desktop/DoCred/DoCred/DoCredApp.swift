@@ -2,7 +2,7 @@
 //  DoCredApp.swift
 //  DoCred
 //
-//  Created by Aditysai B on 25/06/25.
+//  Created by Aditysai B on 25/06/25.eraser.fill
 //
 
 import SwiftUI
@@ -14,7 +14,8 @@ struct DoCredApp: App {
     
     var body: some Scene {
         WindowGroup {
-            MainTabView()
+            ContentView()
+                .environmentObject(themeManager)
                 .preferredColorScheme(themeManager.isDarkMode ? .dark : .light)
                 .accentColor(themeManager.customAccentColor)
         }
@@ -196,7 +197,7 @@ struct MainTabView: View {
                 }
                 .tag(5)
         }
-        .onChange(of: selectedTab) { newValue in
+        .onChange(of: selectedTab) { oldValue, newValue in
             HapticManager.shared.lightImpact()
         }
     }

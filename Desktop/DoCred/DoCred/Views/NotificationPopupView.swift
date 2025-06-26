@@ -14,4 +14,4 @@ struct NotificationPopupView: View {
         .shadow(radius: 4)
         .padding()
     }
-} 
+}

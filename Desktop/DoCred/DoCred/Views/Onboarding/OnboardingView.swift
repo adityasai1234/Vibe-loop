@@ -11,5 +11,6 @@ struct OnboardingView: View {
                 .buttonStyle(.borderedProminent)
         }
         .padding()
+
     }
 } 

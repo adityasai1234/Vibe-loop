@@ -15,6 +15,7 @@ struct ReviewDetailView: View {
             }
         }
         .padding()
+        .padding(3)
         .navigationTitle("Review Detail")
     }
-} 
+}

@@ -17,4 +17,4 @@ struct FullCalendarView: View {
         }
         .navigationTitle("Calendar")
     }
-} 
+}
