@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useThemeStore } from '../store/themeStore';
 import { useMusicPlayer } from '../context/MusicPlayerContext';
-import { songs } from '../data/songs';
+import { supabase, getPublicUrl } from '../lib/supabaseClient';
 import { Play, Pause, PlusCircle } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
@@ -10,20 +10,57 @@ export const HomePage: React.FC = () => {
   const { isDark } = useThemeStore();
   const { currentSong, isPlaying, play, pause, addToQueue } = useMusicPlayer();
 
-  const handlePlay = (song: typeof songs[0]) => {
-    if (currentSong?.id === song.id) {
-      if (isPlaying) {
-        pause();
-      } else {
-        play(song);
+  const [songs, setSongs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchSongs = async () => {
+      setLoading(true);
+      setError(null);
+      const { data, error } = await supabase
+        .from('media_files')
+        .select('*')
+        .order('inserted_at', { ascending: false });
+      if (error) {
+        setError('Failed to fetch songs');
+        setLoading(false);
+        return;
       }
-    } else {
-      play(song);
-    }
+      setSongs(data || []);
+      setLoading(false);
+    };
+    fetchSongs();
+  }, []);
+
+  const handlePlay = (song: any) => {
+    play({
+      id: song.id,
+      title: song.file_name,
+      artist: song.artist || 'Unknown Artist',
+      album: song.album || 'Unknown Album',
+      coverUrl: song.coverUrl || '',
+      url: getPublicUrl(song.path),
+      duration: song.duration || 0,
+      genre: song.genre || 'Unknown',
+      releaseDate: song.releaseDate || '',
+      mood: song.mood || [],
+    });
   };
 
-  const handleAddToQueue = (song: typeof songs[0]) => {
-    addToQueue(song);
+  const handleAddToQueue = (song: any) => {
+    addToQueue({
+      id: song.id,
+      title: song.file_name,
+      artist: song.artist || 'Unknown Artist',
+      album: song.album || 'Unknown Album',
+      coverUrl: song.coverUrl || '',
+      url: getPublicUrl(song.path),
+      duration: song.duration || 0,
+      genre: song.genre || 'Unknown',
+      releaseDate: song.releaseDate || '',
+      mood: song.mood || [],
+    });
   };
 
   return (
@@ -37,6 +74,9 @@ export const HomePage: React.FC = () => {
         Hello, {user?.email}! Start exploring music that matches your mood.
       </p>
 
+      {loading && <div>Loading songs...</div>}
+      {error && <div className="text-red-500">{error}</div>}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {songs.map((song) => (
           <div
@@ -45,12 +85,9 @@ export const HomePage: React.FC = () => {
               isDark ? 'bg-secondary-900' : 'bg-white'
             }`}
           >
-            <div className="aspect-square relative">
-              <img
-                src={song.coverUrl}
-                alt={song.title}
-                className="w-full h-full object-cover"
-              />
+            <div className="aspect-square relative flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+              {/* No cover art, just an icon or fallback */}
+              <span className="text-6xl text-gray-400">🎵</span>
               <button
                 onClick={() => handlePlay(song)}
                 className={`absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
@@ -65,20 +102,17 @@ export const HomePage: React.FC = () => {
               </button>
             </div>
             <div className="p-4">
-              <h3 className="font-semibold truncate text-lg">{song.title}</h3>
+              <h3 className="font-semibold truncate text-lg">{song.file_name}</h3>
               <p className={`text-sm truncate ${
                 isDark ? 'text-secondary-400' : 'text-secondary-600'
               }`}>
-                {song.artist}
+                Uploaded: {new Date(song.inserted_at).toLocaleString()}
               </p>
               <div className="mt-3 flex items-center justify-between text-xs">
                 <span className={`px-2 py-0.5 rounded-full ${
                   isDark ? 'bg-secondary-800 text-secondary-300' : 'bg-secondary-100 text-secondary-600'
                 }`}>
-                  {song.genre}
-                </span>
-                <span className={`text-secondary-400' : 'text-secondary-500'}`}>
-                  {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
+                  {song.bucket}
                 </span>
                 <button
                   onClick={() => handleAddToQueue(song)}

@@ -18,7 +18,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
 
   const navItems = [
     { path: '/', icon: Home, label: 'Home' },
-    { path: '/discover', icon: Compass, label: 'Discover' },
     { path: '/liked', icon: Heart, label: 'Liked Songs' },
     { path: '/mood', icon: Heart, label: 'Mood' },
     { path: '/upload', icon: Upload, label: 'Upload' },

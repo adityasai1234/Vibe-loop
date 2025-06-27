@@ -1,6 +1,3 @@
-
-
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Disc3, Heart, User, Search, Settings, Play } from 'lucide-react'; // Import icons for mobile nav
@@ -16,7 +13,6 @@ export const BottomNav: React.FC = () => {
 
   const navItems = [
     { path: '/', icon: Home, label: 'Home' },
-    { path: '/discover', icon: Disc3, label: 'Discover' },
     { path: '/mood', icon: Heart, label: 'Mood' },
     { path: '/profile', icon: User, label: 'Profile' }, // Profile will be handled by RequireAuth
   ];

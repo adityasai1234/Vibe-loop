@@ -5,7 +5,6 @@ import { LikedSongsProvider } from './context/LikedSongsContext';
 import { SearchProvider } from './context/SearchContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { HomePage } from './pages/HomePage';
-import { DiscoverPage } from './pages/DiscoverPage';
 import { UploadPage } from './pages/UploadPage';
 import { PlaylistPage } from './pages/PlaylistPage';
 import { ProfilePage } from './pages/ProfilePage';
@@ -25,7 +24,6 @@ const router = createBrowserRouter(
       element: <Layout />,
       children: [
         { index: true, element: <HomePage /> },
-        { path: 'discover', element: <DiscoverPage /> },
         { path: 'upload', element: <UploadPage /> },
         { path: 'playlist/:id', element: <PlaylistPage /> },
         { path: 'profile', element: <ProfilePage /> },
