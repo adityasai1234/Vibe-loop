@@ -32,7 +32,7 @@ export const BottomNav: React.FC = () => {
             className={`flex flex-col items-center justify-center p-2 rounded-lg text-xs font-medium 
               ${location.pathname === item.path 
                 ? (isDark ? 'text-blue-400' : 'text-blue-600') 
-                : (isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
+                : (isDark ? 'text-gray-400 hover:text-white dark:hover:text-white' : 'text-gray-600 hover:text-gray-900 dark:hover:text-white')
               }
               transition-colors duration-200
             `}
@@ -46,7 +46,7 @@ export const BottomNav: React.FC = () => {
         <button
           onClick={() => setIsMusicPlayerModalOpen(true)}
           className={`flex flex-col items-center justify-center p-2 rounded-lg text-xs font-medium 
-            ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}
+            ${isDark ? 'text-gray-400 hover:text-white dark:hover:text-white' : 'text-gray-600 hover:text-gray-900 dark:hover:text-white'}
             transition-colors duration-200
           `}
         >

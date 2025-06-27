@@ -71,7 +71,7 @@ export const PlaylistModal: React.FC<PlaylistModalProps> = ({ isOpen, onClose, p
       <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
       
       <div className={`relative w-full max-w-md p-6 rounded-lg shadow-xl ${
-        isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
+        isDark ? 'bg-gray-800 text-white dark:text-black' : 'bg-white text-gray-900 dark:text-white'
       }`}>
         <button
           onClick={onClose}
@@ -156,7 +156,7 @@ export const PlaylistModal: React.FC<PlaylistModalProps> = ({ isOpen, onClose, p
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`px-4 py-2 rounded-md bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={"px-4 py-2 rounded-md bg-primary-500 text-white dark:text-black hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"}
             >
               {isSubmitting ? 'Saving...' : playlist ? 'Save Changes' : 'Create Playlist'}
             </button>
@@ -165,4 +165,4 @@ export const PlaylistModal: React.FC<PlaylistModalProps> = ({ isOpen, onClose, p
       </div>
     </div>
   );
-}; 
+};

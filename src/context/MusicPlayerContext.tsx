@@ -44,6 +44,12 @@ interface MusicPlayerContextType {
     toggle: () => void;
     setDuration: (seconds: number) => void;
   };
+
+  // Repeat and shuffle properties
+  isRepeat: boolean;
+  setIsRepeat: (isRepeat: boolean) => void;
+  isShuffle: boolean;
+  setIsShuffle: (isShuffle: boolean) => void;
 }
 
 const MusicPlayerContext = createContext<MusicPlayerContextType | undefined>(undefined);
@@ -78,6 +84,10 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
 
   // Declare setupCrossfade type before its usage
   const setupCrossfadeRef = useRef<SetupCrossfadeFunction | null>(null);
+
+  // Repeat and shuffle state
+  const [isRepeat, setIsRepeat] = useState(false);
+  const [isShuffle, setIsShuffle] = useState(false);
 
   const { songs } = useSongsStore(); // Access songs from the store
 
@@ -237,6 +247,9 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   // Define playback functions using useCallback to ensure stability
   const pause = useCallback(() => {
     setIsPlaying(false);
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
   }, []);
 
   const setVolume = useCallback((vol: number) => {
@@ -250,19 +263,74 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Shuffle queue helper
+  const shuffleQueue = useCallback(() => {
+    if (queue.length <= 1) return queue;
+    const shuffled = [...queue];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }, [queue]);
+
+  // Modified playNext for shuffle/repeat
   const playNext = useCallback(() => {
     if (queue.length === 0) return;
-    const nextIndex = (currentQueueIndex + 1) % queue.length;
-    setCurrentQueueIndex(nextIndex);
-    play(queue[nextIndex]);
-  }, [currentQueueIndex, queue, play]);
+    if (isShuffle) {
+      const shuffled = shuffleQueue();
+      setQueueState(shuffled);
+      setCurrentQueueIndex(0);
+      play(shuffled[0]);
+      return;
+    }
+    if (currentQueueIndex === queue.length - 1) {
+      if (isRepeat) {
+        setCurrentQueueIndex(0);
+        play(queue[0]);
+      }
+      // else do nothing (end of queue)
+    } else {
+      const nextIndex = currentQueueIndex + 1;
+      setCurrentQueueIndex(nextIndex);
+      play(queue[nextIndex]);
+    }
+  }, [currentQueueIndex, queue, play, isRepeat, isShuffle, shuffleQueue]);
 
+  // Modified playPrevious for shuffle
   const playPrevious = useCallback(() => {
     if (queue.length === 0) return;
-    const prevIndex = (currentQueueIndex - 1 + queue.length) % queue.length;
-    setCurrentQueueIndex(prevIndex);
-    play(queue[prevIndex]);
-  }, [currentQueueIndex, queue, play]);
+    if (isShuffle) {
+      const shuffled = shuffleQueue();
+      setQueueState(shuffled);
+      setCurrentQueueIndex(0);
+      play(shuffled[0]);
+      return;
+    }
+    if (currentQueueIndex === 0) {
+      if (isRepeat) {
+        setCurrentQueueIndex(queue.length - 1);
+        play(queue[queue.length - 1]);
+      }
+      // else do nothing (start of queue)
+    } else {
+      const prevIndex = currentQueueIndex - 1;
+      setCurrentQueueIndex(prevIndex);
+      play(queue[prevIndex]);
+    }
+  }, [currentQueueIndex, queue, play, isRepeat, isShuffle, shuffleQueue]);
+
+  // On song end, repeat or shuffle
+  useEffect(() => {
+    if (!audioRef.current) return;
+    audioRef.current.onended = () => {
+      if (isRepeat) {
+        play(currentSong!);
+      } else {
+        playNext();
+      }
+    };
+  }, [isRepeat, playNext, currentSong]);
 
   const addToQueue = useCallback((song: Song) => {
     setQueueState(prev => {
@@ -362,7 +430,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
       };
 
       // Add preload handling
-      audioRef.current.preload = 'metadata';
+      audioRef.current.preload = 'auto';
     }
   }, [playNext, volume]);
 
@@ -471,9 +539,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
         addToQueue,
         removeFromQueue,
         clearQueue,
-        setQueue: setFullQueue, // Renamed to setQueue in context for clarity
-
-        // Sleep Timer values
+        setQueue: setFullQueue,
         sleepTimer: {
           isActive: sleepTimerActive,
           remainingTime: sleepTimerRemaining,
@@ -482,14 +548,16 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
           cancel: cancelSleepTimer,
           presets: SLEEP_TIMER_PRESETS
         },
-
-        // Crossfade values
         crossfade: {
           isEnabled: crossfadeEnabled,
           duration: crossfadeDuration,
           toggle: toggleCrossfade,
           setDuration: updateCrossfadeDuration
-        }
+        },
+        isRepeat,
+        setIsRepeat,
+        isShuffle,
+        setIsShuffle,
       }}
     >
       {children}

@@ -34,9 +34,7 @@ export const PlayerControls: React.FC = () => {
         }`}>
           {/* Sleep Timer Section */}
           <div className="mb-4">
-            <h3 className={`text-sm font-medium mb-2 ${
-              isDark ? 'text-secondary-200' : 'text-secondary-700'
-            }`}>
+            <h3 className={`text-sm font-medium mb-2 text-secondary-700 dark:text-secondary-200`}>
               Sleep Timer
             </h3>
             
@@ -44,7 +42,7 @@ export const PlayerControls: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <Timer size={16} className={isDark ? 'text-primary-400' : 'text-primary-600'} />
-                  <span className={isDark ? 'text-secondary-300' : 'text-secondary-600'}>
+                  <span className={`text-sm text-secondary-600 dark:text-secondary-300`}>
                     {formatTime(sleepTimer.remainingTime)}
                   </span>
                 </div>
@@ -79,16 +77,12 @@ export const PlayerControls: React.FC = () => {
 
           {/* Crossfade Section */}
           <div>
-            <h3 className={`text-sm font-medium mb-2 ${
-              isDark ? 'text-secondary-200' : 'text-secondary-700'
-            }`}>
+            <h3 className={`text-sm font-medium mb-2 text-secondary-700 dark:text-secondary-200`}>
               Crossfade
             </h3>
             
             <div className="flex items-center justify-between mb-2">
-              <span className={`text-sm ${
-                isDark ? 'text-secondary-300' : 'text-secondary-600'
-              }`}>
+              <span className={`text-sm text-secondary-600 dark:text-secondary-300`}>
                 {crossfade.isEnabled ? 'Enabled' : 'Disabled'}
               </span>
               <button
@@ -132,9 +126,7 @@ export const PlayerControls: React.FC = () => {
                     } 100%)`
                   }}
                 />
-                <span className={`text-sm ${
-                  isDark ? 'text-secondary-300' : 'text-secondary-600'
-                }`}>
+                <span className={`text-sm text-secondary-600 dark:text-secondary-300`}>
                   {crossfade.duration}s
                 </span>
               </div>

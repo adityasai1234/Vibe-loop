@@ -2,12 +2,12 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useMusicPlayer } from '../context/MusicPlayerContext';
 import { useThemeStore } from '../store/themeStore';
 import { useLikedSongs } from '../context/LikedSongsContext';
-import { Play, Pause, SkipBack, SkipForward, Heart, Loader2 } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Heart, Loader2, Repeat, Shuffle } from 'lucide-react';
 import { Song } from '../store/songsStore';
 import { PlayerControls } from './PlayerControls';
 
 export const MusicPlayer: React.FC = () => {
-  const { currentSong, isPlaying, play, pause, duration, currentTime, setVolume, seek, playNext, playPrevious, volume } = useMusicPlayer();
+  const { currentSong, isPlaying, play, pause, duration, currentTime, setVolume, seek, playNext, playPrevious, volume, isRepeat, setIsRepeat, isShuffle, setIsShuffle } = useMusicPlayer();
   const { isDark } = useThemeStore();
   const { isLiked, toggleLike } = useLikedSongs();
   const [isDragging, setIsDragging] = useState(false);
@@ -249,7 +249,7 @@ export const MusicPlayer: React.FC = () => {
       {/* Error Toast */}
       {error && (
         <div className={`absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full mt-2 px-4 py-2 rounded-lg shadow-lg ${
-          isDark ? 'bg-red-900 text-white' : 'bg-red-100 text-red-900'
+          isDark ? 'bg-red-900 text-white dark:text-black' : 'bg-red-100 text-red-900'
         }`}>
           {error}
         </div>
@@ -274,7 +274,7 @@ export const MusicPlayer: React.FC = () => {
           </div>
           <div className="min-w-0 flex-1">
             <h3 className={`font-semibold text-lg truncate ${
-              isDark ? 'text-secondary-100' : 'text-secondary-900'
+              isDark ? 'text-secondary-100 dark:text-white' : 'text-secondary-900'
             }`}>
               {currentSong.title}
             </h3>
@@ -290,6 +290,13 @@ export const MusicPlayer: React.FC = () => {
         <div className="flex flex-col items-center flex-1 w-full sm:w-auto px-0 sm:px-4">
           <div className="flex items-center space-x-4 mb-3">
             <button
+              onClick={() => setIsShuffle(!isShuffle)}
+              className={`p-2 rounded-full transition-colors duration-200 ${isShuffle ? (isDark ? 'bg-primary-700 text-white' : 'bg-primary-500 text-white') : (isDark ? 'hover:bg-secondary-800' : 'hover:bg-secondary-100')}`}
+              title="Shuffle"
+            >
+              <Shuffle size={20} />
+            </button>
+            <button
               onClick={playPrevious}
               disabled={isLoading}
               className={`p-2 rounded-full transition-colors duration-200 ${
@@ -298,12 +305,11 @@ export const MusicPlayer: React.FC = () => {
             >
               <SkipBack size={20} />
             </button>
-
             <button
               onClick={handlePlayPause}
               disabled={isLoading}
               className={`p-3 rounded-full shadow-md transition-all duration-200 ${
-                isDark ? 'bg-primary-600 text-white hover:bg-primary-700' : 'bg-primary-500 text-white hover:bg-primary-600'
+                isDark ? 'bg-primary-600 text-white dark:text-black hover:bg-primary-700' : 'bg-primary-500 text-white dark:text-black hover:bg-primary-600'
               } ${isLoading ? 'opacity-75 cursor-wait' : ''} ${
                 isBuffering ? 'animate-pulse' : ''
               }`}
@@ -316,7 +322,6 @@ export const MusicPlayer: React.FC = () => {
                 <Play size={24} />
               )}
             </button>
-
             <button
               onClick={playNext}
               disabled={isLoading}
@@ -325,6 +330,13 @@ export const MusicPlayer: React.FC = () => {
               } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <SkipForward size={20} />
+            </button>
+            <button
+              onClick={() => setIsRepeat(!isRepeat)}
+              className={`p-2 rounded-full transition-colors duration-200 ${isRepeat ? (isDark ? 'bg-primary-700 text-white' : 'bg-primary-500 text-white') : (isDark ? 'hover:bg-secondary-800' : 'hover:bg-secondary-100')}`}
+              title="Repeat"
+            >
+              <Repeat size={20} />
             </button>
           </div>
           
@@ -433,7 +445,7 @@ export const MusicPlayer: React.FC = () => {
               {hoverTime !== null && (
                 <div 
                   className={`absolute bottom-full mb-2 px-2 py-1 rounded text-xs font-medium transform -translate-x-1/2 ${
-                    isDark ? 'bg-secondary-800 text-white' : 'bg-white text-secondary-900'
+                    isDark ? 'bg-secondary-800 text-white dark:text-black' : 'bg-white text-secondary-900 dark:text-white'
                   } shadow-lg pointer-events-none`}
                   style={{ 
                     left: `${(hoverTime / duration) * 100}%`,
@@ -474,8 +486,8 @@ export const MusicPlayer: React.FC = () => {
                   ? 'text-accent-500 hover:text-accent-400'
                   : 'text-accent-600 hover:text-accent-500'
                 : isDark
-                ? 'text-secondary-400 hover:text-secondary-100'
-                : 'text-secondary-500 hover:text-secondary-800'
+                ? 'text-secondary-400 hover:text-secondary-100 dark:hover:text-black'
+                : 'text-secondary-500 hover:text-secondary-800 dark:hover:text-white'
             }`}
           >
             <Heart

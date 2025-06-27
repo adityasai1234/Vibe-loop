@@ -75,8 +75,8 @@ export const MoodSuggestions: React.FC = () => {
             className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap ${
               selectedMood === category.name
                 ? isDark
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-blue-500 text-white'
+                  ? 'bg-blue-600 text-white dark:text-black'
+                  : 'bg-blue-500 text-white dark:text-black'
                 : isDark
                 ? 'bg-gray-800 hover:bg-gray-700'
                 : 'bg-white hover:bg-gray-100'
@@ -115,7 +115,7 @@ export const MoodSuggestions: React.FC = () => {
                     play(song);
                   }
                 }}
-                className="p-2 rounded-full bg-blue-500 hover:bg-blue-600 text-white"
+                className="p-2 rounded-full bg-blue-500 hover:bg-blue-600 text-white dark:text-black"
               >
                 <Play size={20} />
               </button>

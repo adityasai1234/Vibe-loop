@@ -73,9 +73,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   };
 
   const sidebarContent = (
-    <div className={`h-full flex flex-col transition-colors duration-300 ${
-      isDark ? 'bg-secondary-950 text-secondary-100' : 'bg-white text-secondary-800'
-    }`}>
+    <div className={`h-full flex flex-col transition-colors duration-300 bg-white text-secondary-800 dark:bg-secondary-950 dark:text-secondary-100`}>
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-1">
         {navItems.map(({ path, icon: Icon, label }) => (
@@ -86,8 +84,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
               isActive(path)
                 ? isDark
-                  ? 'bg-primary-700 text-white'
-                  : 'bg-primary-500 text-white'
+                  ? 'bg-primary-700 text-white dark:text-black'
+                  : 'bg-primary-500 text-white dark:text-black'
                 : isDark
                 ? 'hover:bg-secondary-800'
                 : 'hover:bg-secondary-100'
@@ -126,7 +124,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               <Music className="mr-3 h-5 w-5" />
               {editingId === playlist.id ? (
                 <input
-                  className={`flex-1 bg-transparent border-b border-primary-500 focus:outline-none px-1 text-sm ${isDark ? 'text-white' : 'text-secondary-900'}`}
+                  className={`flex-1 bg-transparent border-b border-primary-500 focus:outline-none px-1 text-sm text-secondary-900 dark:text-white`}
                   value={editValue}
                   autoFocus
                   onChange={handleEditChange}
