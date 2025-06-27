@@ -7,7 +7,7 @@ struct TaskDetailView: View {
             Text(task.title)
                 .font(.largeTitle)
                 .bold()
-            Text(task.description)
+            Text(task.details)
                 .font(.body)
             Text("Status: \(task.status.rawValue.capitalized)")
                 .font(.headline)
@@ -23,4 +23,4 @@ struct TaskDetailView: View {
         .padding()
         .navigationTitle("Task Detail")
     }
-} 
+}

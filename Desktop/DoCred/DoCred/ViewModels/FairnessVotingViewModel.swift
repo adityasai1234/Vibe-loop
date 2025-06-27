@@ -34,4 +34,4 @@ class FairnessVotingViewModel: ObservableObject {
         guard majorityReached else { return nil }
         return reassignVotes > keepVotes ? "reassign" : "keep"
     }
-} 
+}

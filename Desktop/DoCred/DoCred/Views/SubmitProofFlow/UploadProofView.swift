@@ -14,4 +14,4 @@ struct UploadProofView: View {
         .padding()
         .navigationTitle("Upload Proof")
     }
-} 
+}

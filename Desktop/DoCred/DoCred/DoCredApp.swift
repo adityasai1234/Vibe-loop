@@ -1,9 +1,4 @@
-//
-//  DoCredApp.swift
-//  DoCred
-//
-//  Created by Aditysai B on 25/06/25.eraser.fill
-//
+
 
 import SwiftUI
 import SwiftData

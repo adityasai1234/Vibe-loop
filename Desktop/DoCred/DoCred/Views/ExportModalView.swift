@@ -13,11 +13,11 @@ struct ExportModalView: View {
                 }
             }
             .pickerStyle(.segmented)
-            // Field selection checkboxes go here
+            // Field selection checkboxes go here later
             Button("Export") {}
                 .buttonStyle(.borderedProminent)
             Spacer()
         }
         .padding()
     }
-} 
+}

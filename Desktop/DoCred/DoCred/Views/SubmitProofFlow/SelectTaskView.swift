@@ -11,4 +11,4 @@ struct SelectTaskView: View {
         }
         .navigationTitle("Submit Proof")
     }
-} 
+}

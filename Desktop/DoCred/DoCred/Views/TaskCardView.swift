@@ -14,7 +14,7 @@ struct TaskCardView: View {
                         .foregroundColor(.primary)
                         .lineLimit(2)
                     
-                    Text(task.description)
+                    Text(task.details)
                         .font(.system(size: 14, weight: .regular))
                         .foregroundColor(.secondary)
                         .lineLimit(2)
@@ -116,4 +116,4 @@ struct TaskCardView: View {
             return Color.orange
         }
     }
-} 
+}

@@ -147,7 +147,7 @@ struct SettingsView: View {
                             title: "Version",
                             subtitle: "1.0.0 (Build 1)"
                         ) {
-                            Text("")
+                            EmptyView()
                         }
                         
                         // Terms of service
@@ -273,4 +273,4 @@ struct SettingsRow<Content: View>: View {
         .padding(.vertical, 16)
         .background(Color(.systemBackground))
     }
-} 
+}

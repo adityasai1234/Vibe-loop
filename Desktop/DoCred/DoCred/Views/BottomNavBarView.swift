@@ -3,8 +3,7 @@ import SwiftUI
 struct BottomNavBarView: View {
     @Binding var selectedTab: Int
     @StateObject private var themeManager = ThemeManager.shared
-    
-    var body: some View {
+   var body: some View {
         HStack(spacing: 0) {
             ForEach(0..<6) { index in
                 Button(action: {

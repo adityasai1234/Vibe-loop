@@ -3,6 +3,7 @@ import SwiftUI
 struct DashboardView: View {
     @StateObject var viewModel = DashboardViewModel()
     @EnvironmentObject private var themeManager: ThemeManager
+    @State private var showMiniGame = false
     
     var body: some View {
         ScrollView {
@@ -44,7 +45,6 @@ struct DashboardView: View {
                             .font(.system(size: 22, weight: .bold, design: .rounded))
                         Spacer()
                         Button("View All") {
-                            // Navigate to full task list
                         }
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(themeManager.customAccentColor)
@@ -60,7 +60,6 @@ struct DashboardView: View {
                     }
                     .padding(.horizontal, 20)
                 }
-                // Quick actions section
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Quick Actions")
                         .font(.system(size: 22, weight: .bold, design: .rounded))
@@ -86,6 +85,13 @@ struct DashboardView: View {
                             color: .orange
                         ) {
                             // Navigate to leaderboard
+                        }
+                        QuickActionButton(
+                            title: "Mini-Game",
+                            icon: "gamecontroller.fill",
+                            color: .purple
+                        ) {
+                            showMiniGame = true
                         }
                     }
                     .padding(.horizontal, 20)
@@ -125,6 +131,9 @@ struct DashboardView: View {
         }
         .onAppear {
             viewModel.loadDashboard(userId: "demoUserId")
+        }
+        .sheet(isPresented: $showMiniGame) {
+            MiniGameView(users: ["Alice", "Bob", "Charlie", "Dana"])
         }
     }
 }

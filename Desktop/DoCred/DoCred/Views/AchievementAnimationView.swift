@@ -1,4 +1,16 @@
 import SwiftUI
+import AVFoundation
+
+class SoundManager {
+    static let shared = SoundManager()
+    private var player: AVAudioPlayer?
+    func playSound(named name: String) {
+        if let url = Bundle.main.url(forResource: name, withExtension: "mp3") {
+            player = try? AVAudioPlayer(contentsOf: url)
+            player?.play()
+        }
+    }
+}
 
 struct AchievementAnimationView: View {
     let title: String
@@ -73,6 +85,7 @@ struct AchievementAnimationView: View {
         }
         .onAppear {
             animateIn()
+            SoundManager.shared.playSound(named: "success")
         }
     }
     

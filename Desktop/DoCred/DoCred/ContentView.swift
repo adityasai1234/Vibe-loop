@@ -74,13 +74,11 @@ struct ContentView: View {
             .accentColor(themeManager.customAccentColor)
             .onChange(of: selectedTab) { newValue in
                 if newValue == 3 {
-                    // Reset to home tab and show submit sheet
                     selectedTab = 0
                     showingSubmitSheet = true
                 }
             }
             
-            // Floating Action Button (FAB)
             VStack {
                 Spacer()
                 HStack {
@@ -125,15 +123,16 @@ struct ContentView: View {
                 SubmitProofView(task: Task(
                     id: "demoTask",
                     title: "Demo Task",
-                    description: "This is a demo task for proof submission.",
+                    details: "This is a demo task for proof submission.",
                     status: .pending,
-                    proof: [],
                     createdAt: Date(),
                     updatedAt: nil,
                     assignedTo: "demoUserId",
                     reviewedBy: nil,
                     score: 5,
-                    teamId: nil
+                    teamId: nil,
+                    recurrence: .none,
+                    recurrenceEndDate: nil
                 ))
             }
         }

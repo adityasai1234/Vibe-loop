@@ -14,7 +14,6 @@ struct HistoryView: View {
             .padding()
             Button("Export") {}
                 .buttonStyle(.bordered)
-            // List of history cards goes here
             Spacer()
         }
         .navigationTitle("My History")

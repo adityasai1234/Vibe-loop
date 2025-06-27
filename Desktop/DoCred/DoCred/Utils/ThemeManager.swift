@@ -64,4 +64,4 @@ enum AppTheme: String, CaseIterable {
         case .lavender: return "Lavender"
         }
     }
-} 
+}

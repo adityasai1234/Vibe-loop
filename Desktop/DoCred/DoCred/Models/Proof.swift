@@ -1,5 +1,5 @@
 import Foundation
-import DoCred
+
 enum ProofType: String, Codable {
     case photo, file, link, note
 }

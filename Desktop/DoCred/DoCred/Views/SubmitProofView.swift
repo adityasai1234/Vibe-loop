@@ -9,7 +9,6 @@ struct SubmitProofView: View {
                 TextField("Enter notes", text: $notes)
             }
             Button("Submit Proof") {
-                // TODO: Handle proof submission
             }
         }
         .navigationTitle("Submit Proof")
