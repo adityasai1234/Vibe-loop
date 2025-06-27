@@ -1,18 +1,22 @@
-
-
 import SwiftUI
 import SwiftData
 
 @main
 struct DoCredApp: App {
     @StateObject private var themeManager = ThemeManager.shared
+    @State private var showWelcome = true
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(themeManager)
-                .preferredColorScheme(themeManager.isDarkMode ? .dark : .light)
-                .accentColor(themeManager.customAccentColor)
+            if showWelcome {
+                WelcomeScreen(onContinue: { showWelcome = false })
+                    .environmentObject(themeManager)
+            } else {
+                ContentView()
+                    .environmentObject(themeManager)
+                    .preferredColorScheme(themeManager.isDarkMode ? .dark : .light)
+                    .accentColor(themeManager.customAccentColor)
+            }
         }
     }
 }

@@ -1,12 +1,12 @@
 import SwiftUI
 
 struct WelcomeScreen: View {
-    @State private var navigate = false
+    var onContinue: () -> Void = {}
     var body: some View {
-        NavigationStack {
+        NavigationView {
             VStack(spacing: 40) {
                 Spacer()
-                Image(systemName: "star.circle.fill")
+                Image(systemName: "hand.wave.fill")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 100, height: 100)
@@ -14,11 +14,11 @@ struct WelcomeScreen: View {
                 Text("Welcome to DoCred!")
                     .font(.largeTitle)
                     .fontWeight(.bold)
-                Text("Your gamified, social chore manager.")
+                Text("Spin the wheel to see who does the extra chore!")
                     .font(.title3)
                     .foregroundColor(.secondary)
                 Spacer()
-                Button(action: { navigate = true }) {
+                Button(action: { onContinue() }) {
                     Text("Continue")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
@@ -32,9 +32,8 @@ struct WelcomeScreen: View {
                 Spacer()
             }
             .padding()
-            .navigationDestination(isPresented: $navigate) {
-                LandingDemoView()
-            }
+            .background(Color(.white))
+            .navigationTitle("")
         }
     }
 }

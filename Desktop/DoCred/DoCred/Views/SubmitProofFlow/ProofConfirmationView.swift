@@ -16,3 +16,4 @@ struct ProofConfirmationView: View {
         .navigationTitle("Confirmation")
     }
 } 
+    

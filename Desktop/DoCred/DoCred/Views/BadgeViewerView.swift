@@ -11,4 +11,4 @@ struct BadgeViewerView: View {
         .padding()
         .navigationTitle("Badges")
     }
-} 
+}
