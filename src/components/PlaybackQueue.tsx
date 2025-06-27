@@ -30,7 +30,7 @@ export const PlaybackQueue: React.FC = () => {
             key={song.id}
             className={`flex items-center p-3 rounded-md transition-colors duration-200 ${
               currentSong?.id === song.id
-                ? isDark ? 'bg-primary-700 text-white' : 'bg-primary-100 text-primary-800'
+                ? isDark ? 'bg-primary-700 text-white dark:text-black' : 'bg-primary-100 text-primary-800 dark:text-black'
                 : isDark ? 'hover:bg-secondary-800' : 'hover:bg-secondary-50'
             }`}
           >
@@ -42,8 +42,8 @@ export const PlaybackQueue: React.FC = () => {
             <div className="flex-1 min-w-0">
               <p className={`font-semibold truncate ${
                 currentSong?.id === song.id
-                  ? 'text-white'
-                  : isDark ? 'text-secondary-200' : 'text-secondary-800'
+                  ? 'text-white dark:text-black'
+                  : isDark ? 'text-secondary-200 dark:text-white' : 'text-secondary-800 dark:text-white'
               }`}>
                 {song.title}
               </p>

@@ -54,7 +54,7 @@ export const DraggableSong: React.FC<DraggableSongProps> = ({
         <div className="flex items-center">
           <img src={song.coverUrl} alt={song.title} className="w-10 h-10 rounded-md object-cover mr-4" />
           <div className="flex flex-col">
-            <div className="text-sm font-medium text-white">{song.title}</div>
+            <div className="text-sm font-medium text-white dark:text-black">{song.title}</div>
             <div className="text-sm text-gray-500">{song.artist}</div>
           </div>
         </div>

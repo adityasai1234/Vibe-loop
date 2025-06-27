@@ -31,7 +31,7 @@ export const LikedSongsPage: React.FC = () => {
         <div className={`p-4 rounded-full shadow-md ${
           isDark ? 'bg-primary-600' : 'bg-primary-500'
         }`}>
-          <Heart className="w-8 h-8 text-white" />
+          <Heart className="w-8 h-8 text-white dark:text-black" />
         </div>
         <div>
           <h1 className="text-3xl font-bold">Liked Songs</h1>
