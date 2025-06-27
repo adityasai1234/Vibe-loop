@@ -12,7 +12,7 @@ export const SearchBar: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate('/discover');
+      // navigate('/discover');
     }
   };
   if (!searchQuery) {
