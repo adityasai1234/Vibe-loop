@@ -42,4 +42,3 @@ export const SearchBar: React.FC = () => {
     </form>
   );
 };
-// usage in HomePage 
