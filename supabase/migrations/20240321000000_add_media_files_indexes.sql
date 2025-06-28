@@ -1,6 +1,4 @@
--- Add composite index for cursor-based pagination
-CREATE INDEX IF NOT EXISTS media_files_cursor_idx 
-ON public.media_files (inserted_at, id);
+
 
 -- Add index for owner_id to speed up user-specific queries
 CREATE INDEX IF NOT EXISTS media_files_owner_id_idx 
@@ -10,12 +8,11 @@ ON public.media_files (owner_id);
 CREATE INDEX IF NOT EXISTS media_files_file_name_idx 
 ON public.media_files (file_name);
 
--- Add a function to get paginated media files
 CREATE OR REPLACE FUNCTION get_paginated_media_files(
   _page_size integer,
   _cursor_inserted_at timestamptz DEFAULT NULL,
   _cursor_id uuid DEFAULT NULL,
-  _owner_id uuid DEFAULT NULL
+  _owner_id uuid DEFAULT NULzL
 )
 RETURNS TABLE (
   items json,

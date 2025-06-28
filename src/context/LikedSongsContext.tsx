@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
-import { supabase } from '../lib/supabaseClient';
+// import { supabase } from '../lib/supabaseClient';
 import { Song as StoredSong } from '../store/songsStore'; // Import Song from songsStore
 
 // Define the Song interface for the context, matching the stored song type
@@ -37,26 +37,13 @@ export function LikedSongsProvider({ children }: { children: React.ReactNode }) 
     }
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('liked_songs')
-        .select('*')
-        .eq('user_id', user.id);
+      // const { data, error } = await supabase
+      //   .from('liked_songs')
+      //   .select('*')
+      //   .eq('user_id', user.id);
 
-      if (error) throw error;
-
-      // Transform the data to match our Song interface
-      const songs: Song[] = data.map(item => ({
-        id: item.song_id,
-        title: item.title,
-        artist: item.artist,
-        coverUrl: item.cover_url,
-        url: item.url,
-        duration: item.duration,
-        album: item.album,
-        genre: item.genre,
-        mood: item.mood || [],
-        releaseDate: item.release_date,
-      }));
+      // if (error) throw error;
+      const songs: Song[] = [];
 
       setLikedSongs(songs);
     } catch (error) {
@@ -77,35 +64,34 @@ export function LikedSongsProvider({ children }: { children: React.ReactNode }) 
       const isCurrentlyLiked = isLiked(song.id);
 
       if (isCurrentlyLiked) {
-        // Remove from liked songs
-        const { error } = await supabase
-          .from('liked_songs')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('song_id', song.id);
+        // const { error } = await supabase
+        //   .from('liked_songs')
+        //   .delete()
+        //   .eq('user_id', user.id)
+        //   .eq('song_id', song.id);
 
-        if (error) throw error;
+        // if (error) throw error;
 
         setLikedSongs(prev => prev.filter(s => s.id !== song.id));
       } else {
         // Add to liked songs
-        const { error } = await supabase
-          .from('liked_songs')
-          .insert({
-            user_id: user.id,
-            song_id: song.id,
-            title: song.title,
-            artist: song.artist,
-            cover_url: song.coverUrl,
-            url: song.url,
-            duration: song.duration,
-            album: song.album,
-            genre: song.genre,
-            mood: song.mood,
-            release_date: song.releaseDate,
-          });
+        // const { error } = await supabase
+        //   .from('liked_songs')
+        //   .insert({
+        //     user_id: user.id,
+        //     song_id: song.id,
+        //     title: song.title,
+        //     artist: song.artist,
+        //     cover_url: song.coverUrl,
+        //     url: song.url,
+        //     duration: song.duration,
+        //     album: song.album,
+        //     genre: song.genre,
+        //     mood: song.mood,
+        //     release_date: song.releaseDate,
+        //   });
 
-        if (error) throw error;
+        // if (error) throw error;
 
         setLikedSongs(prev => [...prev, song]);
       }

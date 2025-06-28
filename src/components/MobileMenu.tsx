@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Compass, Heart, User, Search, Sun, Moon, LogOut, X, Music, Upload } from 'lucide-react';
+import { Home, Compass, Heart, User, Search, Sun, Moon, LogOut, X, Music, Upload, DoorOpen } from 'lucide-react';
 import { useThemeStore } from '../store/themeStore';
 import { useAuth } from '../context/AuthContext';
 import { SearchBar } from './SearchBar';
@@ -174,7 +174,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
                 ${isDark ? 'hover:bg-secondary-800' : 'hover:bg-secondary-100'}
               }`}
             >
-              <LogOut size={20} className="mr-3" />
+              <DoorOpen size={20} className="mr-3" />
               Sign out
             </button>
           ) : (

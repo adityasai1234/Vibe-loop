@@ -1,6 +1,7 @@
 import React from 'react';
 import { useCursorPagination } from '../hooks/useCursorPagination';
 import { Music, Video, Loader2 } from 'lucide-react';
+import { useThemeStore } from '../store/themeStore';
 import type { Database } from '../types/supabase';
 
 type MediaFile = Database['public']['Tables']['media_files']['Row'];
@@ -18,6 +19,7 @@ export const MediaFileList: React.FC<MediaFileListProps> = ({
   onError,
   className = '',
 }) => {
+  const { isDark } = useThemeStore();
   const {
     items,
     loading,
@@ -71,7 +73,7 @@ export const MediaFileList: React.FC<MediaFileListProps> = ({
             </div>
             
             <div className="p-4">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">
+              <h3 className={`text-sm font-medium ${isDark ? 'text-white' : 'text-black'} truncate`}>
                 {file.file_name}
               </h3>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Search, Sun, Moon, User, LogOut } from 'lucide-react';
+import { Menu, Search, Sun, Moon, User, LogOut, DoorOpen } from 'lucide-react';
 import { useThemeStore } from '../store/themeStore';
 import { useAuth } from '../context/AuthContext';
 import { Logo } from './Logo';
@@ -59,33 +59,32 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, isMobile }) => {
               className={`p-2 rounded-md transition-colors duration-200 ${
                 isDark ? 'hover:bg-secondary-800' : 'hover:bg-secondary-100'
               }`}
+              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
 
             {user ? (
-              <div className="relative group">
+              <>
+                <button
+                  onClick={signOut}
+                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                    isDark ? 'bg-red-700 text-white hover:bg-red-800' : 'bg-red-500 text-white hover:bg-red-600'
+                  }`}
+                  aria-label={`Sign out as ${user.email}`}
+                >
+                  <LogOut size={18} className="mr-2" />
+                  Logout ({user.email})
+                </button>
                 <button
                   className={`p-2 rounded-full transition-colors duration-200 ${
                     isDark ? 'hover:bg-secondary-800' : 'hover:bg-secondary-100'
                   }`}
+                  aria-label="User menu"
                 >
                   <User size={18} />
                 </button>
-                <div className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 transition-colors duration-200 ${
-                  isDark ? 'bg-secondary-900' : 'bg-white'
-                } hidden group-hover:block`}>
-                  <button
-                    onClick={signOut}
-                    className={`flex items-center w-full px-4 py-2 text-sm transition-colors duration-200 ${
-                      isDark ? 'hover:bg-secondary-800' : 'hover:bg-secondary-100'
-                    }`}
-                  >
-                    <LogOut size={16} className="mr-2" />
-                    Sign out
-                  </button>
-                </div>
-              </div>
+              </>
             ) : (
               <Link
                 to="/login"

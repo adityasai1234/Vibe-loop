@@ -1,8 +1,7 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { Upload, X, Music, Video, AlertCircle } from 'lucide-react';
-import { useFileUpload } from '../hooks/useFileUpload';
+import { useHetznerUpload } from '../hooks/useHetznerUpload';
 
-// Helper function to format file size for display
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
@@ -12,36 +11,41 @@ const formatFileSize = (bytes: number): string => {
 };
 
 interface FileUploadProps {
-  onUploadComplete?: (url: string, filePath: string) => void;
   className?: string;
+  onUploadComplete?: (url: string) => void;
+  onUploadSuccess?: (result: any) => void;
 }
 
-export const FileUpload: React.FC<FileUploadProps> = ({
+export const FileUpload: React.FC<FileUploadProps> = ({ 
+  className = '', 
   onUploadComplete,
-  className = '',
+  onUploadSuccess 
 }) => {
+  const [localFile, setLocalFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [localFile, setLocalFile] = useState<File | null>(null); // To store file for display
-  const { state, onChange: handleFileUploadChange } = useFileUpload();
-
-  // Handle the onUploadComplete prop when the hook's state is 'done'
-  useEffect(() => {
-    if (state.phase === 'done' && onUploadComplete) {
-      // Note: The new useFileUpload hook does not return filePath directly.
-      // We are passing localFile?.name as a placeholder. Review if actual filePath is needed.
-      onUploadComplete(state.url, localFile?.name || '');
+  const { state, uploadFile, reset } = useHetznerUpload({
+    onUploadComplete: (result) => {
+      if (onUploadComplete) {
+        onUploadComplete(result.publicUrl);
+      }
+      if (onUploadSuccess) {
+        onUploadSuccess(result);
+      }
     }
-  }, [state, onUploadComplete, localFile]);
+  });
 
-  const handleSelectAndUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setLocalFile(file); // Store file for display
-      handleFileUploadChange(e); // Pass the event directly to the hook
-    } else {
-      setLocalFile(null); // Clear file if selection is cancelled
+  const handleSelectAndUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setLocalFile(file);
+    
+    try {
+      const result = await uploadFile(file);
+    } catch (error) {
+      console.error('Upload failed:', error);
     }
-  }, [handleFileUploadChange]);
+  }, [uploadFile]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -53,34 +57,33 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     setIsDragging(false);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile) {
-      // Create a synthetic ChangeEvent to pass to the hook's onChange
-      const syntheticEvent = {
-        target: { files: [droppedFile] },
-      } as unknown as React.ChangeEvent<HTMLInputElement>;
-      setLocalFile(droppedFile); // Store file for display
-      handleFileUploadChange(syntheticEvent);
-    } else {
-      setLocalFile(null);
+    
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+
+    setLocalFile(file);
+    
+    try {
+      const result = await uploadFile(file);
+    } catch (error) {
+      console.error('Upload failed:', error);
     }
-  }, [handleFileUploadChange]);
+  }, [uploadFile]);
 
   const handleRemoveFile = useCallback(() => {
     setLocalFile(null);
-    // The useFileUpload hook does not provide a reset function for its internal state.
-    // If a complete reset of the upload process is needed, the hook would require a reset method.
-  }, []);
+    reset();
+  }, [reset]);
 
   const isAudio = localFile?.type?.startsWith('audio/');
   const isVideo = localFile?.type?.startsWith('video/');
   const displayErrorMessage = state.phase === 'error' ? state.msg : null;
 
-  const ALL_ALLOWED_TYPES = ['audio/mpeg', 'audio/mp3', 'video/mp4']; // From useFileUpload
-  const MAX_FILE_SIZE_MB = 100; // From useFileUpload
+  const ALL_ALLOWED_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/flac', 'video/mp4', 'video/webm'];
+  const MAX_FILE_SIZE_MB = 50;
 
   return (
     <div className={`w-full max-w-xl mx-auto ${className}`}>
@@ -158,7 +161,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   />
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                  Uploading... {Math.round(state.pct)}%
+                  Uploading to Hetzner... {Math.round(state.pct)}%
                 </p>
               </div>
             )}
@@ -166,7 +169,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             {state.phase === 'done' && (
               <div className="text-center">
                 <p className="text-sm text-green-600 dark:text-green-400 mb-2">
-                  Upload complete!
+                  Upload complete! File stored on Hetzner.
                 </p>
                 {isAudio ? (
                   <audio controls className="w-full">

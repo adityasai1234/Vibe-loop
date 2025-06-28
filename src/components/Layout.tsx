@@ -43,7 +43,6 @@ export const Layout: React.FC = () => {
             <BottomNav />
           </div>
         )}
-
         <div className={`fixed bottom-0 left-0 right-0 z-40 ${
           isDesktop ? 'ml-64' : ''
         }`}>

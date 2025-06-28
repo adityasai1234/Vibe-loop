@@ -55,7 +55,7 @@ export const MoodPage: React.FC = () => {
               onClick={() => handleMoodSelect(mood.emoji)}
               className={`p-4 rounded-lg flex flex-col items-center justify-center transition-all duration-200 ${
                 selectedMood === mood.emoji
-                  ? `bg-primary-600 text-white dark:text-black shadow-md transform scale-105`
+                  ? `bg-primary-600 text-white shadow-md transform scale-105`
                   : isDark
                     ? 'bg-secondary-900 hover:bg-secondary-800'
                     : 'bg-white hover:bg-secondary-100 shadow-sm'
@@ -99,7 +99,7 @@ export const MoodPage: React.FC = () => {
             
             <button
               onClick={handleSaveMood}
-              className={"bg-primary-500 text-white dark:text-black px-6 py-3 rounded-lg shadow-md hover:bg-primary-600 transition-colors duration-200"}
+              className={`bg-primary-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-primary-600 transition-colors duration-200`}
             >
               Save to Mood Journal
             </button>

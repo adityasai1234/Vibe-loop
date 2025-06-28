@@ -115,7 +115,9 @@ export const MoodSuggestions: React.FC = () => {
                     play(song);
                   }
                 }}
-                className="p-2 rounded-full bg-blue-500 hover:bg-blue-600 text-white dark:text-black"
+                className={`p-2 rounded-full ${
+                  isDark ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'
+                }`}
               >
                 <Play size={20} />
               </button>

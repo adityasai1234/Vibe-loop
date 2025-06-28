@@ -13,7 +13,6 @@ export const MusicPlayer: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isBuffering, setIsBuffering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -30,60 +29,28 @@ export const MusicPlayer: React.FC = () => {
         if (audioElement.currentTime !== currentTime) {
           seek(audioElement.currentTime);
         }
-        // Clear buffering state if we're receiving time updates
-        if (isBuffering) {
-          setIsBuffering(false);
-        }
       };
 
       const handleLoadedMetadata = () => {
         setError(null);
         setIsLoading(false);
-        setIsBuffering(false);
       };
 
       const handleCanPlay = () => {
         setIsLoading(false);
-        setIsBuffering(false);
       };
 
-      const handleSeeked = () => {
-        setIsBuffering(false);
-      };
-
-      const handleWaiting = () => {
-        // Only set buffering if we're actually playing
-        if (isPlaying) {
-          setIsBuffering(true);
-        }
-      };
-
-      const handlePlaying = () => {
-        setIsBuffering(false);
-        setIsLoading(false);
-      };
-
-      const handlePlay = () => {
-        setIsBuffering(false);
-        setIsLoading(false);
-      };
-
-      const handlePause = () => {
-        setIsBuffering(false);
-      };
-
+      const handleSeeked = () => {};
+      const handleWaiting = () => {};
+      const handlePlaying = () => { setIsLoading(false); };
+      const handlePlay = () => { setIsLoading(false); };
+      const handlePause = () => {};
       const handleError = (e: Event) => {
         console.error('Audio error:', e);
         setError('Error playing audio. Please try again.');
         setIsLoading(false);
-        setIsBuffering(false);
       };
-
-      const handleStalled = () => {
-        if (isPlaying) {
-          setIsBuffering(true);
-        }
-      };
+      const handleStalled = () => {};
 
       // Add all event listeners
       audioElement.addEventListener('timeupdate', handleTimeUpdate);
@@ -111,7 +78,7 @@ export const MusicPlayer: React.FC = () => {
         audioElement.removeEventListener('stalled', handleStalled);
       };
     }
-  }, [currentTime, seek, isPlaying, isBuffering]);
+  }, [currentTime, seek, isPlaying]);
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -223,7 +190,6 @@ export const MusicPlayer: React.FC = () => {
       setError(null);
       if (isPlaying) {
         pause();
-        setIsBuffering(false);
       } else {
         setIsLoading(true);
         // Preload the audio before playing
@@ -236,20 +202,27 @@ export const MusicPlayer: React.FC = () => {
     } catch (err) {
       console.error('Playback error:', err);
       setError('Failed to play song. Please try again.');
-      setIsBuffering(false);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
+    <>
+      <audio
+        ref={audioRef}
+        preload="auto"
+        src={currentSong?.url || ''}
+        crossOrigin="anonymous"
+        style={{ display: 'none' }}
+      />
     <div className={`fixed bottom-0 left-0 right-0 p-4 sm:p-6 shadow-lg transition-colors duration-300 ${
       isDark ? 'bg-secondary-950 border-t border-secondary-800' : 'bg-white border-t border-secondary-200'
     }`}>
       {/* Error Toast */}
       {error && (
         <div className={`absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full mt-2 px-4 py-2 rounded-lg shadow-lg ${
-          isDark ? 'bg-red-900 text-white dark:text-black' : 'bg-red-100 text-red-900'
+          isDark ? 'bg-red-900 text-white' : 'bg-red-100 text-red-900'
         }`}>
           {error}
         </div>
@@ -262,19 +235,12 @@ export const MusicPlayer: React.FC = () => {
           <img
             src={currentSong.coverUrl}
             alt={currentSong.title}
-              className={`w-12 h-12 rounded-md shadow-md transition-opacity duration-200 ${
-                isBuffering ? 'opacity-50' : 'opacity-100'
-              }`}
+                className={`w-12 h-12 rounded-md shadow-md transition-opacity duration-200`}
             />
-            {isBuffering && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Loader2 className="w-6 h-6 animate-spin text-primary-500" />
-              </div>
-            )}
           </div>
           <div className="min-w-0 flex-1">
             <h3 className={`font-semibold text-lg truncate ${
-              isDark ? 'text-secondary-100 dark:text-white' : 'text-secondary-900'
+              isDark ? 'text-white' : 'text-secondary-900'
             }`}>
               {currentSong.title}
             </h3>
@@ -309,10 +275,8 @@ export const MusicPlayer: React.FC = () => {
               onClick={handlePlayPause}
               disabled={isLoading}
               className={`p-3 rounded-full shadow-md transition-all duration-200 ${
-                isDark ? 'bg-primary-600 text-white dark:text-black hover:bg-primary-700' : 'bg-primary-500 text-white dark:text-black hover:bg-primary-600'
-              } ${isLoading ? 'opacity-75 cursor-wait' : ''} ${
-                isBuffering ? 'animate-pulse' : ''
-              }`}
+                isDark ? 'bg-primary-600 text-white hover:bg-primary-700' : 'bg-primary-500 text-white hover:bg-primary-600'
+                } ${isLoading ? 'opacity-75 cursor-wait' : ''}`}
             >
               {isLoading ? (
                 <Loader2 className="w-6 h-6 animate-spin" />
@@ -393,25 +357,11 @@ export const MusicPlayer: React.FC = () => {
               {/* Background track */}
               <div className="absolute inset-0 rounded-full" />
               
-              {/* Buffering indicator - only show when actually buffering */}
-              {isBuffering && isPlaying && (
-                <div className="absolute inset-0 rounded-full overflow-hidden">
-                  <div className={`absolute inset-0 ${
-                    isDark ? 'bg-secondary-600' : 'bg-secondary-400'
-                  } animate-pulse`} 
-                  style={{
-                    animationDuration: '1s',
-                    animationTimingFunction: 'ease-in-out'
-                  }}
-                  />
-                </div>
-              )}
-              
               {/* Played track */}
               <div 
                 className={`absolute h-full rounded-full transition-all duration-100 ${
                   isDark ? 'bg-primary-500' : 'bg-primary-600'
-                } ${isBuffering ? 'opacity-50' : ''}`}
+                  }`}
                 style={{ 
                   width: `${((hoverTime ?? currentTime) / duration) * 100}%`,
                   transition: isDragging ? 'none' : 'width 100ms linear'
@@ -445,7 +395,7 @@ export const MusicPlayer: React.FC = () => {
               {hoverTime !== null && (
                 <div 
                   className={`absolute bottom-full mb-2 px-2 py-1 rounded text-xs font-medium transform -translate-x-1/2 ${
-                    isDark ? 'bg-secondary-800 text-white dark:text-black' : 'bg-white text-secondary-900 dark:text-white'
+                    isDark ? 'bg-secondary-800 text-white' : 'bg-white text-secondary-900'
                   } shadow-lg pointer-events-none`}
                   style={{ 
                     left: `${(hoverTime / duration) * 100}%`,
@@ -463,15 +413,6 @@ export const MusicPlayer: React.FC = () => {
             }`}>
               {formatTime(duration)}
             </span>
-
-            {/* Playback status - only show when actually buffering */}
-            <div className="w-full text-center text-xs mt-1">
-              {isBuffering && isPlaying && (
-                <span className={`${isDark ? 'text-secondary-400' : 'text-secondary-600'}`}>
-                  Buffering...
-                </span>
-              )}
-            </div>
           </div>
         </div>
 
@@ -498,5 +439,6 @@ export const MusicPlayer: React.FC = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { isValidElement } from 'react';
 import { Play, Heart, Pause } from 'lucide-react';
 import { Playlist } from '../types';
 import { usePlayerStore } from '../store/playerStore';
@@ -41,7 +41,7 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist }) => {
           <div className="absolute inset-0 bg-black/40 rounded-md"></div>
           <button 
             onClick={handlePlay}
-            className="relative z-10 w-12 h-12 flex items-center justify-center rounded-full bg-primary-500 hover:bg-primary-600 text-white dark:text-black transition-all transform hover:scale-105"
+            className={`w-12 h-12 flex items-center justify-center rounded-full bg-primary-500 hover:bg-primary-600 text-white transition-all transform hover:scale-105`}
           >
             {isPlaylistPlaying ? <Pause size={20} /> : <Play size={20} />}
           </button>
@@ -58,4 +58,4 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist }) => {
       </div>
     </div>
   );
-};
+}

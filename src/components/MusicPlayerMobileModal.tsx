@@ -118,7 +118,7 @@ export const MusicPlayerMobileModal: React.FC<MusicPlayerMobileModalProps> = ({ 
           </button>
           <button
             onClick={() => isPlaying ? pause() : play(currentSong)}
-            className={`p-4 rounded-full bg-blue-500 text-white dark:text-black ${
+            className={`p-4 rounded-full bg-blue-500 text-white ${
               isDark ? 'hover:bg-blue-600' : 'hover:bg-blue-600'
             }`}
           >

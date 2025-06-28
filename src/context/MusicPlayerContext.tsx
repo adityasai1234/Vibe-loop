@@ -1,11 +1,9 @@
 import React, { createContext, useContext, useState, useRef, useEffect, ReactNode, useCallback } from 'react';
 import { Song, useSongsStore } from '../store/songsStore';
 
-// Constants
 const DEFAULT_CROSSFADE_DURATION = 3; // 3 seconds
 const SLEEP_TIMER_PRESETS = [15, 30, 45, 60, 90]; // minutes
 
-// Type for the setupCrossfade function
 type SetupCrossfadeFunction = (nextSong: Song) => Promise<void>;
 
 interface MusicPlayerContextType {

@@ -13,6 +13,7 @@ import { LikedSongsPage } from './pages/LikedSongsPage';
 import { FavoritesPage } from './pages/FavoritesPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import { PlaybackQueue } from './components/PlaybackQueue';
 import { Layout } from './components/Layout';
 
@@ -40,6 +41,10 @@ const router = createBrowserRouter(
     {
       path: '/signup',
       element: <SignupPage />,
+    },
+    {
+      path: '/reset-password',
+      element: <ResetPasswordPage />,
     },
   ],
   {
