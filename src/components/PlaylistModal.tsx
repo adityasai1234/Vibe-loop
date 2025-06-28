@@ -71,7 +71,7 @@ export const PlaylistModal: React.FC<PlaylistModalProps> = ({ isOpen, onClose, p
       <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
       
       <div className={`relative w-full max-w-md p-6 rounded-lg shadow-xl ${
-        isDark ? 'bg-gray-800 text-white dark:text-black' : 'bg-white text-gray-900 dark:text-white'
+        isDark ? 'bg-gray-800 text-white' : 'bg-white text-black'
       }`}>
         <button
           onClick={onClose}

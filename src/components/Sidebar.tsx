@@ -83,12 +83,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             onClick={onClose}
             className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
               isActive(path)
-                ? isDark
-                  ? 'bg-primary-700 text-white dark:text-black'
-                  : 'bg-primary-500 text-white dark:text-black'
-                : isDark
-                ? 'hover:bg-secondary-800'
-                : 'hover:bg-secondary-100'
+                ? isDark ? 'bg-primary-700 text-white' : 'bg-primary-500 text-white'
+                : isDark ? 'bg-primary-600 text-white' : 'bg-primary-500 text-white'
             }`}
           >
             <Icon className="mr-3 h-5 w-5" />

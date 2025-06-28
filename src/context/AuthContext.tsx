@@ -13,6 +13,14 @@ interface AuthContextType {
     error: Error | null;
     data: { user: User | null; session: Session | null } | null;
   }>;
+  resetPassword: (email: string) => Promise<{
+    error: Error | null;
+    data: any;
+  }>;
+  updatePassword: (password: string) => Promise<{
+    error: Error | null;
+    data: any;
+  }>;
   signOut: () => Promise<void>;
   loading: boolean;
 }
@@ -68,6 +76,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      return { data, error };
+    } catch (error) {
+      return { data: null, error: error as Error };
+    }
+  };
+
+  const updatePassword = async (password: string) => {
+    try {
+      const { data, error } = await supabase.auth.updateUser({
+        password: password,
+      });
+      return { data, error };
+    } catch (error) {
+      return { data: null, error: error as Error };
+    }
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
@@ -77,6 +107,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     signUp,
     signIn,
+    resetPassword,
+    updatePassword,
     signOut,
     loading,
   };

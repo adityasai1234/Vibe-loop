@@ -74,7 +74,7 @@ export const SongCard: React.FC<SongCardProps> = ({ song, size = 'medium' }) => 
           {isActive && isPlaying && (
             <button 
               onClick={handleStop}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-red-500 hover:bg-red-600 text-white dark:text-black transition-all"
+              className={`w-8 h-8 flex items-center justify-center rounded-full bg-red-500 hover:bg-red-600 text-white transition-all`}
               title="Stop"
             >
               <Square size={16} />
@@ -82,8 +82,8 @@ export const SongCard: React.FC<SongCardProps> = ({ song, size = 'medium' }) => 
           )}
         <button 
           onClick={handlePlay}
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-primary-500 hover:bg-primary-600 text-white dark:text-black transition-all"
-            title={isActive && isPlaying ? "Double click to stop" : "Play"}
+          className={`w-8 h-8 flex items-center justify-center rounded-full bg-primary-500 hover:bg-primary-600 text-white transition-all`}
+          title={isActive && isPlaying ? "Double click to stop" : "Play"}
         >
           {isActive && isPlaying ? <Pause size={16} /> : <Play size={16} />}
         </button>
@@ -106,7 +106,7 @@ export const SongCard: React.FC<SongCardProps> = ({ song, size = 'medium' }) => 
             {isActive && isPlaying && (
               <button 
                 onClick={handleStop}
-                className="w-12 h-12 flex items-center justify-center rounded-full bg-red-500 hover:bg-red-600 text-white dark:text-black transition-all transform hover:scale-105"
+                className={`w-12 h-12 flex items-center justify-center rounded-full bg-red-500 hover:bg-red-600 text-white transition-all`}
                 title="Stop"
               >
                 <Square size={24} />
@@ -114,7 +114,7 @@ export const SongCard: React.FC<SongCardProps> = ({ song, size = 'medium' }) => 
             )}
           <button 
             onClick={handlePlay}
-              className="w-12 h-12 flex items-center justify-center rounded-full bg-primary-500 hover:bg-primary-600 text-white dark:text-black transition-all transform hover:scale-105"
+              className={`w-12 h-12 flex items-center justify-center rounded-full bg-primary-500 hover:bg-primary-600 text-white transition-all`}
               title={isActive && isPlaying ? "Double click to stop" : "Play"}
           >
               {isActive && isPlaying ? <Pause size={24} /> : <Play size={24} />}

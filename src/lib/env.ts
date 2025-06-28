@@ -11,7 +11,6 @@ export const logEnvVars = () => {
   return envVars;
 };
 
-// Validate required environment variables
 export const validateEnvVars = () => {
   const required = [
     'VITE_SUPABASE_URL',

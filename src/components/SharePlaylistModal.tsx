@@ -97,22 +97,18 @@ export const SharePlaylistModal: React.FC<SharePlaylistModalProps> = ({ isOpen, 
             <div className="flex space-x-3">
               <button
                 onClick={() => handleShare('facebook')}
-                className={`flex-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-md ${
-                  isDark
-                    ? 'bg-blue-600 hover:bg-blue-700'
-                    : 'bg-blue-500 hover:bg-blue-600'
-                } text-white dark:text-black`}
+                className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 ${
+                  isDark ? 'bg-primary-600 hover:bg-primary-700' : 'bg-primary-500 hover:bg-primary-600'
+                } text-white`}
               >
                 <Facebook size={20} />
                 <span>Facebook</span>
               </button>
               <button
                 onClick={() => handleShare('twitter')}
-                className={`flex-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-md ${
-                  isDark
-                    ? 'bg-blue-400 hover:bg-blue-500'
-                    : 'bg-blue-400 hover:bg-blue-500'
-                } text-white dark:text-black`}
+                className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 ${
+                  isDark ? 'bg-primary-600 hover:bg-primary-700' : 'bg-primary-500 hover:bg-primary-600'
+                } text-white`}
               >
                 <Twitter size={20} />
                 <span>Twitter</span>

@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import { FileUpload } from '../components/FileUpload';
 import { Logo } from '../components/Logo';
-import { MAX_FILE_SIZE } from '../lib/supabaseClient';
+import { DebugEnv } from '../components/DebugEnv';
+import { Notification } from '../components/Notification';
+// import { MAX_FILE_SIZE } from '../lib/supabaseClient';
+// Supabase is disabled, so define MAX_FILE_SIZE locally:
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+import { eventEmitter, EVENTS } from '../lib/events';
 
-// Helper function to format file size for display
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
@@ -13,13 +17,43 @@ const formatFileSize = (bytes: number): string => {
 };
 
 export const UploadPage = () => {
-  const handleUploadComplete = (url: string, filePath: string) => {
-    console.log('Upload complete:', { url, filePath });
-    // TODO: Add any additional logic after upload (e.g., redirect, show success message)
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
+
+  const handleUploadComplete = (url: string) => {
+    console.log('Upload complete:', { url });
+    // Show success notification
+    setNotification({
+      type: 'success',
+      message: 'File uploaded successfully! It will appear on the home page shortly.',
+    });
+    eventEmitter.emit(EVENTS.FILE_UPLOADED, { url });
+  };
+
+  const handleUploadSuccess = (result: any) => {
+    console.log('Upload success with full result:', result);
+    // Show success notification
+    setNotification({
+      type: 'success',
+      message: `File "${result.fileKey.split('/').pop()}" uploaded successfully!`,
+    });
+    // Emit event to refresh file list on home page
+    eventEmitter.emit(EVENTS.FILE_UPLOADED, result);
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Notification */}
+      {notification && (
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          onClose={() => setNotification(null)}
+        />
+      )}
+
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <div className="h-12 mx-auto mb-4">
@@ -29,6 +63,11 @@ export const UploadPage = () => {
           <p className="text-gray-600 dark:text-gray-400">
             Share your music and videos with the world
           </p>
+        </div>
+
+        {/* Debug component - remove this in production */}
+        <div className="mb-6">
+          <DebugEnv />
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
@@ -42,7 +81,10 @@ export const UploadPage = () => {
             </ul>
           </div>
 
-          <FileUpload onUploadComplete={handleUploadComplete} />
+          <FileUpload 
+            onUploadComplete={handleUploadComplete}
+            onUploadSuccess={handleUploadSuccess}
+          />
         </div>
       </div>
     </div>

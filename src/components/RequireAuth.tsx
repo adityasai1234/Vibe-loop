@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { validateEnvVars } from '../lib/env';
 
 interface RequireAuthProps {
   children: React.ReactNode;
@@ -19,7 +20,6 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
   }
 
   if (!user) {
-    // Redirect to login page but save the attempted url
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
