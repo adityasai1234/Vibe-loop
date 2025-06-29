@@ -32,12 +32,10 @@ export const DroppablePlaylist: React.FC<DroppablePlaylistProps> = ({
   const [{ isOver }, drop] = useDrop(() => ({
     accept: 'SONG',
     drop: (item: { id: string; type: string }) => {
-      // Find the source playlist that contains this song
       const sourcePlaylist = playlists.find(playlist => 
         playlist.songs.includes(item.id)
       );
 
-      // Only move if we found a source playlist and it's different from the target
       if (sourcePlaylist && sourcePlaylist.id !== playlistId) {
         moveSongBetweenPlaylists(item.id, sourcePlaylist.id, playlistId);
       }

@@ -1,4 +1,4 @@
-/* Supabase storage logic commented out. Use Hetzner upload instead. */
+/* Supabase storage logic commented out. Using Hetzner upload instead. */
 
 // import { useState, ChangeEvent } from 'react';
 // import { supabase } from '../lib/supabaseClient';
@@ -72,6 +72,7 @@
 //     setState({ phase: 'done', url: pub.publicUrl });
 //   }
 //
+
 //   return { state, onChange };
 // } 
 

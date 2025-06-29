@@ -5,7 +5,6 @@ import { hetznerS3Client, HETZNER_BUCKET_NAME, getHetznerPublicUrl } from '../sr
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log('List Hetzner files API route called:', req.method, req.url);
   
-  // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -81,7 +80,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json(responseData);
 
   } catch (error: any) {
-    // Handle Hetzner's 404 "NoSuchKey" as an empty list
     if (error.Code === 'NoSuchKey' || error.$metadata?.httpStatusCode === 404) {
       return res.status(200).json({
         success: true,
