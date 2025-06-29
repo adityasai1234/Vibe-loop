@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../lib/api';
 import { eventEmitter, EVENTS } from '../lib/events';
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { SongCard } from '../components/SongCard';
+import { SearchBar } from '../components/SearchBar';
+import { MoodSuggestions } from '../components/MoodSuggestions';
+import { Layout } from '../components/Layout';
 
-interface Song {
+interface ApiSong {
   id: number;
-  url: string;
   title: string;
+  url: string;
 }
 
 export const HomePage: React.FC = () => {
-  const [songs, setSongs] = useState<Song[]>([]);
+  const [songs, setSongs] = useState<ApiSong[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,12 +21,12 @@ export const HomePage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      console.log('🔄 Fetching songs from backend...');
-      console.log('🌐 Fetch URL:', `${API_BASE_URL}/api/uploads`);
+      console.log('🔄 Fetching songs...');
       
+      // Use real API (both development and production)
+      console.log('🌐 Fetch URL:', `${API_BASE_URL}/api/uploads`);
       const res = await fetch(`${API_BASE_URL}/api/uploads`);
       console.log('📡 Response status:', res.status);
-      console.log('📡 Response headers:', Object.fromEntries(res.headers.entries()));
       
       if (!res.ok) {
         const errorText = await res.text();
@@ -33,7 +37,6 @@ export const HomePage: React.FC = () => {
       const data = await res.json();
       console.log('🎵 Songs received:', data);
       console.log('🎵 Number of songs:', data.length);
-      console.log('🎵 Songs array type:', Array.isArray(data) ? 'Array' : typeof data);
       
       setSongs(data);
       console.log('✅ Songs state updated');

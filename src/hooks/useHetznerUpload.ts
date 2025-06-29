@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../lib/api';
 
 interface UploadState {
   phase: 'idle' | 'uploading' | 'done' | 'error';
@@ -38,7 +39,7 @@ export const useHetznerUpload = (options: UseHetznerUploadOptions = {}) => {
       formData.append('file', file);
       if (user?.id) formData.append('userId', user.id);
 
-      const response = await fetch('/api/upload-to-hetzner', {
+      const response = await fetch(`${API_BASE_URL}/api/upload-to-hetzner`, {
         method: 'POST',
         body: formData,
       });

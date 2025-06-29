@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { Upload, X, Music, Video, AlertCircle } from 'lucide-react';
-// import { useExpressUpload } from '../hooks/useExpressUpload';
+import { useHetznerUpload } from '../hooks/useHetznerUpload';
 
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 Bytes';
@@ -23,18 +23,26 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 }) => {
   const [localFile, setLocalFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  // const { state, uploadFile, reset } = useExpressUpload({ ... });
+  const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Placeholder upload state
-  const [uploadState, setUploadState] = useState<'idle' | 'uploading' | 'done' | 'error'>('idle');
-  const [uploadMsg, setUploadMsg] = useState<string | null>(null);
+  // Use Hetzner upload hook
+  const { state, uploadFile, reset } = useHetznerUpload({
+    onUploadComplete: (result) => {
+      if (onUploadComplete) {
+        onUploadComplete(result.publicUrl);
+      }
+      if (onUploadSuccess) {
+        onUploadSuccess(result);
+      }
+    }
+  });
 
-  // Remove all upload logic for now
   const handleSelectAndUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    
     setLocalFile(file);
-    // TODO: Implement upload logic
+    // Don't auto-upload, let user click upload button
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -52,19 +60,34 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     setIsDragging(false);
     const file = e.dataTransfer.files?.[0];
     if (!file) return;
+    
     setLocalFile(file);
-    // TODO: Implement upload logic
+    // Don't auto-upload, let user click upload button
   }, []);
+
+  const handleUpload = async (file: File) => {
+    try {
+      // Use real Hetzner upload (both development and production)
+      await uploadFile(file);
+    } catch (error) {
+      console.error('Upload failed:', error);
+    }
+  };
+
+  const handleStartUpload = useCallback(async () => {
+    if (!localFile) return;
+    await handleUpload(localFile);
+  }, [localFile]);
 
   const handleRemoveFile = useCallback(() => {
     setLocalFile(null);
-    setUploadState('idle');
-    setUploadMsg(null);
-  }, []);
+    reset();
+    setUploadProgress(0);
+  }, [reset]);
 
   const isAudio = localFile?.type?.startsWith('audio/');
   const isVideo = localFile?.type?.startsWith('video/');
-  const displayErrorMessage = uploadState === 'error' ? uploadMsg : null;
+  const displayErrorMessage = state.phase === 'error' ? state.msg : null;
 
   const ALL_ALLOWED_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/flac', 'video/mp4', 'video/webm'];
   const MAX_FILE_SIZE_MB = 50;
@@ -88,9 +111,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           onChange={handleSelectAndUpload}
           className="hidden"
           id="file-upload"
-          disabled={uploadState === 'uploading'}
+          disabled={state.phase === 'uploading'}
         />
-        {uploadState === 'idle' && !localFile ? (
+        {state.phase === 'idle' && !localFile ? (
           <label
             htmlFor="file-upload"
             className="flex flex-col items-center justify-center cursor-pointer"
@@ -123,35 +146,48 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                     </p>
                   </div>
                 </div>
-                {uploadState !== 'uploading' && (
-                  <button
-                    onClick={handleRemoveFile}
-                    className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
-                    aria-label="Remove file"
-                  >
-                    <X className="w-5 h-5 text-gray-500" />
-                  </button>
-                )}
+                <div className="flex items-center space-x-2">
+                  {state.phase === 'idle' && (
+                    <button
+                      onClick={handleStartUpload}
+                      className="px-4 py-2 bg-accent-500 hover:bg-accent-600 text-white rounded-lg text-sm font-medium transition-colors"
+                    >
+                      Upload
+                    </button>
+                  )}
+                  {state.phase !== 'uploading' && (
+                    <button
+                      onClick={handleRemoveFile}
+                      className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
+                      aria-label="Remove file"
+                    >
+                      <X className="w-5 h-5 text-gray-500" />
+                    </button>
+                  )}
+                </div>
               </div>
             )}
-            {/* Placeholder for upload progress, success, and error messages */}
-            {uploadState === 'uploading' && (
+            
+            {/* Upload progress */}
+            {state.phase === 'uploading' && (
               <div className="space-y-2">
                 <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-accent-500 transition-all duration-300"
-                    style={{ width: `0%` }}
+                    style={{ width: `${state.pct}%` }}
                   />
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                  Uploading... (not implemented)
+                  Uploading... {state.pct}%
                 </p>
               </div>
             )}
-            {uploadState === 'done' && (
+            
+            {/* Upload success */}
+            {state.phase === 'done' && (
               <div className="text-center">
                 <p className="text-sm text-green-600 dark:text-green-400 mb-2">
-                  Upload complete! (not implemented)
+                  Upload complete!
                 </p>
                 <button
                   onClick={handleRemoveFile}
@@ -161,6 +197,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 </button>
               </div>
             )}
+            
+            {/* Error message */}
             {displayErrorMessage && (
               <p className="text-sm text-red-500 dark:text-red-400 text-center flex items-center justify-center">
                 <AlertCircle size={16} className="mr-1" />
