@@ -16,11 +16,15 @@ export const HomePage: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
+        console.log('🔄 Fetching songs from backend...');
         const res = await fetch('http://localhost:5001/api/uploads');
+        console.log('📡 Response status:', res.status);
         if (!res.ok) throw new Error('Failed to fetch songs');
         const data = await res.json();
+        console.log('🎵 Songs received:', data);
         setSongs(data);
       } catch (err: any) {
+        console.error('❌ Error fetching songs:', err);
         setError(err.message || 'Unknown error');
       } finally {
         setLoading(false);
@@ -28,6 +32,8 @@ export const HomePage: React.FC = () => {
     };
     fetchSongs();
   }, []);
+
+  console.log('🎵 Current songs state:', songs);
 
   return (
     <div className="p-8">
