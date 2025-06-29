@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { API_BASE_URL } from '../lib/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 interface UploadState {
   phase: 'idle' | 'uploading' | 'done' | 'error';
@@ -38,7 +38,7 @@ export const useExpressUpload = (options: UseExpressUploadOptions = {}) => {
       const formData = new FormData();
       formData.append('file', file);
 
-      const hetznerRes = await fetch(`/api/upload-to-hetzner`, {
+      const hetznerRes = await fetch(`${API_BASE_URL}/api/upload-to-hetzner`, {
         method: 'POST',
         body: formData,
       });
@@ -62,7 +62,7 @@ export const useExpressUpload = (options: UseExpressUploadOptions = {}) => {
 
       // 2. Send title and url to Express backend
       const title = file.name.replace(/\.[^/.]+$/, ""); // Remove file extension
-      const response = await fetch(`/api/upload`, {
+      const response = await fetch(`${API_BASE_URL}/api/upload`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
