@@ -37,9 +37,8 @@ export const UploadPage = () => {
     // Show success notification
     setNotification({
       type: 'success',
-      message: `File "${result.fileKey.split('/').pop()}" uploaded successfully!`,
+      message: `Song "${result.song.title}" uploaded successfully!`,
     });
-    // Emit event to refresh file list on home page
     eventEmitter.emit(EVENTS.FILE_UPLOADED, result);
   };
 

@@ -506,11 +506,10 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
         setIsBuffering(false);
       };
 
-      // Add all event listeners
+     
       audioElement.addEventListener('timeupdate', handleTimeUpdate);
       audioElement.addEventListener('error', handleError);
 
-      // Cleanup function
       return () => {
         audioElement.removeEventListener('timeupdate', handleTimeUpdate);
         audioElement.removeEventListener('error', handleError);

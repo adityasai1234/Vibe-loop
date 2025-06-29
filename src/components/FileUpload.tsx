@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { Upload, X, Music, Video, AlertCircle } from 'lucide-react';
-import { useHetznerUpload } from '../hooks/useHetznerUpload';
+import { useExpressUpload } from '../hooks/useExpressUpload';
 
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 Bytes';
@@ -23,10 +23,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 }) => {
   const [localFile, setLocalFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const { state, uploadFile, reset } = useHetznerUpload({
+  const { state, uploadFile, reset } = useExpressUpload({
     onUploadComplete: (result) => {
       if (onUploadComplete) {
-        onUploadComplete(result.publicUrl);
+        onUploadComplete(result.song.url);
       }
       if (onUploadSuccess) {
         onUploadSuccess(result);
@@ -161,7 +161,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   />
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                  Uploading to Hetzner... {Math.round(state.pct)}%
+                  Uploading to Express backend... {Math.round(state.pct)}%
                 </p>
               </div>
             )}
@@ -169,7 +169,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             {state.phase === 'done' && (
               <div className="text-center">
                 <p className="text-sm text-green-600 dark:text-green-400 mb-2">
-                  Upload complete! File stored on Hetzner.
+                  Upload complete! Song added to backend.
                 </p>
                 {isAudio ? (
                   <audio controls className="w-full">

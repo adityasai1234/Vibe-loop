@@ -63,4 +63,4 @@ export const Notification: React.FC<NotificationProps> = ({
       </div>
     </div>
   );
-}; 
+};
