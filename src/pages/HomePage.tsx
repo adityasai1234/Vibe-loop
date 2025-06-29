@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { eventEmitter, EVENTS } from '../lib/events';
-import { API_BASE_URL } from '../lib/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 interface Song {
   id: number;
@@ -18,9 +18,9 @@ export const HomePage: React.FC = () => {
     setError(null);
     try {
       console.log('🔄 Fetching songs from backend...');
-      console.log('🌐 Fetch URL: http://localhost:5001/api/uploads');
+      console.log('🌐 Fetch URL:', `${API_BASE_URL}/api/uploads`);
       
-      const res = await fetch(`/api/uploads`);
+      const res = await fetch(`${API_BASE_URL}/api/uploads`);
       console.log('📡 Response status:', res.status);
       console.log('📡 Response headers:', Object.fromEntries(res.headers.entries()));
       

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 interface HetznerFile {
   key: string;
@@ -41,7 +42,7 @@ export const useHetznerFiles = (options: UseHetznerFilesOptions = {}): UseHetzne
         prefix,
         limit: limit.toString(),
       });
-      const response = await fetch(`/api/list-hetzner-files?${params}`);
+      const response = await fetch(`${API_BASE_URL}/api/list-hetzner-files?${params}`);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
