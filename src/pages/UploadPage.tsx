@@ -37,7 +37,7 @@ export const UploadPage = () => {
     // Show success notification
     setNotification({
       type: 'success',
-      message: `Song "${result.song.title}" uploaded successfully!`,
+      message: `File uploaded successfully! URL: ${result.publicUrl}`,
     });
     eventEmitter.emit(EVENTS.FILE_UPLOADED, result);
   };
