@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { eventEmitter, EVENTS } from '../lib/events';
+import { API_BASE_URL } from '../lib/api';
 
 interface Song {
   id: number;
@@ -19,7 +20,7 @@ export const HomePage: React.FC = () => {
       console.log('🔄 Fetching songs from backend...');
       console.log('🌐 Fetch URL: http://localhost:5001/api/uploads');
       
-      const res = await fetch('http://localhost:5001/api/uploads');
+      const res = await fetch(`/api/uploads`);
       console.log('📡 Response status:', res.status);
       console.log('📡 Response headers:', Object.fromEntries(res.headers.entries()));
       
