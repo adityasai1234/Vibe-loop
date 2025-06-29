@@ -1,6 +1,6 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Upload, X, Music, Video, AlertCircle } from 'lucide-react';
-import { useExpressUpload } from '../hooks/useExpressUpload';
+// import { useExpressUpload } from '../hooks/useExpressUpload';
 
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 Bytes';
@@ -23,29 +23,19 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 }) => {
   const [localFile, setLocalFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const { state, uploadFile, reset } = useExpressUpload({
-    onUploadComplete: (result) => {
-      if (onUploadComplete) {
-        onUploadComplete(result.song.url);
-      }
-      if (onUploadSuccess) {
-        onUploadSuccess(result);
-      }
-    }
-  });
+  // const { state, uploadFile, reset } = useExpressUpload({ ... });
 
+  // Placeholder upload state
+  const [uploadState, setUploadState] = useState<'idle' | 'uploading' | 'done' | 'error'>('idle');
+  const [uploadMsg, setUploadMsg] = useState<string | null>(null);
+
+  // Remove all upload logic for now
   const handleSelectAndUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
     setLocalFile(file);
-    
-    try {
-      const result = await uploadFile(file);
-    } catch (error) {
-      console.error('Upload failed:', error);
-    }
-  }, [uploadFile]);
+    // TODO: Implement upload logic
+  }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -60,27 +50,21 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
     const file = e.dataTransfer.files?.[0];
     if (!file) return;
-
     setLocalFile(file);
-    
-    try {
-      const result = await uploadFile(file);
-    } catch (error) {
-      console.error('Upload failed:', error);
-    }
-  }, [uploadFile]);
+    // TODO: Implement upload logic
+  }, []);
 
   const handleRemoveFile = useCallback(() => {
     setLocalFile(null);
-    reset();
-  }, [reset]);
+    setUploadState('idle');
+    setUploadMsg(null);
+  }, []);
 
   const isAudio = localFile?.type?.startsWith('audio/');
   const isVideo = localFile?.type?.startsWith('video/');
-  const displayErrorMessage = state.phase === 'error' ? state.msg : null;
+  const displayErrorMessage = uploadState === 'error' ? uploadMsg : null;
 
   const ALL_ALLOWED_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/flac', 'video/mp4', 'video/webm'];
   const MAX_FILE_SIZE_MB = 50;
@@ -104,10 +88,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           onChange={handleSelectAndUpload}
           className="hidden"
           id="file-upload"
-          disabled={state.phase === 'uploading'}
+          disabled={uploadState === 'uploading'}
         />
-        
-        {state.phase === 'idle' && !localFile ? (
+        {uploadState === 'idle' && !localFile ? (
           <label
             htmlFor="file-upload"
             className="flex flex-col items-center justify-center cursor-pointer"
@@ -140,7 +123,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                     </p>
                   </div>
                 </div>
-                {state.phase !== 'uploading' && (
+                {uploadState !== 'uploading' && (
                   <button
                     onClick={handleRemoveFile}
                     className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
@@ -151,37 +134,25 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 )}
               </div>
             )}
-
-            {state.phase === 'uploading' && (
+            {/* Placeholder for upload progress, success, and error messages */}
+            {uploadState === 'uploading' && (
               <div className="space-y-2">
                 <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-accent-500 transition-all duration-300"
-                    style={{ width: `${state.pct}%` }}
+                    style={{ width: `0%` }}
                   />
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                  Uploading to Express backend... {Math.round(state.pct)}%
+                  Uploading... (not implemented)
                 </p>
               </div>
             )}
-
-            {state.phase === 'done' && (
+            {uploadState === 'done' && (
               <div className="text-center">
                 <p className="text-sm text-green-600 dark:text-green-400 mb-2">
-                  Upload complete! Song added to backend.
+                  Upload complete! (not implemented)
                 </p>
-                {isAudio ? (
-                  <audio controls className="w-full">
-                    <source src={state.url} type={localFile?.type} />
-                    Your browser does not support the audio element.
-                  </audio>
-                ) : (
-                  <video controls className="w-full rounded-lg">
-                    <source src={state.url} type={localFile?.type} />
-                    Your browser does not support the video element.
-                  </video>
-                )}
                 <button
                   onClick={handleRemoveFile}
                   className="mt-4 py-2 px-4 rounded-lg font-medium bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200"
@@ -190,7 +161,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 </button>
               </div>
             )}
-
             {displayErrorMessage && (
               <p className="text-sm text-red-500 dark:text-red-400 text-center flex items-center justify-center">
                 <AlertCircle size={16} className="mr-1" />
