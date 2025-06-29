@@ -7,7 +7,7 @@ import path from 'path';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 3001;
 
 // File to store songs persistently
 const SONGS_FILE = 'songs.json';
@@ -94,6 +94,6 @@ app.get('/api/health', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📁 Upload endpoint: http://localhost:${PORT}/api/upload`);
-  console.log(`🎵 Songs: http://localhost:${PORT}/api/uploads`);
+  console.log(`🎵 Songs list: http://localhost:${PORT}/api/uploads`);
   console.log(`📊 Current songs in memory:`, uploadedSongs.length);
 }); 

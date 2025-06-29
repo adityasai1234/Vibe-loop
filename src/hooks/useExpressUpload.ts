@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { API_BASE_URL } from '../lib/api';
 
 interface UploadState {
   phase: 'idle' | 'uploading' | 'done' | 'error';
@@ -37,7 +38,7 @@ export const useExpressUpload = (options: UseExpressUploadOptions = {}) => {
       const formData = new FormData();
       formData.append('file', file);
 
-      const hetznerRes = await fetch('/api/upload-to-hetzner', {
+      const hetznerRes = await fetch(`/api/upload-to-hetzner`, {
         method: 'POST',
         body: formData,
       });
@@ -61,7 +62,7 @@ export const useExpressUpload = (options: UseExpressUploadOptions = {}) => {
 
       // 2. Send title and url to Express backend
       const title = file.name.replace(/\.[^/.]+$/, ""); // Remove file extension
-      const response = await fetch('http://localhost:5001/api/upload', {
+      const response = await fetch(`/api/upload`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
