@@ -7,7 +7,7 @@ import path from 'path';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 5001;
 
 // File to store songs persistently
 const SONGS_FILE = 'songs.json';

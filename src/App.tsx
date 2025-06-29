@@ -16,6 +16,7 @@ import SignupPage from './pages/SignupPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import { PlaybackQueue } from './components/PlaybackQueue';
 import { Layout } from './components/Layout';
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
 
 // Create router with future flags configuration
 const router = createBrowserRouter(
@@ -58,17 +59,29 @@ const router = createBrowserRouter(
 
 export function App() {
   return (
-      <AuthProvider>
-      <ThemeProvider>
-        <SearchProvider>
-          <LikedSongsProvider>
-            <MusicPlayerProvider>
-              <RouterProvider router={router} />
-            </MusicPlayerProvider>
-          </LikedSongsProvider>
-        </SearchProvider>
-      </ThemeProvider>
-      </AuthProvider>
+    <>
+      <header style={{ display: 'flex', justifyContent: 'flex-end', padding: '1rem' }}>
+        <SignedOut>
+          <SignInButton mode="modal" />
+        </SignedOut>
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
+      </header>
+      <SignedIn>
+        <AuthProvider>
+          <ThemeProvider>
+            <SearchProvider>
+              <LikedSongsProvider>
+                <MusicPlayerProvider>
+                  <RouterProvider router={router} />
+                </MusicPlayerProvider>
+              </LikedSongsProvider>
+            </SearchProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </SignedIn>
+    </>
   );
 }
 
