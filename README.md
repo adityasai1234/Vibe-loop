@@ -1,103 +1,145 @@
-# Vibe Loop
+# VibeLoop - Full-Stack Music Library
 
-A modern music streaming web app built with React (Vite, TypeScript, Tailwind CSS). Features file uploads, song listing, playback, playlists, and a clean, frontend-only architecture.
+A modern, full-stack music library application built with Next.js, Supabase, and BetterAuth. Upload, manage, and play your music collection with a beautiful, responsive interface.
 
----
+## Features
 
-## 🗺️ App Flow Sequence Diagram
+- 🎵 **Music Management**: Upload, edit, and delete songs
+- 🔐 **Authentication**: Secure email/password authentication with BetterAuth
+- 🎨 **Modern UI**: Beautiful, responsive design with Tailwind CSS
+- 🌙 **Dark Mode**: Toggle between light and dark themes
+- 📱 **Mobile Friendly**: Fully responsive design
+- 🎧 **Audio Player**: Built-in audio player with progress controls
+- 📊 **File Management**: Automatic file size validation and storage
+- 🔍 **Pagination**: Efficient loading with pagination support
 
-Below is a high-level sequence diagram showing the main user flows, frontend logic, API utilities, storage, and UI components.
+## Tech Stack
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant FrontendApp as Frontend App
-    participant APIUtils as API Utilities
-    participant Hetzner as Hetzner Storage
-    participant FileUpload as FileUpload Component
-    participant MediaFileList as MediaFileList
-    participant MoodPage
-    participant PlaylistPage
-    participant ProfilePage
+- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes
+- **Database**: Supabase PostgreSQL
+- **Storage**: Supabase Storage
+- **Authentication**: BetterAuth
+- **State Management**: TanStack Query (React Query)
+- **UI Components**: Radix UI + shadcn/ui
+- **Deployment**: Vercel
 
-    User->>FrontendApp: Open file upload page
-    FrontendApp->>FileUpload: Render upload UI
-    FileUpload->>APIUtils: Prepare & send upload request
-    APIUtils->>Hetzner: Upload file to storage
-    Hetzner-->>APIUtils: Return upload result
-    APIUtils-->>FileUpload: Notify upload result
-    FileUpload-->>FrontendApp: Notify upload status
-    FrontendApp->>MediaFileList: Refresh file list
-    MediaFileList->>APIUtils: Fetch media files
-    APIUtils->>Hetzner: Query files
-    Hetzner-->>APIUtils: Return file data
-    APIUtils-->>MediaFileList: Update UI with files
+## Quick Start
 
-    User->>FrontendApp: Play or pause song
-    FrontendApp->>MediaFileList: Play selected song
-    FrontendApp->>PlaylistPage: Update playlist view
-    FrontendApp->>MoodPage: Filter playlist data
-    FrontendApp->>ProfilePage: Display profile
+### 1. Clone and Install
 
-    User->>ProfilePage: Edit profile
-    ProfilePage->>FrontendApp: Update user name
-    FrontendApp->>ProfilePage: Show updated name
-```
+\`\`\`bash
+git clone <your-repo>
+cd music-app
+npm install
+\`\`\`
 
----
+### 2. Environment Setup
 
-## 🗂️ Project File Mapping
+Copy `.env.example` to `.env.local` and fill in your values:
 
-| Diagram Swimlane      | Project Files/Directories                                      | Description                                      |
-|----------------------|---------------------------------------------------------------|--------------------------------------------------|
-| **Frontend App**     | `src/pages/`, `src/components/`, `src/context/`, `src/store/` | Main React app, context, state, and UI           |
-| **API Utilities**    | `src/lib/hetznerStorage.ts`, `src/hooks/useHetznerFiles.ts`   | Logic for file upload/listing, S3 integration    |
-| **Hetzner Storage**  | (External)                                                     | S3 bucket, accessed via API utilities            |
-| **FileUpload**       | `src/components/FileUpload.tsx`                                | File upload UI component                         |
-| **MediaFileList**    | `src/components/MediaFileList.tsx`                             | Media file listing UI component                  |
-| **MoodPage**         | `src/pages/MoodPage.tsx`                                       | Mood-based music selection page                  |
-| **PlaylistPage**     | `src/pages/PlaylistPage.tsx`                                   | Playlist details and actions page                |
-| **ProfilePage**      | `src/pages/ProfilePage.tsx`                                    | User profile page                               |
+\`\`\`bash
+cp .env.example .env.local
+\`\`\`
 
-**Event System:**
-- `src/lib/events.ts` — Used for emitting/listening to UI update events (e.g., after upload)
+### 3. Database Setup
 
----
+1. Create a Supabase project
+2. Run the SQL script in `scripts/setup-database.sql` in your Supabase SQL editor
+3. Create a storage bucket named "media" in Supabase Storage
+4. Set up Row Level Security policies (included in the SQL script)
 
-## 🔗 API Utilities & Endpoints Mapping
+### 4. Run Development Server
 
-| **API Utility / Endpoint**         | **File(s)**                                         | **Used By / Purpose**                                                                                   |
-|------------------------------------|-----------------------------------------------------|---------------------------------------------------------------------------------------------------------|
-| **Hetzner S3 Upload**              | `src/lib/hetznerStorage.ts`<br>`api/upload-to-hetzner.ts` | Handles file upload logic to Hetzner S3. Used by the `FileUpload` component to send files to storage.    |
-| **List Hetzner Files**             | `src/hooks/useHetznerFiles.ts`<br>`api/list-hetzner-files.ts` | Fetches the list of uploaded files from Hetzner S3. Used by `MediaFileList` and any page showing files.  |
-| **Event System**                   | `src/lib/events.ts`                                 | Emits and listens for events (e.g., after upload, triggers file list refresh in UI components).          |
-| **Supabase (legacy/disabled)**     | `src/hooks/useFileUpload.ts`                        | Previously handled uploads and metadata with Supabase. Now mostly disabled, but structure remains.       |
-| **Upload and Store (Hetzner+Supabase)** | `api/upload-and-store.ts`                         | (If used) Uploads to Hetzner and stores metadata in Supabase.                                           |
+\`\`\`bash
+npm run dev
+\`\`\`
 
-### How the API Utilities Are Connected in the App Flow
+Visit `http://localhost:3000` to see your app!
 
-1. **User uploads a file** via `FileUpload` (`src/components/FileUpload.tsx`)
-2. **FileUpload** calls the upload API utility (`src/lib/hetznerStorage.ts` or `api/upload-to-hetzner.ts`)
-3. **API utility** sends the file to Hetzner S3
-4. On success, **FileUpload** emits an event via `src/lib/events.ts`
-5. **MediaFileList** (`src/components/MediaFileList.tsx`) listens for this event and uses `src/hooks/useHetznerFiles.ts` to fetch the updated file list from `api/list-hetzner-files.ts`
-6. **MediaFileList** displays the updated files
+## Deployment
 
----
+### Deploy to Vercel
 
-## 🚀 Features
-- Upload and stream audio/video files
-- Playlist and mood-based browsing
-- Responsive, modern UI
-- No backend required — all logic is frontend or serverless
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy!
 
----
+The app is optimized for Vercel deployment with proper configuration files included.
 
-## 🛠️ Setup
-1. Install dependencies: `npm install`
-2. Start the dev server: `npm run dev`
+## Environment Variables
 
----
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `DATABASE_URL` | PostgreSQL connection string | Yes |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | Yes |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key | Yes |
+| `NEXT_PUBLIC_STORAGE_BUCKET` | Storage bucket name | Yes |
+| `NEXT_PUBLIC_MAX_FILE_SIZE` | Max file size in bytes | Yes |
+| `BETTER_AUTH_SECRET` | Secret for BetterAuth | Yes |
+| `NEXT_PUBLIC_BETTER_AUTH_URL` | App URL for auth | Yes |
 
-## 🤝 Contributing
-Pull requests and issues welcome!
+## File Structure
+
+\`\`\`
+music-app/
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes
+│   ├── auth/              # Authentication pages
+│   ├── dashboard/         # Main dashboard
+│   └── profile/           # User profile
+├── components/            # React components
+│   ├── auth/              # Authentication components
+│   └── ui/                # UI components (shadcn/ui)
+├── lib/                   # Utilities and configurations
+├── scripts/               # Database setup scripts
+└── public/                # Static assets
+\`\`\`
+
+## Usage
+
+1. **Sign Up**: Create a new account with email/password
+2. **Upload Songs**: Drag & drop or select audio files to upload
+3. **Manage Library**: Edit song details, delete songs, organize your collection
+4. **Play Music**: Use the built-in audio player with progress controls
+5. **Profile**: View your account information and settings
+
+## Features in Detail
+
+### Authentication
+- Secure email/password authentication
+- Protected routes
+- User session management
+- Profile management
+
+### Music Management
+- File upload with validation (max 5MB)
+- Metadata editing (title, artist, genre)
+- File storage in Supabase
+- Automatic cleanup on deletion
+
+### Audio Player
+- Play/pause controls
+- Progress bar with seeking
+- Volume control
+- Duration display
+
+### UI/UX
+- Responsive grid layout
+- Loading skeletons
+- Toast notifications
+- Dark/light theme toggle
+- Modern gradient design
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details.
