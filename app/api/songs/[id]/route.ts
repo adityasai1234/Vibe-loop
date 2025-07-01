@@ -1,33 +1,34 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { SongService } from "@/lib/services/song-service"
+import { updateSongLikes, getSongMetadata } from "@/lib/s3-service"
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const { id } = params
-    const body = await request.json()
-    const { title, artist, genre } = body
-    const song = await SongService.updateSong(id, { title, artist, genre })
-    return NextResponse.json(song)
-  } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 500 })
-  }
-}
+    const songId = params.id
+    const { action } = await request.json()
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-  try {
-    const { id } = params
-    // Get song details first
-    const song = await SongService.getSongByIdForDeletion(id)
-    if (!song) {
-      return NextResponse.json({ error: "Song not found" }, { status: 404 })
+    if (action !== 'like') {
+      return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
-    // Delete song from MongoDB
-    const deleted = await SongService.deleteSong(id)
-    if (!deleted) {
-      return NextResponse.json({ error: "Failed to delete song" }, { status: 500 })
+
+    // Get current metadata
+    const metadata = await getSongMetadata(songId)
+    if (!metadata) {
+      return NextResponse.json({ error: 'Song not found' }, { status: 404 })
     }
-    return NextResponse.json({ message: "Song deleted successfully" })
+
+    // Increment likes
+    const newLikes = metadata.likes + 1
+    await updateSongLikes(songId, newLikes)
+
+    return NextResponse.json({ 
+      message: 'Song liked successfully',
+      likes: newLikes 
+    })
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 500 })
+    console.error('Error updating song:', error)
+    return NextResponse.json({ error: 'Failed to update song' }, { status: 500 })
   }
-}
+} 

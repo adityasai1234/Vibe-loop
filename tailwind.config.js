@@ -27,6 +27,7 @@ module.exports = {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          500: "#0098A0",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -43,6 +44,7 @@ module.exports = {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          500: "#FF9800",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
