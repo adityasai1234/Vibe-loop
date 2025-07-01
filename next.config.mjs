@@ -7,16 +7,20 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['focjpbfuhfszqgrnenrw.supabase.co'],
     unoptimized: true,
   },
   env: {
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    NEXT_PUBLIC_STORAGE_BUCKET: process.env.NEXT_PUBLIC_STORAGE_BUCKET,
-    NEXT_PUBLIC_MAX_FILE_SIZE: process.env.NEXT_PUBLIC_MAX_FILE_SIZE,
-    NEXT_PUBLIC_BETTER_AUTH_URL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
+    S3_ENABLED: process.env.S3_ENABLED,
+    S3_ENDPOINT: process.env.S3_ENDPOINT,
+    S3_REGION: process.env.S3_REGION,
+    S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID,
+    S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY,
+    S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
+    S3_FORCE_PATH_STYLE: process.env.S3_FORCE_PATH_STYLE,
   },
+  experimental: {
+    serverComponentsExternalPackages: ['@aws-sdk/client-s3']
+  }
 }
 
 export default nextConfig

@@ -1,29 +1,19 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getSongsCollection } from "@/lib/mongodb"
-import { transformSong } from "@/lib/models/song"
+import { 
+  getAllSongs, 
+  uploadAudioFile, 
+  storeSongMetadata, 
+  generateSongId,
+  type SongMetadata 
+} from "@/lib/s3-service"
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url)
-    const page = Number.parseInt(searchParams.get("page") || "1")
-    const limit = Number.parseInt(searchParams.get("limit") || "10")
-    const skip = (page - 1) * limit
-    const collection = await getSongsCollection()
-    const [songs, total] = await Promise.all([
-      collection.find({}).sort({ created_at: -1 }).skip(skip).limit(limit).toArray(),
-      collection.countDocuments({}),
-    ])
-    return NextResponse.json({
-      songs: songs.map(transformSong),
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    })
+    const songs = await getAllSongs()
+    return NextResponse.json({ songs })
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 500 })
+    console.error('Error fetching songs:', error)
+    return NextResponse.json({ error: 'Failed to fetch songs' }, { status: 500 })
   }
 }
 
@@ -31,13 +21,49 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     const file = formData.get("file") as File
+    const title = formData.get("title") as string
+    const artist = formData.get("artist") as string
+
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 })
     }
-    // Add logic to handle file upload and song creation
-    // For now, just return a placeholder
-    return NextResponse.json({ message: "Song uploaded (placeholder)" })
+
+    if (!title || !artist) {
+      return NextResponse.json({ error: "Title and artist are required" }, { status: 400 })
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('audio/')) {
+      return NextResponse.json({ error: "File must be an audio file" }, { status: 400 })
+    }
+
+    // Generate unique song ID
+    const songId = generateSongId()
+
+    // Convert file to buffer
+    const fileBuffer = Buffer.from(await file.arrayBuffer())
+
+    // Upload audio file to S3
+    await uploadAudioFile(songId, fileBuffer, file.type)
+
+    // Store metadata
+    const metadata: SongMetadata = {
+      title,
+      artist,
+      likes: 0,
+      uploadedAt: new Date().toISOString(),
+    }
+
+    await storeSongMetadata(songId, metadata)
+
+    return NextResponse.json({ 
+      message: "Song uploaded successfully", 
+      songId 
+    })
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 500 })
+    console.error('Error uploading song:', error)
+    return NextResponse.json({ 
+      error: `Failed to upload song: ${error instanceof Error ? error.message : 'Unknown error'}` 
+    }, { status: 500 })
   }
 }
