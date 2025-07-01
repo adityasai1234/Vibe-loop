@@ -106,13 +106,6 @@ music-app/
 5. **Profile**: View your account information and settings
 
 ## Features in Detail
-
-### Authentication
-- Secure email/password authentication
-- Protected routes
-- User session management
-- Profile management
-
 ### Music Management
 - File upload with validation (max 5MB)
 - Metadata editing (title, artist, genre)
