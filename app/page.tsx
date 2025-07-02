@@ -1,9 +1,30 @@
+'use client'
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Music, Play } from "lucide-react"
+import { useAuth } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function HomePage(): JSX.Element {
+  const { isSignedIn, isLoaded } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.replace('/login');
+    }
+  }, [isLoaded, isSignedIn, router]);
+
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isSignedIn) {
+    return <></>;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       {/* Header */}
@@ -49,9 +70,6 @@ export default function HomePage(): JSX.Element {
               World
             </span>
           </h1>
-          <p className="max-w-[660px] text-lg text-muted-foreground md:text-xl">
-            Upload your favorite tracks, discover amazing music from others, and show some love with likes. No sign-up required — just pure music sharing.
-          </p>
           <div className="flex flex-col items-center gap-4 sm:flex-row">
             <Link href="/dashboard">
               <Button size="lg">
