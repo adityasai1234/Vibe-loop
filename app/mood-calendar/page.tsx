@@ -99,11 +99,84 @@ export default function MoodCalendarPage() {
                   </li>
                 ))}
               </ul>
+              <MoodJournalForm selectedDay={selectedDay} onEntryAdded={() => {
+                (async () => {
+                  setLoading(true);
+                  try {
+                    const res = await fetch('/api/mood-log');
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    if (data.logs) setMoodLogs(data.logs);
+                  } finally {
+                    setLoading(false);
+                  }
+                })();
+              }} />
               <button className="mt-2 text-sm text-primary underline" onClick={() => setSelectedDay(null)}>Close</button>
             </div>
           )}
         </div>
       )}
     </div>
+  );
+}
+
+function MoodJournalForm({ selectedDay, onEntryAdded }: { selectedDay: string, onEntryAdded: () => void }) {
+  const [emoji, setEmoji] = useState('😊');
+  const [text, setText] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const emojis = ['😊', '😢', '😎', '😴', '🤩', '😡'];
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const time = selectedDay + 'T12:00:00Z'; // Save as noon UTC for the day
+      const res = await fetch('/api/mood-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emoji, text, time }),
+      });
+      if (res.ok) {
+        setText('');
+        onEntryAdded();
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-2">
+      <div className="flex gap-2 items-center">
+        <span className="font-medium">Mood:</span>
+        {emojis.map(e => (
+          <button
+            type="button"
+            key={e}
+            className={`text-2xl px-1 ${emoji === e ? 'ring-2 ring-primary rounded' : ''}`}
+            onClick={() => setEmoji(e)}
+            aria-label={e}
+          >
+            {e}
+          </button>
+        ))}
+      </div>
+      <textarea
+        className="border rounded p-2 bg-background/50"
+        placeholder="Write your mood journal..."
+        value={text}
+        onChange={e => setText(e.target.value)}
+        required
+        rows={2}
+      />
+      <button
+        type="submit"
+        className="bg-primary text-white px-4 py-2 rounded disabled:opacity-50"
+        disabled={submitting || !text.trim()}
+      >
+        {submitting ? 'Saving...' : 'Save Journal'}
+      </button>
+    </form>
   );
 } 
