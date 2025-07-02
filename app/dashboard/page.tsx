@@ -1,3 +1,4 @@
+'use client'
 import { Suspense } from "react"
 import Link from "next/link"
 import { SongList } from "@/components/song-list"
@@ -6,8 +7,28 @@ import { SongListSkeleton } from "@/components/song-list-skeleton"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Music, Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useAuth } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function DashboardPage(): JSX.Element {
+  const { isSignedIn, isLoaded } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.replace('/login');
+    }
+  }, [isLoaded, isSignedIn, router]);
+
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isSignedIn) {
+    return <></>;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       {/* Header */}
