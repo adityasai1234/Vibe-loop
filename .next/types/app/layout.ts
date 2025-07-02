@@ -1,4 +1,4 @@
-// File: /Users/aditysaib/Documents/Vibe-loop/app/layout.tsx
+// File: /Users/aditysaib/Documents/Vibe-loop copy/app/layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

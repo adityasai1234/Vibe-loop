@@ -29,6 +29,7 @@ export function SongList() {
   const [songs, setSongs] = useState<Song[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadSongs = async () => {
@@ -91,6 +92,14 @@ export function SongList() {
             key={song.id} 
             song={song} 
             onLikeUpdate={refreshSongs}
+            isPlaying={currentlyPlayingId === song.id}
+            onPlayPause={(playing: boolean) => {
+              if (playing) {
+                setCurrentlyPlayingId(song.id);
+              } else if (currentlyPlayingId === song.id) {
+                setCurrentlyPlayingId(null);
+              }
+            }}
           />
         ))}
       </div>

@@ -28,6 +28,7 @@ export interface SongMetadata {
   artist: string
   likes: number
   uploadedAt: string
+  likedBy?: string[] // array of user IDs who liked this song
 }
 
 // Upload audio file to S3
@@ -221,4 +222,25 @@ export async function getAllMoodLogs(): Promise<{emoji: string, text: string, ti
     console.error('Error listing mood logs:', error);
     return [];
   }
+}
+
+// Check if a user has already liked a song
+export async function hasUserLikedSong(songId: string, userId: string): Promise<boolean> {
+  const metadata = await getSongMetadata(songId);
+  if (!metadata) return false;
+  return Array.isArray(metadata.likedBy) && metadata.likedBy.includes(userId);
+}
+
+// Add a user's like to a song (if not already liked)
+export async function addUserLikeToSong(songId: string, userId: string): Promise<number | null> {
+  const metadata = await getSongMetadata(songId);
+  if (!metadata) return null;
+  if (!Array.isArray(metadata.likedBy)) metadata.likedBy = [];
+  if (!metadata.likedBy.includes(userId)) {
+    metadata.likedBy.push(userId);
+    metadata.likes = (metadata.likes || 0) + 1;
+    await storeSongMetadata(songId, metadata);
+    return metadata.likes;
+  }
+  return metadata.likes;
 } 

@@ -18,10 +18,11 @@ interface Song {
 interface SongCardProps {
   song: Song
   onLikeUpdate?: () => void
+  isPlaying?: boolean
+  onPlayPause?: (playing: boolean) => void
 }
 
-export function SongCard({ song, onLikeUpdate }: SongCardProps) {
-  const [isPlaying, setIsPlaying] = useState(false)
+export function SongCard({ song, onLikeUpdate, isPlaying = false, onPlayPause }: SongCardProps) {
   const [isLiking, setIsLiking] = useState(false)
   const [currentLikes, setCurrentLikes] = useState(song.likes)
 
@@ -78,7 +79,7 @@ export function SongCard({ song, onLikeUpdate }: SongCardProps) {
           <AudioPlayer 
             src={song.audioUrl} 
             isPlaying={isPlaying} 
-            onPlayPause={setIsPlaying} 
+            onPlayPause={onPlayPause || (() => {})} 
           />
         </div>
 

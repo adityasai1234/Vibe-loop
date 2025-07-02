@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { updateSongLikes, getSongMetadata } from "@/lib/s3-service"
+import { addUserLikeToSong, hasUserLikedSong, getSongMetadata } from "@/lib/s3-service"
+import { auth } from '@clerk/nextjs/server';
 
 export async function PATCH(
   request: NextRequest,
@@ -13,15 +14,26 @@ export async function PATCH(
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
 
+    // Get userId from Clerk
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
     // Get current metadata
     const metadata = await getSongMetadata(songId)
     if (!metadata) {
       return NextResponse.json({ error: 'Song not found' }, { status: 404 })
     }
 
-    // Increment likes
-    const newLikes = metadata.likes + 1
-    await updateSongLikes(songId, newLikes)
+    // Check if user already liked
+    const alreadyLiked = await hasUserLikedSong(songId, userId);
+    if (alreadyLiked) {
+      return NextResponse.json({ error: 'You have already liked this song.' }, { status: 400 });
+    }
+
+    // Add like
+    const newLikes = await addUserLikeToSong(songId, userId);
 
     return NextResponse.json({ 
       message: 'Song liked successfully',
