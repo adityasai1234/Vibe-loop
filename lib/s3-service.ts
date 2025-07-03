@@ -269,3 +269,64 @@ export async function addUserLikeToSong(songId: string, userId: string): Promise
   }
   return metadata.likes;
 } 
+
+// Suggestion interface
+export interface Suggestion {
+  id: string;
+  artist: string;
+  youtubeUrl: string;
+  createdAt: string;
+}
+
+// Store a suggestion as JSON file in S3
+export async function storeSuggestion(suggestion: { artist: string; youtubeUrl: string }): Promise<void> {
+  const id = `suggestion_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const key = `suggestions/${id}.json`;
+  const suggestionObj: Suggestion = {
+    id,
+    artist: suggestion.artist,
+    youtubeUrl: suggestion.youtubeUrl,
+    createdAt: new Date().toISOString(),
+  };
+  const command = new PutObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: key,
+    Body: JSON.stringify(suggestionObj),
+    ContentType: 'application/json',
+  });
+  await s3Client.send(command);
+}
+
+// List all suggestions from S3
+export async function getAllSuggestions(): Promise<Suggestion[]> {
+  try {
+    const listCommand = new ListObjectsV2Command({
+      Bucket: BUCKET_NAME,
+      Prefix: 'suggestions/',
+    });
+    const response = await s3Client.send(listCommand);
+    const objects = response.Contents || [];
+    if (!objects.length) return [];
+    const suggestions: Suggestion[] = [];
+    for (const object of objects) {
+      if (object.Key && object.Key.endsWith('.json')) {
+        const getCommand = new GetObjectCommand({
+          Bucket: BUCKET_NAME,
+          Key: object.Key,
+        });
+        const res = await s3Client.send(getCommand);
+        const body = await res.Body?.transformToString();
+        if (body) {
+          try {
+            suggestions.push(JSON.parse(body));
+          } catch {}
+        }
+      }
+    }
+    // Sort by createdAt (newest first)
+    return suggestions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  } catch (error) {
+    console.error('Error listing suggestions:', error);
+    return [];
+  }
+} 
