@@ -113,7 +113,7 @@ export default function MoodCalendarPage() {
                       }}
                     >
                       View Log
-                    </button>
+                </button>
                   )}
                   {hasLogged && !isToday && (
                     <div className="mt-2 px-3 py-1 bg-green-600 text-white text-xs rounded opacity-75">
@@ -161,19 +161,19 @@ export default function MoodCalendarPage() {
                 ))}
               </ul>
               {selectedDay === new Date().toISOString().split('T')[0] && (
-                <MoodJournalForm selectedDay={selectedDay} onEntryAdded={() => {
-                  (async () => {
-                    setLoading(true);
-                    try {
-                      const res = await fetch('/api/mood-log');
-                      if (!res.ok) return;
-                      const data = await res.json();
-                      if (data.logs) setMoodLogs(data.logs);
-                    } finally {
-                      setLoading(false);
-                    }
-                  })();
-                }} />
+              <MoodJournalForm selectedDay={selectedDay} onEntryAdded={() => {
+                (async () => {
+                  setLoading(true);
+                  try {
+                    const res = await fetch('/api/mood-log');
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    if (data.logs) setMoodLogs(data.logs);
+                  } finally {
+                    setLoading(false);
+                  }
+                })();
+              }} />
               )}
               {selectedDay !== new Date().toISOString().split('T')[0] && (
                 <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded text-blue-800 dark:text-blue-200 text-sm">

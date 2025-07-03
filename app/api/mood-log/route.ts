@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     } else {
       // Get all logs for the user
       const logs = await getUserMoodLogs(userId);
-      return NextResponse.json({ logs });
+    return NextResponse.json({ logs });
     }
   } catch (error) {
     console.error(error);

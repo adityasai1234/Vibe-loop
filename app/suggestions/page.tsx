@@ -1,160 +1,118 @@
 'use client'
 
 import React, { useState, useEffect } from "react";
-import { useAuth } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
 
-function getTimeOfDay(date: Date) {
-  const hour = date.getHours();
-  if (hour >= 5 && hour < 12) return "morning";
-  if (hour >= 12 && hour < 17) return "afternoon";
-  if (hour >= 17 && hour < 21) return "evening";
-  return "night";
-}
-
-const timeOfDayEmojis: Record<string, string> = {
-  morning: "🌅☀️🎶",
-  afternoon: "🌞🎵🥁",
-  evening: "🌇🎸🎷",
-  night: "🌙✨🎧",
-};
-
-const musicEmojis = ["🎶", "🎵", "🎤", "🎧", "🎸", "🥁", "🎷", "🎹", "🪕", "🎺"];
-
-function getRandomMusicEmoji() {
-  return musicEmojis[Math.floor(Math.random() * musicEmojis.length)];
+interface Suggestion {
+  artist: string;
+  youtubeUrl: string;
+  timestamp: string;
 }
 
 export default function SuggestionsPage() {
-  const { isSignedIn, isLoaded } = useAuth();
-  const router = useRouter();
-  const [suggestions, setSuggestions] = useState<{text: string, emoji: string}[]>([]);
-  const [input, setInput] = useState("");
-  const [selectedEmoji, setSelectedEmoji] = useState("");
-  const [randomSongs, setRandomSongs] = useState<any[]>([]);
+  const [artist, setArtist] = useState("");
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
+  // Fetch all suggestions on mount
   useEffect(() => {
-    if (isLoaded && !isSignedIn) {
-      router.replace('/login');
-    }
-  }, [isLoaded, isSignedIn, router]);
-
-  // Set random emoji on client after mount
-  useEffect(() => {
-    setSelectedEmoji(getRandomMusicEmoji());
+    fetchSuggestions();
   }, []);
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (input.trim()) {
-      setSuggestions([{text: input, emoji: selectedEmoji}, ...suggestions]);
-      setInput("");
-      setSelectedEmoji(getRandomMusicEmoji());
-    }
-  }
-
-  function handleRandomEmoji() {
-    setSelectedEmoji(getRandomMusicEmoji());
-  }
-
-  async function handleEmojiClick() {
+  async function fetchSuggestions() {
     setLoading(true);
     setError("");
-    setRandomSongs([]);
     try {
-      const res = await fetch("/api/songs");
-      if (!res.ok) throw new Error("Failed to fetch songs");
+      const res = await fetch("/api/suggestions");
+      if (!res.ok) throw new Error("Failed to fetch suggestions");
       const data = await res.json();
-      const songs = data.songs || [];
-      if (songs.length === 0) {
-        setError("No songs uploaded yet.");
-        setLoading(false);
-        return;
-      }
-      // Filter by time of day
-      const now = new Date();
-      const currentTimeOfDay = getTimeOfDay(now);
-      const filtered = songs.filter((song: any) => {
-        const uploadedDate = new Date(song.uploadedAt);
-        return getTimeOfDay(uploadedDate) === currentTimeOfDay;
-      });
-      const pool = filtered.length > 0 ? filtered : songs; // fallback to all if none match
-      const shuffled = pool.sort(() => 0.5 - Math.random());
-      setRandomSongs(shuffled.slice(0, 3));
+      setSuggestions(data);
     } catch (err: any) {
-      setError(err.message || "Error fetching songs");
+      setError(err.message || "Error fetching suggestions");
     } finally {
       setLoading(false);
     }
   }
 
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+    if (!artist && !youtubeUrl) {
+      setError("Please enter an artist name or a YouTube link.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch("/api/suggestions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ artist, youtubeUrl }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to submit suggestion");
+      }
+      setArtist("");
+      setYoutubeUrl("");
+      setSuccess("Suggestion submitted!");
+      fetchSuggestions();
+    } catch (err: any) {
+      setError(err.message || "Error submitting suggestion");
+    } finally {
+      setLoading(false);
+    }
   }
-
-  if (!isSignedIn) {
-    return <></>;
-  }
-
-  const now = new Date();
-  const currentTimeOfDay = getTimeOfDay(now);
-  const timeEmoji = timeOfDayEmojis[currentTimeOfDay];
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 p-4">
       <h1 className="text-3xl font-bold mb-4 flex items-center gap-2">
-        <button onClick={handleEmojiClick} className="hover:scale-125 transition-transform" title="Show random songs">
-          <span role="img" aria-label="music">🎵</span>
-        </button>
-        Music Suggestions
+        <span role="img" aria-label="music">🎵</span>
+        Public Music Suggestions
       </h1>
-      <form onSubmit={handleSubmit} className="flex gap-2 mb-6 items-center">
-        <button type="button" onClick={handleRandomEmoji} className="text-2xl px-2" title="Random music emoji">{selectedEmoji}</button>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-2 mb-6 w-full max-w-md">
         <input
           type="text"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          placeholder="Suggest a song or artist..."
+          value={artist}
+          onChange={e => setArtist(e.target.value)}
+          placeholder="Artist name (optional)"
           className="border rounded px-3 py-2 focus:outline-none focus:ring"
         />
-        <button type="submit" className="bg-primary text-white px-4 py-2 rounded">Suggest</button>
+        <input
+          type="text"
+          value={youtubeUrl}
+          onChange={e => setYoutubeUrl(e.target.value)}
+          placeholder="YouTube link (optional)"
+          className="border rounded px-3 py-2 focus:outline-none focus:ring"
+        />
+        <button type="submit" className="bg-primary text-white px-4 py-2 rounded" disabled={loading}>
+          {loading ? "Submitting..." : "Suggest"}
+        </button>
+        {error && <div className="text-red-500 text-sm mt-1">{error}</div>}
+        {success && <div className="text-green-600 text-sm mt-1">{success}</div>}
       </form>
-      <ul className="w-full max-w-md space-y-2 mb-8">
-        {suggestions.length === 0 ? (
-          <li className="text-muted-foreground text-center">No suggestions yet. Be the first! 🎤</li>
-        ) : (
-          suggestions.map((s, i) => (
-            <li key={i} className="bg-background/80 border rounded px-4 py-2 shadow-sm flex items-center gap-2">{s.emoji} {s.text}</li>
-          ))
-        )}
-      </ul>
-      {/* Random Songs Section */}
       <div className="w-full max-w-md">
-        {loading && <div className="text-center text-muted-foreground">Loading random songs...</div>}
-        {error && <div className="text-center text-red-500">{error}</div>}
-        {randomSongs.length > 0 && (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-center mb-2">
-              {timeEmoji} Random Songs ({currentTimeOfDay.toUpperCase()}) {timeEmoji}
-            </h2>
-            {randomSongs.map((song, idx) => (
-              <div key={song.id || idx} className="border rounded p-3 bg-background/80 flex flex-col gap-1">
-                <div className="font-bold flex items-center gap-2">{getRandomMusicEmoji()} {song.title}</div>
-                <div className="text-sm text-muted-foreground flex items-center gap-2">by {song.artist} {getRandomMusicEmoji()}</div>
-                <audio controls src={song.audioUrl} className="w-full mt-2" />
-              </div>
-            ))}
-          </div>
-        )}
+        <h2 className="text-xl font-semibold mb-2">All Suggestions</h2>
+        {loading && <div className="text-center text-muted-foreground">Loading suggestions...</div>}
+        <ul className="space-y-2">
+          {suggestions.length === 0 ? (
+            <li className="text-muted-foreground text-center">No suggestions yet. Be the first! 🎤</li>
+          ) : (
+            suggestions.map((s, i) => (
+              <li key={i} className="bg-background/80 border rounded px-4 py-2 shadow-sm flex flex-col gap-1">
+                <div className="font-bold">{s.artist || <span className='text-muted-foreground'>(No artist)</span>}</div>
+                {s.youtubeUrl && (
+                  <a href={s.youtubeUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all">
+                    {s.youtubeUrl}
+                  </a>
+                )}
+                <div className="text-xs text-muted-foreground">{new Date(s.timestamp).toLocaleString()}</div>
+              </li>
+            ))
+          )}
+        </ul>
       </div>
     </div>
   );
