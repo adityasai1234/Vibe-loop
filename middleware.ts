@@ -9,6 +9,7 @@ export const config = {
     // - _next/image (image optimization files)
     // - favicon.ico (favicon file)
     // - public folder
-    '/((?!_next/static|_next/image|favicon.ico|public).*)',
+    // - api routes (to allow large file uploads)
+    '/((?!_next/static|_next/image|favicon.ico|public|api).*)',
   ],
 }; 
