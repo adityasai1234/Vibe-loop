@@ -18,7 +18,9 @@ interface SongsResponse {
 }
 
 async function fetchSongs(): Promise<SongsResponse> {
-  const response = await fetch('/api/songs')
+  const response = await fetch('/api/songs', {
+    credentials: 'include',
+  })
   if (!response.ok) {
     throw new Error("Failed to fetch songs")
   }
