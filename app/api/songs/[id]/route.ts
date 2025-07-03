@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { addUserLikeToSong, hasUserLikedSong, getSongMetadata } from "@/lib/s3-service"
-import { auth } from '@clerk/nextjs/server';
+import { currentUser } from '@clerk/nextjs/server';
 
 export async function PATCH(
   request: NextRequest,
@@ -15,10 +15,11 @@ export async function PATCH(
     }
 
     // Get userId from Clerk
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await currentUser();
+    if (!user) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
+    const userId = user.id;
 
     // Get current metadata
     const metadata = await getSongMetadata(songId)

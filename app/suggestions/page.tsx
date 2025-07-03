@@ -119,19 +119,60 @@ export default function SuggestionsPage() {
           break;
         }
       }
-      const log = { emoji: emojiToUse, text: moodText, time: new Date().toLocaleString() };
-      setMoodEntries([log, ...moodEntries]);
-      setMoodText("");
-      setMoodEmoji(getRandomMoodEmoji());
-      // Store in S3 via API
+      
       try {
-        await fetch("/api/mood-log", {
+        const log = { emoji: emojiToUse, text: moodText, time: new Date().toISOString() };
+        const res = await fetch("/api/mood-log", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(log),
         });
+        
+        if (res.ok) {
+          setMoodEntries([log, ...moodEntries]);
+          setMoodText("");
+          setMoodEmoji(getRandomMoodEmoji());
+        } else {
+          const data = await res.json();
+          if (data.alreadyLogged) {
+            // Show a more user-friendly message
+            const message = "You have already logged your mood for today. You can only log once per day. Check your mood calendar to view your entry!";
+            // Create a custom alert-like notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+              position: fixed;
+              top: 20px;
+              right: 20px;
+              background: #fef3c7;
+              border: 1px solid #f59e0b;
+              border-radius: 8px;
+              padding: 16px;
+              max-width: 300px;
+              z-index: 1000;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+              font-family: system-ui, sans-serif;
+              font-size: 14px;
+              color: #92400e;
+            `;
+            notification.innerHTML = `
+              <div style="display: flex; align-items: flex-start; gap: 8px;">
+                <span style="font-size: 16px;">⚠️</span>
+                <div>
+                  <div style="font-weight: 600; margin-bottom: 4px;">Daily Limit Reached</div>
+                  <div>${message}</div>
+                </div>
+              </div>
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+              document.body.removeChild(notification);
+            }, 5000);
+          } else {
+            alert(data.error || "Failed to save mood log");
+          }
+        }
       } catch (err) {
-        // Optionally handle error
+        alert("Failed to save mood log");
       }
     }
   }

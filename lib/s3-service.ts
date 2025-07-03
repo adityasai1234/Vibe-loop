@@ -178,7 +178,7 @@ export function generateSongId(): string {
 }
 
 // Store mood log as JSON file in S3
-export async function storeMoodLog(log: { emoji: string; text: string; time: string }): Promise<void> {
+export async function storeMoodLog(log: { emoji: string; text: string; time: string; userId: string }): Promise<void> {
   const id = `mood_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   const key = `mood-logs/${id}.json`;
   const command = new PutObjectCommand({
@@ -191,7 +191,7 @@ export async function storeMoodLog(log: { emoji: string; text: string; time: str
 }
 
 // List all mood logs from S3
-export async function getAllMoodLogs(): Promise<{emoji: string, text: string, time: string}[]> {
+export async function getAllMoodLogs(): Promise<{emoji: string, text: string, time: string, userId: string}[]> {
   try {
     const listCommand = new ListObjectsV2Command({
       Bucket: BUCKET_NAME,
@@ -200,7 +200,7 @@ export async function getAllMoodLogs(): Promise<{emoji: string, text: string, ti
     const response = await s3Client.send(listCommand);
     const objects = response.Contents || [];
     if (!objects.length) return [];
-    const logs: {emoji: string, text: string, time: string}[] = [];
+    const logs: {emoji: string, text: string, time: string, userId: string}[] = [];
     for (const object of objects) {
       if (object.Key && object.Key.endsWith('.json')) {
         const getCommand = new GetObjectCommand({
@@ -222,6 +222,31 @@ export async function getAllMoodLogs(): Promise<{emoji: string, text: string, ti
     console.error('Error listing mood logs:', error);
     return [];
   }
+}
+
+// Get mood logs for a specific user
+export async function getUserMoodLogs(userId: string): Promise<{emoji: string, text: string, time: string, userId: string}[]> {
+  const allLogs = await getAllMoodLogs();
+  return allLogs.filter(log => log.userId === userId);
+}
+
+// Check if user has already logged for a specific date
+export async function hasUserLoggedForDate(userId: string, date: string): Promise<boolean> {
+  const userLogs = await getUserMoodLogs(userId);
+  return userLogs.some(log => {
+    const logDate = new Date(log.time).toISOString().split('T')[0];
+    return logDate === date;
+  });
+}
+
+// Get user's mood log for a specific date
+export async function getUserMoodLogForDate(userId: string, date: string): Promise<{emoji: string, text: string, time: string, userId: string} | null> {
+  const userLogs = await getUserMoodLogs(userId);
+  const logForDate = userLogs.find(log => {
+    const logDate = new Date(log.time).toISOString().split('T')[0];
+    return logDate === date;
+  });
+  return logForDate || null;
 }
 
 // Check if a user has already liked a song

@@ -1,6 +1,6 @@
 {
-  "/dashboard/page": "app/dashboard/page.js",
-  "/api/songs/route": "app/api/songs/route.js",
-  "/api/songs/[id]/route": "app/api/songs/[id]/route.js",
-  "/page": "app/page.js"
+  "/_not-found/page": "app/_not-found/page.js",
+  "/page": "app/page.js",
+  "/mood-calendar/page": "app/mood-calendar/page.js",
+  "/api/mood-log/route": "app/api/mood-log/route.js"
 }
