@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from "react";
+import { useAuth } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 
 function getTimeOfDay(date: Date) {
   const hour = date.getHours();
@@ -23,13 +25,9 @@ function getRandomMusicEmoji() {
   return musicEmojis[Math.floor(Math.random() * musicEmojis.length)];
 }
 
-const moodEmojis = ["😃", "😊", "😎", "🥳", "😢", "😡", "😴", "🤩", "😇", "🤔", "😌", "😭", "😤", "😍", "😬", "😱", "😆", "😐", "😃", "🥰"];
-
-function getRandomMoodEmoji() {
-  return moodEmojis[Math.floor(Math.random() * moodEmojis.length)];
-}
-
 export default function SuggestionsPage() {
+  const { isSignedIn, isLoaded } = useAuth();
+  const router = useRouter();
   const [suggestions, setSuggestions] = useState<{text: string, emoji: string}[]>([]);
   const [input, setInput] = useState("");
   const [selectedEmoji, setSelectedEmoji] = useState("");
@@ -37,28 +35,15 @@ export default function SuggestionsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Mood journal state
-  const [moodText, setMoodText] = useState("");
-  const [moodEmoji, setMoodEmoji] = useState("");
-  const [moodEntries, setMoodEntries] = useState<{emoji: string, text: string, time: string}[]>([]);
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.replace('/login');
+    }
+  }, [isLoaded, isSignedIn, router]);
 
   // Set random emoji on client after mount
   useEffect(() => {
-    setMoodEmoji(getRandomMoodEmoji());
     setSelectedEmoji(getRandomMusicEmoji());
-  }, []);
-
-  // Fetch mood logs on mount
-  useEffect(() => {
-    async function fetchMoodLogs() {
-      try {
-        const res = await fetch("/api/mood-log");
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.logs) setMoodEntries(data.logs);
-      } catch {}
-    }
-    fetchMoodLogs();
   }, []);
 
   function handleSubmit(e: React.FormEvent) {
@@ -105,80 +90,19 @@ export default function SuggestionsPage() {
     }
   }
 
-  // Mood journal handlers
-  async function handleMoodSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (moodText.trim()) {
-      // Check for sad words
-      const sadWords = ["low", "sad", "not well"];
-      const lowerText = moodText.toLowerCase();
-      let emojiToUse = moodEmoji;
-      for (const word of sadWords) {
-        if (lowerText.includes(word)) {
-          emojiToUse = "😢";
-          break;
-        }
-      }
-      
-      try {
-        const log = { emoji: emojiToUse, text: moodText, time: new Date().toISOString() };
-        const res = await fetch("/api/mood-log", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(log),
-        });
-        
-        if (res.ok) {
-          setMoodEntries([log, ...moodEntries]);
-          setMoodText("");
-          setMoodEmoji(getRandomMoodEmoji());
-        } else {
-          const data = await res.json();
-          if (data.alreadyLogged) {
-            // Show a more user-friendly message
-            const message = "You have already logged your mood for today. You can only log once per day. Check your mood calendar to view your entry!";
-            // Create a custom alert-like notification
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-              position: fixed;
-              top: 20px;
-              right: 20px;
-              background: #fef3c7;
-              border: 1px solid #f59e0b;
-              border-radius: 8px;
-              padding: 16px;
-              max-width: 300px;
-              z-index: 1000;
-              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-              font-family: system-ui, sans-serif;
-              font-size: 14px;
-              color: #92400e;
-            `;
-            notification.innerHTML = `
-              <div style="display: flex; align-items: flex-start; gap: 8px;">
-                <span style="font-size: 16px;">⚠️</span>
-                <div>
-                  <div style="font-weight: 600; margin-bottom: 4px;">Daily Limit Reached</div>
-                  <div>${message}</div>
-                </div>
-              </div>
-            `;
-            document.body.appendChild(notification);
-            setTimeout(() => {
-              document.body.removeChild(notification);
-            }, 5000);
-          } else {
-            alert(data.error || "Failed to save mood log");
-          }
-        }
-      } catch (err) {
-        alert("Failed to save mood log");
-      }
-    }
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
-  function handleRandomMoodEmoji() {
-    setMoodEmoji(getRandomMoodEmoji());
+  if (!isSignedIn) {
+    return <></>;
   }
 
   const now = new Date();
@@ -187,38 +111,6 @@ export default function SuggestionsPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 p-4">
-      {/* Mood Journal Section */}
-      <div className="w-full max-w-md mb-8 p-4 border rounded bg-background/80">
-        <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">Mood Journal <span>{moodEmoji}</span></h2>
-        <form onSubmit={handleMoodSubmit} className="flex gap-2 mb-2">
-          <button type="button" onClick={handleRandomMoodEmoji} className="text-2xl px-2" title="Random mood emoji">{moodEmoji}</button>
-          <input
-            type="text"
-            value={moodText}
-            onChange={e => setMoodText(e.target.value)}
-            placeholder="How are you feeling?"
-            className="border rounded px-3 py-2 flex-1 focus:outline-none focus:ring"
-          />
-          <button type="submit" className="bg-primary text-white px-4 py-2 rounded">Log</button>
-        </form>
-        {moodEntries.length > 0 && (
-          <div className="mt-2 text-muted-foreground">
-            <div className="font-semibold">Latest Mood:</div>
-            <div className="flex items-center gap-2 text-lg">{moodEntries[0].emoji} {moodEntries[0].text} <span className="text-xs text-muted-foreground">({moodEntries[0].time})</span></div>
-            <div className="mt-4">
-              <div className="font-semibold mb-1">Mood Log:</div>
-              <ul className="space-y-1 max-h-40 overflow-y-auto">
-                {moodEntries.map((entry, idx) => (
-                  <li key={idx} className="flex items-center gap-2 text-base">
-                    <span>{entry.emoji}</span> {entry.text} <span className="text-xs text-muted-foreground">({entry.time})</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )}
-      </div>
-
       <h1 className="text-3xl font-bold mb-4 flex items-center gap-2">
         <button onClick={handleEmojiClick} className="hover:scale-125 transition-transform" title="Show random songs">
           <span role="img" aria-label="music">🎵</span>
