@@ -83,19 +83,15 @@ export function UploadSong() {
     setIsUploading(true)
 
     try {
-      const formData = new FormData()
-      formData.append("file", file)
-      formData.append("title", title)
-      formData.append("artist", artist)
-
-      const response = await fetch("/api/songs", {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || "Failed to upload song")
+      // For files larger than 4MB, use direct S3 upload
+      const maxDirectUpload = 4 * 1024 * 1024 // 4MB
+      
+      if (file.size > maxDirectUpload) {
+        // Use direct S3 upload for large files
+        await uploadLargeFile()
+      } else {
+        // Use regular form upload for smaller files
+        await uploadSmallFile()
       }
 
       toast({
@@ -119,6 +115,80 @@ export function UploadSong() {
       })
     } finally {
       setIsUploading(false)
+    }
+  }
+
+  const uploadSmallFile = async () => {
+    const formData = new FormData()
+    formData.append("file", file!)
+    formData.append("title", title)
+    formData.append("artist", artist)
+
+    const response = await fetch("/api/songs", {
+      method: "POST",
+      body: formData,
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.error || "Failed to upload song")
+    }
+  }
+
+  const uploadLargeFile = async () => {
+    try {
+      // Step 1: Get presigned URL
+      const presignedResponse = await fetch("/api/songs/presigned-url", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fileName: file!.name,
+          fileType: file!.type,
+          title,
+          artist,
+        }),
+      })
+
+      if (!presignedResponse.ok) {
+        const error = await presignedResponse.json()
+        throw new Error(error.error || "Failed to get upload URL")
+      }
+
+      const { presignedUrl, songId, uploadUrl } = await presignedResponse.json()
+
+      // Step 2: Upload directly to S3
+      const uploadResponse = await fetch(presignedUrl, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": file!.type,
+        },
+      })
+
+      if (!uploadResponse.ok) {
+        throw new Error("Failed to upload file to storage")
+      }
+
+      // Step 3: Complete the upload
+      const completeResponse = await fetch(uploadUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          artist,
+        }),
+      })
+
+      if (!completeResponse.ok) {
+        const error = await completeResponse.json()
+        throw new Error(error.error || "Failed to complete upload")
+      }
+    } catch (error: any) {
+      throw new Error(`Large file upload failed: ${error.message}`)
     }
   }
 

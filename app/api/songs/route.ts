@@ -36,10 +36,10 @@ export async function POST(request: NextRequest) {
     const contentLength = request.headers.get('content-length')
     if (contentLength) {
       const size = parseInt(contentLength, 10)
-      const maxSize = 20 * 1024 * 1024 // 20MB
+      const maxSize = 4 * 1024 * 1024 // 4MB (Vercel serverless limit)
       if (size > maxSize) {
         return NextResponse.json({ 
-          error: `File too large. Maximum size is 20MB. Received: ${(size / 1024 / 1024).toFixed(2)}MB` 
+          error: `File too large for direct upload. Please use the web interface for files larger than 4MB. Received: ${(size / 1024 / 1024).toFixed(2)}MB` 
         }, { status: 413 })
       }
     }
@@ -63,10 +63,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file size again after parsing
-    const maxSize = 20 * 1024 * 1024 // 20MB
+    const maxSize = 4 * 1024 * 1024 // 4MB (Vercel serverless limit)
     if (file.size > maxSize) {
       return NextResponse.json({ 
-        error: `File too large. Maximum size is 20MB. Received: ${(file.size / 1024 / 1024).toFixed(2)}MB` 
+        error: `File too large for direct upload. Please use the web interface for files larger than 4MB. Received: ${(file.size / 1024 / 1024).toFixed(2)}MB` 
       }, { status: 413 })
     }
 
