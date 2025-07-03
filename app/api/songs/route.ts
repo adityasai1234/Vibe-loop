@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { auth } from "@clerk/nextjs/server"
 import { 
   getAllSongs, 
   uploadAudioFile, 
@@ -10,12 +9,7 @@ import {
 
 export async function GET() {
   try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
+    // No Clerk auth check: allow public access
     const songs = await getAllSongs()
     return NextResponse.json({ songs })
   } catch (error) {
@@ -26,12 +20,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
+    // No Clerk auth check: allow public upload
     // Check content length to prevent memory issues
     const contentLength = request.headers.get('content-length')
     if (contentLength) {
