@@ -7,6 +7,7 @@ interface Suggestion {
   artist: string;
   youtubeUrl: string;
   createdAt: string;
+  likes: number;
 }
 
 export default function SuggestionsPage() {
@@ -66,6 +67,33 @@ export default function SuggestionsPage() {
     }
   }
 
+  // Like logic
+  function hasLiked(id: string) {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem(`liked_suggestion_${id}`) === '1';
+  }
+  function setLiked(id: string) {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(`liked_suggestion_${id}`, '1');
+  }
+  async function handleLike(id: string) {
+    if (hasLiked(id)) return;
+    try {
+      await fetch('/api/suggestions', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      setLiked(id);
+      fetchSuggestions();
+    } catch {}
+  }
+
+  // Most voted (top 3 by likes)
+  const mostVoted = [...suggestions].sort((a, b) => b.likes - a.likes).slice(0, 3);
+  // The rest, sorted by date
+  const rest = suggestions.filter(s => !mostVoted.some(mv => mv.id === s.id));
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 p-4">
       <h1 className="text-3xl font-bold mb-4 flex items-center gap-2">
@@ -96,15 +124,47 @@ export default function SuggestionsPage() {
         {success && <div className="text-green-600 text-sm mt-1">{success}</div>}
       </form>
       <div className="w-full max-w-md">
+        <h2 className="text-xl font-semibold mb-2">Most Voted</h2>
+        <ul className="space-y-2 mb-6">
+          {mostVoted.length === 0 ? (
+            <li className="text-muted-foreground text-center">No votes yet.</li>
+          ) : (
+            mostVoted.map((s) => (
+              <li key={s.id} className="bg-background/80 border rounded px-4 py-2 shadow-sm flex flex-col gap-1">
+                <div className="font-bold flex items-center gap-2">{s.artist}
+                  <button
+                    className={`ml-2 px-2 py-1 rounded ${hasLiked(s.id) ? 'bg-gray-300 text-gray-600' : 'bg-primary text-white hover:bg-primary/80'}`}
+                    onClick={() => handleLike(s.id)}
+                    disabled={hasLiked(s.id)}
+                    title={hasLiked(s.id) ? 'You already liked this' : 'Like'}
+                  >
+                    👍 {s.likes}
+                  </button>
+                </div>
+                <a href={s.youtubeUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all">{s.youtubeUrl}</a>
+                <div className="text-xs text-muted-foreground">Suggested at {new Date(s.createdAt).toLocaleString()}</div>
+              </li>
+            ))
+          )}
+        </ul>
         <h2 className="text-xl font-semibold mb-2">Public Suggestions</h2>
         {loading && <div className="text-muted-foreground">Loading suggestions...</div>}
         <ul className="space-y-2">
-          {suggestions.length === 0 ? (
+          {rest.length === 0 ? (
             <li className="text-muted-foreground text-center">No suggestions yet. Be the first!</li>
           ) : (
-            suggestions.map((s) => (
+            rest.map((s) => (
               <li key={s.id} className="bg-background/80 border rounded px-4 py-2 shadow-sm flex flex-col gap-1">
-                <div className="font-bold">{s.artist}</div>
+                <div className="font-bold flex items-center gap-2">{s.artist}
+                  <button
+                    className={`ml-2 px-2 py-1 rounded ${hasLiked(s.id) ? 'bg-gray-300 text-gray-600' : 'bg-primary text-white hover:bg-primary/80'}`}
+                    onClick={() => handleLike(s.id)}
+                    disabled={hasLiked(s.id)}
+                    title={hasLiked(s.id) ? 'You already liked this' : 'Like'}
+                  >
+                    👍 {s.likes}
+                  </button>
+                </div>
                 <a href={s.youtubeUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all">{s.youtubeUrl}</a>
                 <div className="text-xs text-muted-foreground">Suggested at {new Date(s.createdAt).toLocaleString()}</div>
               </li>

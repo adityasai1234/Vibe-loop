@@ -34,3 +34,6 @@ logs
 Thumbs.db
 .env*.local
 .vercel
+
+# Test files
+test_song_operations.py

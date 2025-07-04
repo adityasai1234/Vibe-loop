@@ -86,10 +86,13 @@ export function SongList() {
     )
   }
 
+  // Sort songs by likes (descending)
+  const sortedSongs = [...songs].sort((a, b) => b.likes - a.likes);
+
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {songs.map((song) => (
+        {sortedSongs.map((song) => (
           <SongCard 
             key={song.id} 
             song={song} 

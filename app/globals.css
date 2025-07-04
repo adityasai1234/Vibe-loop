@@ -58,7 +58,47 @@
   }
 }
 
-/* Custom audio player styles */
+@layer utilities {
+  .pb-safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .pt-safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .pl-safe-area-inset-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .pr-safe-area-inset-right {
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* Touch-friendly interactions */
+  .touch-pan-y {
+    touch-action: pan-y;
+  }
+  
+  .touch-pan-x {
+    touch-action: pan-x;
+  }
+  
+  .touch-none {
+    touch-action: none;
+  }
+  
+  .h-screen-mobile {
+    height: 100vh;
+    height: 100dvh;
+  }
+  
+  .min-h-screen-mobile {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+}
+
 .audio-player {
   @apply w-full;
 }
@@ -84,7 +124,6 @@
   @apply bg-primary;
 }
 
-/* Loading skeleton animations */
 @keyframes shimmer {
   0% {
     background-position: -200px 0;

@@ -276,6 +276,7 @@ export interface Suggestion {
   artist: string;
   youtubeUrl: string;
   createdAt: string;
+  likes: number;
 }
 
 // Store a suggestion as JSON file in S3
@@ -287,6 +288,7 @@ export async function storeSuggestion(suggestion: { artist: string; youtubeUrl: 
     artist: suggestion.artist,
     youtubeUrl: suggestion.youtubeUrl,
     createdAt: new Date().toISOString(),
+    likes: 0,
   };
   const command = new PutObjectCommand({
     Bucket: BUCKET_NAME,
@@ -295,6 +297,38 @@ export async function storeSuggestion(suggestion: { artist: string; youtubeUrl: 
     ContentType: 'application/json',
   });
   await s3Client.send(command);
+}
+
+// Get a suggestion by id
+export async function getSuggestionById(id: string): Promise<Suggestion | null> {
+  try {
+    const key = `suggestions/${id}.json`;
+    const command = new GetObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+    });
+    const response = await s3Client.send(command);
+    const body = await response.Body?.transformToString();
+    return body ? JSON.parse(body) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+// Like a suggestion by id (increment likes)
+export async function likeSuggestionById(id: string): Promise<Suggestion | null> {
+  const suggestion = await getSuggestionById(id);
+  if (!suggestion) return null;
+  suggestion.likes = (suggestion.likes || 0) + 1;
+  const key = `suggestions/${id}.json`;
+  const command = new PutObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: key,
+    Body: JSON.stringify(suggestion),
+    ContentType: 'application/json',
+  });
+  await s3Client.send(command);
+  return suggestion;
 }
 
 // List all suggestions from S3

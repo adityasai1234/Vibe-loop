@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { addUserLikeToSong, hasUserLikedSong, getSongMetadata } from "@/lib/s3-service"
+import { addUserLikeToSong, hasUserLikedSong, getSongMetadata, getAudioUrl } from "@/lib/s3-service"
 import { currentUser } from '@clerk/nextjs/server';
 
 export async function PATCH(
@@ -43,5 +43,32 @@ export async function PATCH(
   } catch (error) {
     console.error('Error updating song:', error)
     return NextResponse.json({ error: 'Failed to update song' }, { status: 500 })
+  }
+} 
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const songId = params.id
+    const metadata = await getSongMetadata(songId)
+    if (!metadata) {
+      return NextResponse.json({ error: 'Song not found' }, { status: 404 })
+    }
+    
+    // Get signed audio URL
+    const audioUrl = await getAudioUrl(songId)
+    
+    return NextResponse.json({
+      song: {
+        id: songId,
+        ...metadata,
+        audioUrl,
+      }
+    })
+  } catch (error) {
+    console.error('Error fetching song:', error)
+    return NextResponse.json({ error: 'Failed to fetch song' }, { status: 500 })
   }
 } 
