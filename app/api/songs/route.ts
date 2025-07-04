@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { auth } from "@clerk/nextjs/server"
 import { 
   getAllSongs, 
   uploadAudioFile, 
@@ -9,6 +10,10 @@ import {
 
 export async function GET() {
   try {
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     const songs = await getAllSongs()
     return NextResponse.json({ songs })
   } catch (error) {
@@ -19,6 +24,22 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    // Check content length to prevent memory issues
+    const contentLength = request.headers.get('content-length')
+    if (contentLength) {
+      const size = parseInt(contentLength, 10)
+      const maxSize = 4 * 1024 * 1024 // 4MB (Vercel serverless limit)
+      if (size > maxSize) {
+        return NextResponse.json({ 
+          error: `File too large for direct upload. Please use the web interface for files larger than 4MB. Received: ${(size / 1024 / 1024).toFixed(2)}MB` 
+        }, { status: 413 })
+      }
+    }
+
     const formData = await request.formData()
     const file = formData.get("file") as File
     const title = formData.get("title") as string
@@ -35,6 +56,14 @@ export async function POST(request: NextRequest) {
     // Validate file type
     if (!file.type.startsWith('audio/')) {
       return NextResponse.json({ error: "File must be an audio file" }, { status: 400 })
+    }
+
+    // Validate file size again after parsing
+    const maxSize = 4 * 1024 * 1024 // 4MB (Vercel serverless limit)
+    if (file.size > maxSize) {
+      return NextResponse.json({ 
+        error: `File too large for direct upload. Please use the web interface for files larger than 4MB. Received: ${(file.size / 1024 / 1024).toFixed(2)}MB` 
+      }, { status: 413 })
     }
 
     // Generate unique song ID

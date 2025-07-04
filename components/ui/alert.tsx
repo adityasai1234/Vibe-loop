@@ -14,6 +14,8 @@ const alertVariants = cva(
       },
     },
     defaultVariants: {
+      size: "default",
+      orientation: "horizontal",
       variant: "default",
     },
   }

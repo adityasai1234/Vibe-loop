@@ -18,7 +18,14 @@ export default function HomePage(): JSX.Element {
   }, [isLoaded, isSignedIn, router]);
 
   if (!isLoaded) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!isSignedIn) {
@@ -50,13 +57,12 @@ export default function HomePage(): JSX.Element {
         </div>
       </header>
 
-      {/* Hero Section */}
       <main className="flex-1">
         {/* Hero */}
         <section className="container flex flex-col items-center justify-center gap-8 py-12 text-center md:gap-10 md:py-16">
           <h1 className="text-4xl font-extrabold tracking-tight leading-tight sm:text-5xl md:text-6xl">
-            Share Your Music
-            <br className="hidden sm:inline" />with the&nbsp;
+            Welcome to VibeLoop
+            <br className="hidden sm:inline" />
             <span
               style={{
                 background: 'linear-gradient(90deg, #0098A0 0%, #FF9800 100%)',
@@ -67,13 +73,13 @@ export default function HomePage(): JSX.Element {
                 display: 'inline-block',
               }}
             >
-              World
+              Your Music Hub
             </span>
           </h1>
           <div className="flex flex-col items-center gap-4 sm:flex-row">
             <Link href="/dashboard">
               <Button size="lg">
-                <Play className="h-4 w-4 mr-2" /> Start Sharing Music
+                <Play className="h-4 w-4 mr-2" /> Go to Dashboard
               </Button>
             </Link>
             <Link href="/suggestions">
@@ -88,31 +94,6 @@ export default function HomePage(): JSX.Element {
             </Link>
           </div>
         </section>
-
-        {/* Features */}
-        <section className="container grid gap-8 pb-16 sm:grid-cols-2 md:grid-cols-3">
-          <div className="flex flex-col items-center text-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 dark:bg-primary/20">
-              <Music className="h-6 w-6 text-primary" />
-            </div>
-            <h3 className="text-lg font-semibold">Upload Music</h3>
-            <p className="text-sm text-muted-foreground">Share your tracks with the community.</p>
-          </div>
-          <div className="flex flex-col items-center text-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 dark:bg-primary/20">
-              <Play className="h-6 w-6 text-primary" />
-            </div>
-            <h3 className="text-lg font-semibold">Discover Music</h3>
-            <p className="text-sm text-muted-foreground">Browse and play songs from others.</p>
-          </div>
-          <div className="flex flex-col items-center text-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 dark:bg-primary/20">
-              <span className="text-lg">❤️</span>
-            </div>
-            <h3 className="text-lg font-semibold">Show Love</h3>
-            <p className="text-sm text-muted-foreground">Like your favorite tracks.</p>
-          </div>
-        </section>
       </main>
 
       {/* Footer */}
@@ -122,5 +103,5 @@ export default function HomePage(): JSX.Element {
         </div>
       </footer>
     </div>
-  )
+  );
 }

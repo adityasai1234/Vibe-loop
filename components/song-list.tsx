@@ -18,7 +18,9 @@ interface SongsResponse {
 }
 
 async function fetchSongs(): Promise<SongsResponse> {
-  const response = await fetch('/api/songs')
+  const response = await fetch('/api/songs', {
+    credentials: 'include',
+  })
   if (!response.ok) {
     throw new Error("Failed to fetch songs")
   }
@@ -29,6 +31,7 @@ export function SongList() {
   const [songs, setSongs] = useState<Song[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadSongs = async () => {
@@ -83,14 +86,25 @@ export function SongList() {
     )
   }
 
+  // Sort songs by likes (descending)
+  const sortedSongs = [...songs].sort((a, b) => b.likes - a.likes);
+
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {songs.map((song) => (
+        {sortedSongs.map((song) => (
           <SongCard 
             key={song.id} 
             song={song} 
             onLikeUpdate={refreshSongs}
+            isPlaying={currentlyPlayingId === song.id}
+            onPlayPause={(playing: boolean) => {
+              if (playing) {
+                setCurrentlyPlayingId(song.id);
+              } else if (currentlyPlayingId === song.id) {
+                setCurrentlyPlayingId(null);
+              }
+            }}
           />
         ))}
       </div>

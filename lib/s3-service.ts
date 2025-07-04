@@ -28,6 +28,7 @@ export interface SongMetadata {
   artist: string
   likes: number
   uploadedAt: string
+  likedBy?: string[] // array of user IDs who liked this song
 }
 
 // Upload audio file to S3
@@ -177,7 +178,7 @@ export function generateSongId(): string {
 }
 
 // Store mood log as JSON file in S3
-export async function storeMoodLog(log: { emoji: string; text: string; time: string }): Promise<void> {
+export async function storeMoodLog(log: { emoji: string; text: string; time: string; userId: string }): Promise<void> {
   const id = `mood_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   const key = `mood-logs/${id}.json`;
   const command = new PutObjectCommand({
@@ -190,7 +191,7 @@ export async function storeMoodLog(log: { emoji: string; text: string; time: str
 }
 
 // List all mood logs from S3
-export async function getAllMoodLogs(): Promise<{emoji: string, text: string, time: string}[]> {
+export async function getAllMoodLogs(): Promise<{emoji: string, text: string, time: string, userId: string}[]> {
   try {
     const listCommand = new ListObjectsV2Command({
       Bucket: BUCKET_NAME,
@@ -199,7 +200,7 @@ export async function getAllMoodLogs(): Promise<{emoji: string, text: string, ti
     const response = await s3Client.send(listCommand);
     const objects = response.Contents || [];
     if (!objects.length) return [];
-    const logs: {emoji: string, text: string, time: string}[] = [];
+    const logs: {emoji: string, text: string, time: string, userId: string}[] = [];
     for (const object of objects) {
       if (object.Key && object.Key.endsWith('.json')) {
         const getCommand = new GetObjectCommand({
@@ -219,6 +220,147 @@ export async function getAllMoodLogs(): Promise<{emoji: string, text: string, ti
     return logs.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
   } catch (error) {
     console.error('Error listing mood logs:', error);
+    return [];
+  }
+}
+
+// Get mood logs for a specific user
+export async function getUserMoodLogs(userId: string): Promise<{emoji: string, text: string, time: string, userId: string}[]> {
+  const allLogs = await getAllMoodLogs();
+  return allLogs.filter(log => log.userId === userId);
+}
+
+// Check if user has already logged for a specific date
+export async function hasUserLoggedForDate(userId: string, date: string): Promise<boolean> {
+  const userLogs = await getUserMoodLogs(userId);
+  return userLogs.some(log => {
+    const logDate = new Date(log.time).toISOString().split('T')[0];
+    return logDate === date;
+  });
+}
+
+// Get user's mood log for a specific date
+export async function getUserMoodLogForDate(userId: string, date: string): Promise<{emoji: string, text: string, time: string, userId: string} | null> {
+  const userLogs = await getUserMoodLogs(userId);
+  const logForDate = userLogs.find(log => {
+    const logDate = new Date(log.time).toISOString().split('T')[0];
+    return logDate === date;
+  });
+  return logForDate || null;
+}
+
+// Check if a user has already liked a song
+export async function hasUserLikedSong(songId: string, userId: string): Promise<boolean> {
+  const metadata = await getSongMetadata(songId);
+  if (!metadata) return false;
+  return Array.isArray(metadata.likedBy) && metadata.likedBy.includes(userId);
+}
+
+// Add a user's like to a song (if not already liked)
+export async function addUserLikeToSong(songId: string, userId: string): Promise<number | null> {
+  const metadata = await getSongMetadata(songId);
+  if (!metadata) return null;
+  if (!Array.isArray(metadata.likedBy)) metadata.likedBy = [];
+  if (!metadata.likedBy.includes(userId)) {
+    metadata.likedBy.push(userId);
+    metadata.likes = (metadata.likes || 0) + 1;
+    await storeSongMetadata(songId, metadata);
+    return metadata.likes;
+  }
+  return metadata.likes;
+} 
+
+// Suggestion interface
+export interface Suggestion {
+  id: string;
+  artist: string;
+  youtubeUrl: string;
+  createdAt: string;
+  likes: number;
+}
+
+// Store a suggestion as JSON file in S3
+export async function storeSuggestion(suggestion: { artist: string; youtubeUrl: string }): Promise<void> {
+  const id = `suggestion_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const key = `suggestions/${id}.json`;
+  const suggestionObj: Suggestion = {
+    id,
+    artist: suggestion.artist,
+    youtubeUrl: suggestion.youtubeUrl,
+    createdAt: new Date().toISOString(),
+    likes: 0,
+  };
+  const command = new PutObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: key,
+    Body: JSON.stringify(suggestionObj),
+    ContentType: 'application/json',
+  });
+  await s3Client.send(command);
+}
+
+// Get a suggestion by id
+export async function getSuggestionById(id: string): Promise<Suggestion | null> {
+  try {
+    const key = `suggestions/${id}.json`;
+    const command = new GetObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+    });
+    const response = await s3Client.send(command);
+    const body = await response.Body?.transformToString();
+    return body ? JSON.parse(body) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+// Like a suggestion by id (increment likes)
+export async function likeSuggestionById(id: string): Promise<Suggestion | null> {
+  const suggestion = await getSuggestionById(id);
+  if (!suggestion) return null;
+  suggestion.likes = (suggestion.likes || 0) + 1;
+  const key = `suggestions/${id}.json`;
+  const command = new PutObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: key,
+    Body: JSON.stringify(suggestion),
+    ContentType: 'application/json',
+  });
+  await s3Client.send(command);
+  return suggestion;
+}
+
+// List all suggestions from S3
+export async function getAllSuggestions(): Promise<Suggestion[]> {
+  try {
+    const listCommand = new ListObjectsV2Command({
+      Bucket: BUCKET_NAME,
+      Prefix: 'suggestions/',
+    });
+    const response = await s3Client.send(listCommand);
+    const objects = response.Contents || [];
+    if (!objects.length) return [];
+    const suggestions: Suggestion[] = [];
+    for (const object of objects) {
+      if (object.Key && object.Key.endsWith('.json')) {
+        const getCommand = new GetObjectCommand({
+          Bucket: BUCKET_NAME,
+          Key: object.Key,
+        });
+        const res = await s3Client.send(getCommand);
+        const body = await res.Body?.transformToString();
+        if (body) {
+          try {
+            suggestions.push(JSON.parse(body));
+          } catch {}
+        }
+      }
+    }
+    // Sort by createdAt (newest first)
+    return suggestions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  } catch (error) {
+    console.error('Error listing suggestions:', error);
     return [];
   }
 } 

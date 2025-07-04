@@ -18,6 +18,24 @@ module.exports = {
       },
     },
     extend: {
+      screens: {
+        'xs': '475px',
+        '3xl': '1600px',
+      },
+      spacing: {
+        'safe-top': 'env(safe-area-inset-top)',
+        'safe-bottom': 'env(safe-area-inset-bottom)',
+        'safe-left': 'env(safe-area-inset-left)',
+        'safe-right': 'env(safe-area-inset-right)',
+      },
+      height: {
+        'screen-mobile': '100dvh',
+        'screen-dynamic': '100dvh',
+      },
+      minHeight: {
+        'screen-mobile': '100dvh',
+        'screen-dynamic': '100dvh',
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -69,10 +87,20 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "slide-in-from-bottom": {
+          "0%": { transform: "translateY(100%)" },
+          "100%": { transform: "translateY(0)" },
+        },
+        "slide-out-to-bottom": {
+          "0%": { transform: "translateY(0)" },
+          "100%": { transform: "translateY(100%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "slide-in-from-bottom": "slide-in-from-bottom 0.3s ease-out",
+        "slide-out-to-bottom": "slide-out-to-bottom 0.3s ease-out",
       },
     },
   },

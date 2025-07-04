@@ -44,12 +44,18 @@ const DrawerContent = React.forwardRef<
       ref={ref}
       className={cn(
         "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background",
+        "max-h-[85vh] sm:max-h-[90vh]",
+        "pb-safe-area-inset-bottom",
+        "touch-pan-y",
+        "overflow-hidden",
         className
       )}
       {...props}
     >
       <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
-      {children}
+      <div className="flex-1 overflow-y-auto px-4 pb-4">
+        {children}
+      </div>
     </DrawerPrimitive.Content>
   </DrawerPortal>
 ))
@@ -60,7 +66,13 @@ const DrawerHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn("grid gap-1.5 p-4 text-center sm:text-left", className)}
+    className={cn(
+      "grid gap-1.5 p-4 text-center sm:text-left",
+      // Mobile responsive improvements
+      "sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+      "border-b border-border/40",
+      className
+    )}
     {...props}
   />
 )
@@ -71,7 +83,14 @@ const DrawerFooter = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn("mt-auto flex flex-col gap-2 p-4", className)}
+    className={cn(
+      "mt-auto flex flex-col gap-2 p-4",
+      // Mobile responsive improvements
+      "sticky bottom-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+      "border-t border-border/40",
+      "pb-safe-area-inset-bottom",
+      className
+    )}
     {...props}
   />
 )
@@ -85,6 +104,8 @@ const DrawerTitle = React.forwardRef<
     ref={ref}
     className={cn(
       "text-lg font-semibold leading-none tracking-tight",
+      // Mobile responsive improvements
+      "text-base sm:text-lg",
       className
     )}
     {...props}
@@ -98,7 +119,12 @@ const DrawerDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn(
+      "text-sm text-muted-foreground",
+      // Mobile responsive improvements
+      "text-xs sm:text-sm",
+      className
+    )}
     {...props}
   />
 ))

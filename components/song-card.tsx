@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { AudioPlayer } from "@/components/audio-player"
-import { Heart, Music, Calendar } from "lucide-react"
+import { Heart, Music, Calendar, Share2 } from "lucide-react"
 
 interface Song {
   id: string
@@ -18,12 +18,14 @@ interface Song {
 interface SongCardProps {
   song: Song
   onLikeUpdate?: () => void
+  isPlaying?: boolean
+  onPlayPause?: (playing: boolean) => void
 }
 
-export function SongCard({ song, onLikeUpdate }: SongCardProps) {
-  const [isPlaying, setIsPlaying] = useState(false)
+export function SongCard({ song, onLikeUpdate, isPlaying = false, onPlayPause }: SongCardProps) {
   const [isLiking, setIsLiking] = useState(false)
   const [currentLikes, setCurrentLikes] = useState(song.likes)
+  const [isSharing, setIsSharing] = useState(false)
 
   const handleLike = async () => {
     if (isLiking) return
@@ -47,6 +49,39 @@ export function SongCard({ song, onLikeUpdate }: SongCardProps) {
       console.error('Error liking song:', error)
     } finally {
       setIsLiking(false)
+    }
+  }
+
+  const handleShare = async () => {
+    if (isSharing) return
+
+    try {
+      setIsSharing(true)
+      
+      // Create share data
+      const shareUrl = window.location.origin + `/songs/${song.id}`;
+      const shareData = {
+        title: `${song.title} by ${song.artist}`,
+        text: `Check out this amazing song: ${song.title} by ${song.artist}`,
+        url: shareUrl,
+      }
+
+      // Try native sharing first
+      if (navigator.share && navigator.canShare(shareData)) {
+        await navigator.share(shareData)
+      } else {
+        // Fallback: copy to clipboard
+        const shareText = `${shareData.title}\n${shareData.text}\n${shareData.url}`
+        await navigator.clipboard.writeText(shareText)
+        
+        // Show success message (you can add a toast notification here)
+        alert('Song link copied to clipboard!')
+      }
+    } catch (error) {
+      console.error('Error sharing song:', error)
+      alert('Failed to share song')
+    } finally {
+      setIsSharing(false)
     }
   }
 
@@ -78,7 +113,7 @@ export function SongCard({ song, onLikeUpdate }: SongCardProps) {
           <AudioPlayer 
             src={song.audioUrl} 
             isPlaying={isPlaying} 
-            onPlayPause={setIsPlaying} 
+            onPlayPause={onPlayPause || (() => {})} 
           />
         </div>
 
@@ -88,20 +123,31 @@ export function SongCard({ song, onLikeUpdate }: SongCardProps) {
             <Calendar className="h-3 w-3" />
             <span>{formatDate(song.uploadedAt)}</span>
           </div>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLike}
-            disabled={isLiking}
-            className="flex items-center gap-2 hover:text-red-500 transition-colors"
-          >
-            <Heart 
-              className={`h-4 w-4 ${isLiking ? 'animate-pulse' : ''}`} 
-              fill={currentLikes > 0 ? 'currentColor' : 'none'}
-            />
-            <span className="text-sm font-medium">{currentLikes}</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleShare}
+              disabled={isSharing}
+              className="flex items-center gap-2 hover:text-blue-500 transition-colors"
+              title="Share song"
+            >
+              <Share2 className={`h-4 w-4 ${isSharing ? 'animate-pulse' : ''}`} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLike}
+              disabled={isLiking}
+              className="flex items-center gap-2 hover:text-red-500 transition-colors"
+            >
+              <Heart 
+                className={`h-4 w-4 ${isLiking ? 'animate-pulse' : ''}`} 
+                fill={currentLikes > 0 ? 'currentColor' : 'none'}
+              />
+              <span className="text-sm font-medium">{currentLikes}</span>
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
