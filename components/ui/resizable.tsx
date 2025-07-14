@@ -41,5 +41,8 @@ const ResizableHandle = ({
     )}
   </ResizablePrimitive.PanelResizeHandle>
 )
+if (process.env.NODE_ENV === "development") {
+  ResizableHandle.displayName = "ResizableHandle"
+}
 
 export { ResizablePanelGroup, ResizablePanel, ResizableHandle }
